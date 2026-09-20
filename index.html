@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<title>RBAB Guide</title>
+<meta name="theme-color" content="#6B4E33">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RBAB Guide">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-card">
+    <div class="auth-logo"><img src="assets/rixos-logo.png" alt="Rixos Bab Al Bahr"></div>
+    <h1>RBAB Guide</h1>
+    <div class="auth-sub">Rooms Controller Reference</div>
+    <form id="authForm">
+      <label>Username <input type="text" id="authUser" autocomplete="username"></label>
+      <label>Password <input type="password" id="authPass" autocomplete="current-password"></label>
+      <div class="auth-error" id="authError">Incorrect username or password.</div>
+      <button type="submit">Sign in</button>
+    </form>
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
+
+  <!-- ===================== ROOMS SCREEN ===================== -->
+  <section class="screen" id="screenRooms">
+    <header class="app-header">
+      <div class="app-header-top">
+        <span class="app-title">RBAB Guide</span>
+        <button class="icon-circle" id="searchToggleBtn" aria-label="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+      </div>
+      <div class="search-bar" id="searchBar" style="display:none">
+        <input type="text" id="searchInput" placeholder="Go to room #" inputmode="numeric" autocomplete="off">
+        <div class="search-results" id="searchResults"></div>
+      </div>
+      <div class="building-tabs" id="buildingTabs"></div>
+      <div class="floor-chip-row" id="floorChipRow"></div>
+      <div class="rooms-toolbar">
+        <button class="toolbar-btn" id="filterOpenBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+          Filter <span class="filter-count-badge" id="filterCountBadge" style="display:none">0</span>
+        </button>
+        <button class="toolbar-btn" id="viewToggleBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="7" height="7" rx="1"/><rect x="14" y="4" width="7" height="7" rx="1"/><rect x="3" y="13" width="7" height="7" rx="1"/><rect x="14" y="13" width="7" height="7" rx="1"/></svg>
+          <span id="viewToggleLabel">Grid</span>
+        </button>
+        <span class="floor-stat" id="floorStat"></span>
+      </div>
+    </header>
+
+    <div class="screen-body" id="roomsBody">
+      <div class="room-list" id="roomList"></div>
+      <div class="grid-wrap" id="gridWrap" style="display:none">
+        <div class="grid" id="grid"></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <!-- ===================== UPSELL SCREEN ===================== -->
+  <section class="screen" id="screenUpsell" style="display:none">
+    <header class="app-header"><div class="app-header-top"><span class="app-title">Upselling Grid</span></div></header>
+    <div class="screen-body">
+      <div class="up-occ-row" id="upOccRow">
+        <label>Occupancy %
+          <input type="number" id="upOccInput" min="0" max="100" placeholder="e.g. 45">
+        </label>
+        <label class="up-nights-check">
+          <input type="checkbox" id="upNightsCheck">
+          4+ nights stay
+        </label>
+      </div>
+      <div id="upsellBody"></div>
+    </div>
+  </section>
+
+  <!-- ===================== CHECKOUT SCREEN ===================== -->
+  <section class="screen" id="screenCheckout" style="display:none">
+    <header class="app-header"><div class="app-header-top"><span class="app-title">Late Checkout</span></div></header>
+    <div class="screen-body">
+      <div id="lateCheckoutBody"></div>
+    </div>
+  </section>
+
+  <!-- ===================== MORE SCREEN ===================== -->
+  <section class="screen" id="screenMore" style="display:none">
+    <header class="app-header"><div class="app-header-top"><span class="app-title">More</span></div></header>
+    <div class="screen-body">
+      <div class="more-list">
+        <a class="more-item" href="https://scnv.io/Ax0g/?qr=1" target="_blank" rel="noopener">
+          <span>Hotel Info</span><span class="more-arrow">↗</span>
+        </a>
+        <a class="more-item" href="https://easymap.ae/rixos-bab-al-bahr/" target="_blank" rel="noopener">
+          <span>Resort Map</span><span class="more-arrow">↗</span>
+        </a>
+        <button class="more-item" id="overviewOpenBtn">
+          <span>All-Buildings Overview</span><span class="more-arrow">→</span>
+        </button>
+        <button class="more-item" id="themeToggleBtn">
+          <span>Dark Mode</span><span class="more-arrow" id="themeStateLabel">Off</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BOTTOM NAV ===================== -->
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-btn active" data-screen="Rooms">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-6 9 6v11a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>
+      Rooms
+    </button>
+    <button class="nav-btn" data-screen="Upsell">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 8-8M21 7v6h-6"/></svg>
+      Upsell
+    </button>
+    <button class="nav-btn" data-screen="Checkout">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 3.5"/></svg>
+      Checkout
+    </button>
+    <button class="nav-btn" data-screen="More">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+      More
+    </button>
+  </nav>
+
+  <!-- ===================== ROOM DETAIL (full-screen slide-up) ===================== -->
+  <div class="detail-sheet" id="detailSheet">
+    <div class="detail-sheet-header">
+      <button class="sheet-close" id="detailCloseBtn">✕</button>
+      <span class="sheet-title">Room <span id="dRoomNum"></span></span>
+      <span class="type-pill" id="dTypePill"></span>
+    </div>
+    <div class="detail-sheet-body">
+      <div class="detail-desc" id="dDesc"></div>
+      <div class="photo-frame" id="dPhoto"></div>
+      <div class="section-label">Room Features</div>
+      <div class="feature-tags" id="dTags"></div>
+      <div class="section-label">Interconnecting Room</div>
+      <div class="connect-box" id="dConnect"></div>
+    </div>
+  </div>
+
+  <!-- ===================== OVERVIEW SHEET ===================== -->
+  <div class="detail-sheet" id="overviewSheet">
+    <div class="detail-sheet-header">
+      <button class="sheet-close" id="overviewCloseBtn">✕</button>
+      <span class="sheet-title">All Buildings Overview</span>
+    </div>
+    <div class="detail-sheet-body" id="overviewBody"></div>
+  </div>
+
+  <div class="lightbox" id="lightbox">
+    <img id="lbImg" src="" alt="">
+  </div>
+
+  <div class="filter-sheet" id="filterSheet">
+    <div class="filter-sheet-panel">
+      <div class="filter-sheet-header">
+        <h3>Filter Rooms</h3>
+        <button class="sheet-close" id="filterSheetCloseX">✕</button>
+      </div>
+      <div class="filter-sheet-body" id="filterSheetBody"></div>
+      <div class="filter-sheet-footer">
+        <button id="filterClearBtn">Clear</button>
+        <button class="apply" id="filterApplyBtn">Apply</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
+}
+</script>
+</body>
+</html>
