@@ -1,7 +1,8 @@
 import { Suspense, lazy, useEffect } from 'react';
 import { HashRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { AnimatePresence, MotionConfig, motion } from 'motion/react';
-import { tickEscalations } from '../store/store';
+import { startSync, tickEscalations } from '../store/store';
+import { createSupabaseTransport, syncEnabled } from '../store/supabaseTransport';
 import { ErrorBoundary } from '../components/ui/ErrorBoundary';
 import { PageSkeleton } from '../components/ui/PageSkeleton';
 import { OfflineBanner } from '../components/ui/OfflineBanner';
@@ -49,6 +50,9 @@ function AnimatedRoutes() {
 }
 
 export function App() {
+  useEffect(() => {
+    if (syncEnabled()) void startSync(createSupabaseTransport);
+  }, []);
   useEffect(() => {
     const id = window.setInterval(tickEscalations, 1000);
     return () => window.clearInterval(id);

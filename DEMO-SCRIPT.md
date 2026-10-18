@@ -9,7 +9,7 @@ For the General Manager, senior management and IT. Presenter: Ahmed Elsayyad, Du
 3. In a second laptop tab, open the **Staff board** (`#/staff`), sign in as Duty Manager with PIN `1234`, and choose **All departments**. Keep it ready for questions.
 4. Turn the laptop volume low (new tickets make a soft chime). Set the projector to light mode, or use the moon icon for dark mode.
 
-Have a fallback ready: everything runs in the browser, so the demo works without Wi-Fi once the page has loaded.
+Check the header badge says **Live on all devices**. Phone and laptop then share the same demo; **Reset** clears both. If the Wi-Fi fails, the badge shows **Offline · this device only** and Present mode still runs the whole demo on the laptop.
 
 ## The walkthrough
 
@@ -76,6 +76,8 @@ Open **Insights** for management questions or **For IT** for architecture, secur
 - **Integration?** Phase 3 connects the property management, work-order and point-of-sale systems through their existing interfaces, with IT.
 
 ## Live extras, if time allows
+
+- Hand your phone to the General Manager with the guest app open. Their request appears on the laptop's staff board within a second; accept it on the laptop and the phone updates.
 
 - Type your own request on the phone, for example “Can I get a baby cot and an iron?”, or ask “What time is check-out?” (the answer carries a Sample content badge).
 - Type a card number to show masking, or “I need a doctor” to show the medical hand-over and emergency guidance.

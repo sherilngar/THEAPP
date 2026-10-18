@@ -2,6 +2,7 @@ import { NavLink, Link } from 'react-router-dom';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { SampleBadge } from './SampleBadge';
+import { SyncBadge } from './SyncBadge';
 
 const LINKS = [
   { to: '/guest', label: 'Guest app' },
@@ -40,8 +41,12 @@ export function SiteHeader({ wide = false }: { wide?: boolean }) {
             </NavLink>
           ))}
         </nav>
-        <div className="hidden lg:block">
+        <div className="hidden items-center gap-2 lg:flex">
+          <SyncBadge />
           <SampleBadge />
+        </div>
+        <div className="lg:hidden">
+          <SyncBadge compact />
         </div>
         <ThemeToggle />
       </div>

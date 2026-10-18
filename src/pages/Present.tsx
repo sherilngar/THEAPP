@@ -8,6 +8,7 @@ import { StaffBoard } from '../components/staff/StaffBoard';
 import { Logo } from '../components/ui/Logo';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { SampleBadge } from '../components/ui/SampleBadge';
+import { SyncBadge } from '../components/ui/SyncBadge';
 import { DEPT_ICON } from '../components/ui/icons';
 import { DEPT_BY_ID } from '../domain/departments';
 import type { DepartmentId } from '../domain/types';
@@ -131,6 +132,7 @@ export default function Present() {
         <span className="hidden text-xs text-muted sm:inline">
           Present mode · same live data on both sides
         </span>
+        <SyncBadge />
         <SampleBadge />
         <div className="ms-auto flex flex-wrap items-center gap-2">
           <button

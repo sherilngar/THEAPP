@@ -16,6 +16,7 @@
     "qr": "node scripts/qr.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
     "lucide-react": "^0.468.0",
     "motion": "^11.15.0",
     "qrcode": "^1.5.4",

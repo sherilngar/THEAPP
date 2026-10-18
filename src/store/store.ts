@@ -31,6 +31,7 @@ import type {
 } from '../domain/types';
 import { DEFAULT_KNOWLEDGE, type Knowledge } from '../data/knowledge';
 import { demoGuest, liveSampleTickets, sampleHistory } from '../data/demo';
+import { RemoteSync, type SyncStatus, type Transport } from './remote';
 
 /**
  * Local demo store. State lives in localStorage and is mirrored to every open tab
@@ -67,7 +68,7 @@ function initialState(): State {
     guest,
     conversation: { id: 'conv-demo', guestId: guest.id, mode: 'ai', lang: 'en' },
     messages: [],
-    tickets: [...sampleHistory(now), ...liveSampleTickets(now)],
+    tickets: [...sampleHistory(now), ...liveSampleTickets(now)], // sample history derives from startedAt
     ratings: [],
     settings: {
       standards: structuredClone(DEFAULT_STANDARDS),
@@ -133,19 +134,19 @@ function commit(next: State, local = true) {
     } catch {
       /* private mode or quota: keep working in memory */
     }
-    channel?.postMessage(state);
+    if (!remote) channel?.postMessage(state);
   }
   emit();
 }
 
 if (channel) {
   channel.onmessage = (e: MessageEvent<State>) => {
-    if (e.data?.v === 3) commit(e.data, false);
+    if (e.data?.v === 3 && !remote) commit(e.data, false);
   };
 }
 if (typeof window !== 'undefined') {
   window.addEventListener('storage', (e) => {
-    if (e.key === KEY && e.newValue) {
+    if (e.key === KEY && e.newValue && !remote) {
       try {
         commit(JSON.parse(e.newValue) as State, false);
       } catch {
@@ -185,6 +186,76 @@ function update(fn: (draft: State) => void) {
   const next = structuredClone(state);
   fn(next);
   commit(next);
+  remote?.enqueue(fn);
+}
+
+// ------------------------------------------------------------ cross-device
+
+let remote: RemoteSync<State> | null = null;
+let syncStatus: SyncStatus = 'local';
+const statusListeners = new Set<() => void>();
+
+/** What travels to the database: everything except the regenerated sample history. */
+function toWire(s: State) {
+  const { rev: _rev, writer: _writer, ...rest } = s;
+  void _rev;
+  void _writer;
+  return { ...rest, tickets: s.tickets.filter((t) => !t.sample) };
+}
+
+function fromWire(w: unknown): State | null {
+  const s = w as Partial<State> | null;
+  if (!s || s.v !== 3 || !Array.isArray(s.tickets) || typeof s.startedAt !== 'number') return null;
+  return {
+    ...(s as State),
+    tickets: [...sampleHistory(s.startedAt), ...s.tickets],
+    rev: state.rev,
+    writer: state.writer,
+  };
+}
+
+export function getSyncStatus() {
+  return syncStatus;
+}
+
+export function useSyncStatus(): SyncStatus {
+  return useSyncExternalStore(
+    (l) => {
+      statusListeners.add(l);
+      return () => {
+        statusListeners.delete(l);
+      };
+    },
+    () => syncStatus,
+    () => syncStatus,
+  );
+}
+
+/** Starts cross-device sync through Supabase. Falls back to this device only if it is unreachable. */
+let syncStarted = false;
+export async function startSync(transportFactory: () => Promise<Transport>) {
+  if (syncStarted) return;
+  syncStarted = true;
+  let transport: Transport;
+  try {
+    transport = await transportFactory();
+  } catch {
+    syncStatus = 'offline';
+    statusListeners.forEach((l) => l());
+    return;
+  }
+  remote = new RemoteSync<State>(transport, {
+    toWire,
+    fromWire,
+    getLocal: () => state,
+    setLocal: (s) => commit(s),
+    clone: (s) => structuredClone(s),
+    onStatus: (st) => {
+      syncStatus = st;
+      statusListeners.forEach((l) => l());
+    },
+  });
+  await remote.start();
 }
 
 let msgCounter = 0;
@@ -867,9 +938,11 @@ export function advanceClock(minutes: number) {
 
 export function resetDemo(opts: { keepSettings?: boolean } = {}) {
   const fresh = initialState();
-  fresh.seq = 1000;
-  if (opts.keepSettings) fresh.settings = state.settings;
-  commit(fresh);
+  update((s) => {
+    const settings = s.settings;
+    Object.assign(s, fresh, { rev: s.rev, writer: s.writer });
+    if (opts.keepSettings) s.settings = settings;
+  });
 }
 
 /** Services grid → booking picker card in the chat. */

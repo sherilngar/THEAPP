@@ -67,18 +67,26 @@ GitHub Pages on a free account needs a public repository. Nothing secret is in t
 
 Replies are in English or Arabic. Other languages are detected and answered in English with a note; the live AI answers in any language.
 
-## Data and sync
+## Data and sync across devices
 
-`src/store/store.ts` keeps state in `localStorage` and mirrors it to every open tab with `BroadcastChannel`, using revision numbers so tabs never overwrite newer data. One tab (chosen with the Web Locks API) runs the escalation clock. Present mode shows the phone and the board in one window; to use a real phone and a laptop at the same time, the pilot needs the shared database (phase 2).
+A guest on a phone and staff on a laptop see the same data, live, through the Supabase project **so-ai-concierge** (Mumbai region, free plan):
+
+- The whole demo is one record (`demo_state`, id `so-demo`) with a revision number. Each change shows on screen at once, then is sent with the revision it was based on. If another device changed something first, the app reloads the latest state, replays its pending changes on top and sends again, so nothing is lost (`src/store/remote.ts`).
+- Other devices are told through Supabase Realtime, with a 10-second check as a fallback if a network blocks live updates.
+- The browser holds only the publishable key. It can read the demo record and write only through `commit_demo_state`, which checks the revision, shape and size (`supabase/migrations/0002_demo_state_sync.sql`). Anyone with the link can still change or reset the demo, which is fine for a proposal but not for real guest data.
+- A badge in the header shows **Live on all devices**, **Offline · this device only** or **This device only**. If Supabase is unreachable the demo keeps working on the device and catches up when the connection returns.
+- **Reset** clears the demo on every connected device.
+- Add `?local` before the `#` in the address (for example `…/THEAPP/?local#/present`) to run on this device only, without the database.
+
+The local store (`src/store/store.ts`) still keeps a copy in `localStorage` and, in device-only mode, syncs tabs with `BroadcastChannel`. One tab per device (chosen with the Web Locks API) runs the escalation clock.
 
 ## Phase 2: real AI and live data across devices
 
-Prepared but **not yet built** in this repository:
+Cross-device sync is live (above). Still to build for a real pilot:
 
-- `supabase/migrations/0001_pilot_schema.sql`: the pilot database schema with row-level security and realtime.
-- `.env.example`: the variables the pilot needs, and where each may live.
-
-Still to build for the pilot: a serverless function that calls Claude (`claude-haiku-5-5` by default, `claude-sonnet-5-5` optional) with the same tools, streaming and rate limits, and a store adapter that reads and writes Supabase instead of `localStorage`. That needs a host with server functions (for example Netlify), because the AI key must never reach the browser; GitHub Pages cannot do this.
+- A serverless function that calls Claude (`claude-haiku-5-5` by default, `claude-sonnet-5-5` optional) with the same tools, streaming and rate limits. It needs a host with server functions (for example Netlify), because the AI key must never reach the browser; GitHub Pages cannot do this.
+- Per-guest data with real sign-in, using the normalised schema in `supabase/migrations/0001_pilot_schema.sql` (not applied) instead of one shared demo record.
+- `.env.example` lists the variables the pilot needs and where each may live.
 
 ## Sample content and what still needs real hotel data
 
@@ -104,7 +112,7 @@ The logo is the file supplied by the hotel (`public/brand/so-logo.jpg`), with it
 
 ## Running cost (approximate)
 
-**This demo on GitHub Pages: no cost.** No AI calls, no database.
+**This demo: no cost.** GitHub Pages and the Supabase free plan; no AI calls.
 
 For the phase 2 pilot, AI cost from Anthropic's published API prices (Claude Haiku 5.5: $0.10 per million input tokens, $0.50 per million output tokens; Claude Sonnet 5.5: $2 and $10). The assumption is about 6,000 input tokens per turn (instructions, knowledge base and tools) and 300 output tokens, before prompt-caching savings:
 
@@ -118,7 +126,7 @@ Prompt caching of the fixed instructions and knowledge base reduces the input sh
 ## Quality checks (latest run)
 
 - TypeScript strict, ESLint and Prettier clean; no console errors in any tested flow
-- 32 unit tests and 21 end-to-end tests passing (Present mode runs on desktop only)
+- 38 unit tests (including cross-device sync against a simulated server) and 21 end-to-end tests passing (Present mode runs on desktop only)
 - Lighthouse (mobile) on `/` and `/guest`: Performance 91, Accessibility 100, Best Practices 100, SEO 100
 - Respects `prefers-reduced-motion`; keyboard navigable with visible focus; live regions for new messages
 

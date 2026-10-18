@@ -16,6 +16,7 @@ import type { Message } from '../../domain/types';
 import { strings } from '../../i18n/strings';
 import {
   cancelTicket,
+  now,
   requestAmbassador,
   requestFromGrid,
   sendGuestMessage,
@@ -29,6 +30,7 @@ import { TicketRow } from '../cards/TicketsCard';
 import { SECTION_ICON } from '../ui/icons';
 import { Logo } from '../ui/Logo';
 import { SampleBadge } from '../ui/SampleBadge';
+import { SyncBadge } from '../ui/SyncBadge';
 import { ThemeToggle } from '../ui/ThemeToggle';
 import { GuestUiContext, useGuestUi } from './context';
 import { Sheet } from './Sheet';
@@ -161,6 +163,7 @@ function GuestHeader() {
       <div className="flex items-center gap-2 px-4 pt-2">
         <Logo className="h-8" />
         <div className="ms-auto flex items-center gap-1">
+          <SyncBadge compact />
           <SampleBadge label={t.sampleContent} title={t.sampleTooltip} />
           <button
             type="button"
@@ -316,7 +319,7 @@ function Bubble({
   onOpenMenu: (c?: string, f?: string) => void;
 }) {
   const { t } = useGuestUi();
-  const [animate] = useState(() => !seenMessages.ids.has(m.id));
+  const [animate] = useState(() => !seenMessages.ids.has(m.id) && now() - m.at < 15_000);
   useEffect(() => {
     seenMessages.ids.add(m.id);
   }, [m.id]);
