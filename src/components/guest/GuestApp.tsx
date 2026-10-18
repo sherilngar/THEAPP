@@ -391,14 +391,13 @@ function StreamText({ text }: { text: string }) {
     const id = window.setTimeout(() => setN((x) => Math.min(words.length, x + 3)), 28);
     return () => window.clearTimeout(id);
   }, [n, words.length]);
+  if (n >= words.length) return <p className="whitespace-pre-line">{text}</p>;
   return (
     <>
       <p className="sr-only">{text}</p>
       <p className="whitespace-pre-line" aria-hidden>
         {words.slice(0, n).join('')}
-        {n < words.length && (
-          <span className="ms-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse rounded-sm bg-accent/60" />
-        )}
+        <span className="ms-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse rounded-sm bg-accent/60" />
       </p>
     </>
   );

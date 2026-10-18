@@ -96,8 +96,10 @@ export function TicketCard({
             {t.quantity && t.kind === 'service' ? `${t.quantity} × ` : ''}
             {t.item}
           </p>
-          {t.details && !compact && (
-            <p className="mt-0.5 line-clamp-2 text-xs text-muted">{t.details}</p>
+          {t.details && (
+            <p className={`mt-0.5 text-xs text-muted ${compact ? 'line-clamp-1' : 'line-clamp-2'}`}>
+              {t.details}
+            </p>
           )}
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-muted">
             <StatusPill status={t.status} escalation={t.escalationLevel} />

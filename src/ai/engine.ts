@@ -209,7 +209,7 @@ const STATUS = [
   'وين وصل',
 ];
 const GREETING =
-  /^(hi|hello|hey|good (morning|afternoon|evening)|salam|مرحبا|السلام عليكم|اهلا|هلا|صباح الخير|مساء الخير)\b/;
+  /^(hi|hello|hey|good (morning|afternoon|evening)|salam|مرحبا|السلام عليكم|اهلا|هلا|صباح الخير|مساء الخير)(?=$|[^\p{L}\p{N}])/u;
 const THANKS =
   /^(thanks|thank you|thx|cheers|great,? thanks|perfect,? thanks|شكرا|مشكور|يعطيك العافيه|تسلم)/;
 

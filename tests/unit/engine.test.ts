@@ -161,3 +161,30 @@ describe('knowledge answers stay out of the way of requests', () => {
     expect(r.replies[0]?.text).toMatch(/Beach Grill/);
   });
 });
+
+describe('Arabic scenarios', () => {
+  it('multi-request in Arabic', () => {
+    const r = respond(
+      'التكييف صوته عالي، ممكن منشفتين وحجز طاولة في مشويات الشاطئ الساعة ٨ الليلة',
+      ctx(),
+    );
+    expect(r.lang).toBe('ar');
+    expect(r.drafts.find((d) => d.itemKey === 'ac')?.details).toBe('Noisy');
+    expect(r.drafts.find((d) => d.itemKey === 'towels')?.quantity).toBe(2);
+    expect(r.pending?.type).toBe('booking');
+    if (r.pending?.type !== 'booking') return;
+    expect(r.pending.booking).toMatchObject({ outlet: 'grill', time: '20:00', date: 'today' });
+    const r2 = respond('شخصين', ctx(r.pending));
+    expect(r2.drafts[0]?.payload?.['party_size']).toBe(2);
+    expect(r2.replies[0]?.text).toMatch(/طاولة/);
+  });
+  it('dining order in Arabic with allergy and confirmation', () => {
+    const r = respond('أبغى كلوب ساندويتش وعصير برتقال، عندي حساسية من المكسرات', ctx());
+    expect(r.pending?.type).toBe('order_confirm');
+    if (r.pending?.type !== 'order_confirm') return;
+    expect(r.pending.order.items.map((i) => i.id)).toEqual(['club', 'oj']);
+    expect(r.pending.order.allergies).toBe('nuts');
+    const yes = respond('نعم', ctx(r.pending));
+    expect(yes.drafts[0]?.department).toBe('ird');
+  });
+});

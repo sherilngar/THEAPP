@@ -51,6 +51,9 @@ export interface State {
   seq: number;
   typing: boolean;
   startedAt: number;
+  /** Monotonic revision and writing tab, so tabs only ever accept newer state. */
+  rev: number;
+  writer: string;
 }
 
 const KEY = 'so-concierge-state';
@@ -74,6 +77,8 @@ function initialState(): State {
     seq: 1000,
     typing: false,
     startedAt: now,
+    rev: 0,
+    writer: '',
   };
 }
 
@@ -82,7 +87,8 @@ function load(): State {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as State;
-      if (parsed.v === 3) return { ...parsed, typing: false };
+      if (parsed.v === 3)
+        return { ...parsed, typing: false, rev: parsed.rev ?? 0, writer: parsed.writer ?? '' };
     }
   } catch {
     /* storage unavailable: fall through to a fresh demo */
@@ -107,14 +113,28 @@ function emit() {
   listeners.forEach((l) => l());
 }
 
-function commit(next: State, broadcast = true) {
+const TAB_ID = Math.random().toString(36).slice(2, 10);
+
+function isNewer(incoming: State) {
+  const rev = incoming.rev ?? 0;
+  return rev > state.rev || (rev === state.rev && (incoming.writer ?? '') > state.writer);
+}
+
+/** Local writes bump the revision, persist and broadcast. Remote states are adopted only if newer. */
+function commit(next: State, local = true) {
+  if (local) {
+    next.rev = state.rev + 1;
+    next.writer = TAB_ID;
+  } else if (!isNewer(next)) return;
   state = next;
-  try {
-    localStorage.setItem(KEY, JSON.stringify(state));
-  } catch {
-    /* private mode or quota: keep working in memory */
+  if (local) {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    } catch {
+      /* private mode or quota: keep working in memory */
+    }
+    channel?.postMessage(state);
   }
-  if (broadcast) channel?.postMessage(state);
   emit();
 }
 
@@ -791,8 +811,18 @@ export function rateTicket(ticketId: string, value: number) {
 
 // ------------------------------------------------------------- escalation
 
-/** Raises escalation levels as time passes. Idempotent, so every open tab can run it. */
+let leader = typeof navigator === 'undefined' || !('locks' in navigator);
+if (!leader) {
+  // One tab at a time runs the escalation clock; the lock passes on when that tab closes.
+  void navigator.locks.request('so-concierge-leader', () => {
+    leader = true;
+    return new Promise<void>(() => {});
+  });
+}
+
+/** Raises escalation levels as time passes. Only the leader tab writes, so tabs never race. */
 export function tickEscalations() {
+  if (!leader) return;
   const t = now();
   const changes = state.tickets.filter(
     (x) => !x.sample && computeEscalation(x, state.settings.standards, t) > x.escalationLevel,
@@ -837,6 +867,7 @@ export function advanceClock(minutes: number) {
 
 export function resetDemo(opts: { keepSettings?: boolean } = {}) {
   const fresh = initialState();
+  fresh.seq = 1000;
   if (opts.keepSettings) fresh.settings = state.settings;
   commit(fresh);
 }

@@ -246,7 +246,7 @@ export function parseTime(raw: string): ParsedTime {
   const clock = t.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b/);
   const atHour =
     clock ??
-    t.match(/(?:\bat|\baround|\bby|الساعه|ساعه)\s*(\d{1,2})\b/) ??
+    t.match(/(?:\bat|\baround|\bby|الساعه|ساعه)\s*(\d{1,2})(?!\d)/) ??
     t.match(/\bfor\s+(\d{1,2})\s+(?:tonight|this evening|today|tomorrow)/);
   if (atHour) {
     let h = Number(atHour[1]);
@@ -292,14 +292,14 @@ export function parsePartySize(raw: string): number | undefined {
 
 export function isAffirmative(raw: string): boolean {
   const t = normalize(raw).replace(/[!.]/g, '');
-  return /^(yes|yes please|yeah|yep|yup|sure|ok|okay|confirm|confirmed|go ahead|please do|place it|perfect|correct|that's right|sounds good|نعم|ايوه|ايوا|اي|اكيد|تمام|اوكي|موافق|اكد|نعم من فضلك|ok please)\b/.test(
+  return /^(yes|yes please|yeah|yep|yup|sure|ok|okay|confirm|confirmed|go ahead|please do|place it|perfect|correct|that's right|sounds good|نعم|ايوه|ايوا|اي|اكيد|تمام|اوكي|موافق|اكد|نعم من فضلك|ok please)(?=$|[^\p{L}\p{N}])/u.test(
     t,
   );
 }
 
 export function isNegative(raw: string): boolean {
   const t = normalize(raw);
-  return /^(no|nope|not yet|change|wait|cancel|لا|مو|غير|الغاء)\b/.test(t);
+  return /^(no|nope|not yet|change|wait|cancel|لا|مو|غير|الغاء|تعديل)(?=$|[^\p{L}\p{N}])/u.test(t);
 }
 
 export function isQuestion(raw: string): boolean {
@@ -309,7 +309,7 @@ export function isQuestion(raw: string): boolean {
     /^(what|when|where|which|who|how|is there|are there|do you|does|is the|are the|can i|may i|could you tell)\b/.test(
       t,
     ) ||
-    /^(متي|اين|وين|كم|هل|ما هي|ما هو|شو|ايش|كيف|فين)\b/.test(t)
+    /^(متي|اين|وين|كم|هل|ما هي|ما هو|شو|ايش|كيف|فين)(?=$|[^\p{L}\p{N}])/u.test(t)
   );
 }
 
