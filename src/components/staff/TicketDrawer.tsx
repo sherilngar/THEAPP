@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { Bot, Send, UserRound, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { DEPT_BY_ID } from '../../domain/departments';
 import { escalationLabel } from '../../domain/escalation';
 import type { StaffSession, Ticket } from '../../domain/types';
-import { handBackToAi, staffReply, useStore } from '../../store/store';
+import { useStore } from '../../store/store';
+import { ChatThread } from './ChatThread';
 import { StatusPill } from '../ui/Status';
 
 const fmt = (t?: number) =>
@@ -80,7 +81,12 @@ export function TicketDrawer({
             <div className="flex-1 space-y-6 overflow-y-auto px-5 py-5">
               <Details ticket={ticket} />
               <Timeline ticket={ticket} />
-              {!ticket.sample && <Conversation ticket={ticket} session={session} />}
+              {!ticket.sample && (
+                <div>
+                  <h3 className="eyebrow mb-3">Guest conversation</h3>
+                  <ChatThread guestId={ticket.guestId} session={session} />
+                </div>
+              )}
             </div>
           </motion.aside>
         </>
@@ -155,104 +161,6 @@ function Timeline({ ticket: t }: { ticket: Ticket }) {
           </li>
         ))}
       </ol>
-    </section>
-  );
-}
-
-function Conversation({ ticket, session }: { ticket: Ticket; session: StaffSession }) {
-  const messages = useStore((s) => s.messages);
-  const conv = useStore((s) => s.conversation);
-  const isGuest = useStore((s) => s.guest.id === ticket.guestId);
-  const [text, setText] = useState('');
-  const end = useRef<HTMLDivElement>(null);
-  useEffect(() => end.current?.scrollIntoView({ block: 'nearest' }), [messages.length]);
-  if (!isGuest)
-    return (
-      <p className="text-sm text-muted">
-        Conversation history is available for live demo guests only.
-      </p>
-    );
-  return (
-    <section>
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="eyebrow">Guest conversation</h3>
-        <span
-          className={`rounded-full px-2 py-0.5 text-xs font-medium ${conv.mode === 'human' ? 'bg-accent text-accent-fg' : 'bg-raised text-muted'}`}
-        >
-          {conv.mode === 'human' ? `${conv.humanName} is replying` : 'AI is replying'}
-        </span>
-      </div>
-      <div className="max-h-80 space-y-2 overflow-y-auto rounded-xl border border-line/70 bg-bg p-3">
-        {messages.length === 0 && (
-          <p className="text-center text-xs text-muted">No messages yet.</p>
-        )}
-        {messages
-          .filter((m) => m.text)
-          .map((m) => (
-            <div
-              key={m.id}
-              className={`flex ${m.sender === 'guest' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[85%] rounded-xl px-3 py-2 text-xs ${m.sender === 'guest' ? 'bg-fg text-bg' : m.sender === 'staff' ? 'border border-accent/40 bg-accent/10' : m.sender === 'system' ? 'bg-raised text-muted' : 'bg-surface'}`}
-                dir="auto"
-              >
-                <span className="mb-0.5 flex items-center gap-1 text-[11px] opacity-70">
-                  {m.sender === 'ai' ? (
-                    <Bot size={10} aria-hidden />
-                  ) : m.sender === 'staff' ? (
-                    <UserRound size={10} aria-hidden />
-                  ) : null}
-                  {m.sender === 'staff'
-                    ? m.staffName
-                    : m.sender === 'ai'
-                      ? 'AI concierge'
-                      : m.sender === 'guest'
-                        ? 'Guest'
-                        : 'System'}
-                </span>
-                <span className="whitespace-pre-line">{m.text}</span>
-              </div>
-            </div>
-          ))}
-        <div ref={end} />
-      </div>
-      <form
-        className="mt-3 flex gap-2"
-        onSubmit={(e) => {
-          e.preventDefault();
-          staffReply(text, session.name, session.department);
-          setText('');
-        }}
-      >
-        <label htmlFor="staff-reply" className="sr-only">
-          Reply to guest
-        </label>
-        <input
-          id="staff-reply"
-          data-testid="staff-reply"
-          className="field"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={`Reply as ${session.name}…`}
-          maxLength={1000}
-        />
-        <button
-          className="btn-primary min-h-[44px] px-4"
-          disabled={!text.trim()}
-          aria-label="Send reply"
-        >
-          <Send size={16} aria-hidden />
-        </button>
-      </form>
-      <p className="mt-2 text-xs text-muted">
-        Replying takes the chat over from the AI. The guest sees your name.
-      </p>
-      {conv.mode === 'human' && (
-        <button className="btn-ghost mt-3 min-h-[40px] text-xs" onClick={handBackToAi}>
-          <Bot size={14} aria-hidden /> Hand back to the AI concierge
-        </button>
-      )}
     </section>
   );
 }

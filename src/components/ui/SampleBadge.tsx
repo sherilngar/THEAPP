@@ -5,9 +5,11 @@ import { hasSampleContent } from '../../data/knowledge';
 export function SampleBadge({
   label = 'Sample content',
   title,
+  compact = false,
 }: {
   label?: string;
   title?: string;
+  compact?: boolean;
 }) {
   const show = useStore((s) => hasSampleContent(s.settings.knowledge));
   if (!show) return null;
@@ -17,7 +19,7 @@ export function SampleBadge({
       title={title ?? 'Placeholder hotel details are in use until real content is approved.'}
     >
       <FlaskConical size={12} aria-hidden />
-      {label}
+      <span className={compact ? 'sr-only' : ''}>{label}</span>
     </span>
   );
 }

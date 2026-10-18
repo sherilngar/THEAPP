@@ -24,6 +24,50 @@
           document.documentElement.dataset.theme = 'dark';
       } catch (e) {}
     </script>
+    <script>
+      // After a new deploy, a cached page can point at script files that no longer exist,
+      // which would leave a blank screen. Reload once with a fresh copy, then show a message.
+      (function () {
+        var KEY = 'so-reload-at';
+        function fallback() {
+          var root = document.getElementById('root');
+          if (!root || root.children.length) return;
+          root.innerHTML =
+            '<div style="font-family:system-ui,sans-serif;max-width:22rem;margin:20vh auto;padding:0 1.5rem;text-align:center;color:#1C1A17">' +
+            '<p style="font-size:1.25rem;margin-bottom:.5rem">The app needs a refresh</p>' +
+            '<p style="color:#665E54;font-size:.9rem;margin-bottom:1.25rem">A new version was just published. Tap below to load it.</p>' +
+            '<button onclick="location.reload()" style="min-height:44px;padding:0 1.5rem;border-radius:999px;border:0;background:#1C1A17;color:#fff;font-size:1rem">Reload</button></div>';
+        }
+        function recover() {
+          try {
+            var last = Number(sessionStorage.getItem(KEY)) || 0;
+            if (Date.now() - last > 30000) {
+              sessionStorage.setItem(KEY, String(Date.now()));
+              var url = new URL(location.href);
+              url.searchParams.set('v', String(Date.now()));
+              location.replace(url.toString());
+              return;
+            }
+          } catch (e) {}
+          fallback();
+        }
+        window.addEventListener(
+          'error',
+          function (e) {
+            var t = e.target;
+            var src = t && (t.src || t.href);
+            if (src && /\/assets\//.test(src) && (t.tagName === 'SCRIPT' || t.tagName === 'LINK'))
+              recover();
+          },
+          true,
+        );
+        window.addEventListener('vite:preloadError', function (e) {
+          e.preventDefault();
+          recover();
+        });
+        setTimeout(fallback, 12000);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

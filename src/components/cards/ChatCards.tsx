@@ -81,7 +81,7 @@ function OrderCard({
   state: 'pending' | 'placed' | 'changed';
   messageId: string;
 }) {
-  const { t, lang } = useGuestUi();
+  const { t, lang, guestId } = useGuestUi();
   const all = useStore((s) => menuItems(s.settings.knowledge));
   return (
     <div className="mt-2 rounded-xl border border-line/70 bg-bg/60 p-3">
@@ -108,10 +108,10 @@ function OrderCard({
       )}
       {state === 'pending' ? (
         <div className="flex gap-2">
-          <button className="btn-primary flex-1" onClick={() => confirmOrder(messageId)}>
+          <button className="btn-primary flex-1" onClick={() => confirmOrder(guestId, messageId)}>
             {t.placeOrder}
           </button>
-          <button className="btn-ghost" onClick={() => void sendGuestMessage(t.change)}>
+          <button className="btn-ghost" onClick={() => void sendGuestMessage(guestId, t.change)}>
             {t.change}
           </button>
         </div>
@@ -157,7 +157,7 @@ function BookingCard({
   state: 'pending' | 'done';
   messageId: string;
 }) {
-  const { t, lang } = useGuestUi();
+  const { t, lang, guestId } = useGuestUi();
   const k = useStore((s) => s.settings.knowledge);
   const [b, setB] = useState<BookingDraft>(() => ({
     ...booking,
@@ -206,7 +206,8 @@ function BookingCard({
       className="mt-2 grid grid-cols-2 gap-3 rounded-xl border border-line/70 bg-bg/60 p-3"
       onSubmit={(e) => {
         e.preventDefault();
-        if (ready) submitBooking(messageId, { ...b, destination: b.destination || undefined });
+        if (ready)
+          submitBooking(guestId, messageId, { ...b, destination: b.destination || undefined });
       }}
     >
       {b.kind === 'restaurant' && (

@@ -30,27 +30,25 @@ import type {
   TicketStatus,
 } from '../domain/types';
 import { DEFAULT_KNOWLEDGE, type Knowledge } from '../data/knowledge';
-import { demoGuest, liveSampleTickets, sampleHistory } from '../data/demo';
+import { DEMO_GUEST_ID, demoGuests, liveSampleTickets, sampleHistory } from '../data/demo';
 import { RemoteSync, type SyncStatus, type Transport } from './remote';
 
 /**
- * Local demo store. State lives in localStorage and is mirrored to every open tab
- * with BroadcastChannel, so a phone-framed guest app and the staff board stay in
- * sync. The shape matches the Supabase tables in supabase/migrations, so a remote
- * adapter can replace persistence without touching the screens.
+ * The concierge's data: in-house guests, one conversation per guest, messages,
+ * tickets and ratings. It lives in localStorage, is mirrored to other tabs with
+ * BroadcastChannel, and to other devices through Supabase when sync is on.
  */
 
 export interface State {
-  v: 3;
-  guest: Guest;
-  conversation: Conversation;
+  v: 4;
+  guests: Guest[];
+  conversations: Conversation[];
   messages: Message[];
   tickets: Ticket[];
   ratings: Rating[];
   settings: { standards: Standards; knowledge: Knowledge };
   clockOffset: number;
   seq: number;
-  typing: boolean;
   startedAt: number;
   /** Monotonic revision and writing tab, so tabs only ever accept newer state. */
   rev: number;
@@ -62,11 +60,10 @@ const CHANNEL = 'so-concierge';
 
 function initialState(): State {
   const now = Date.now();
-  const guest = demoGuest(now);
   return {
-    v: 3,
-    guest,
-    conversation: { id: 'conv-demo', guestId: guest.id, mode: 'ai', lang: 'en' },
+    v: 4,
+    guests: demoGuests(now),
+    conversations: [],
     messages: [],
     tickets: [...sampleHistory(now), ...liveSampleTickets(now)], // sample history derives from startedAt
     ratings: [],
@@ -76,7 +73,6 @@ function initialState(): State {
     },
     clockOffset: 0,
     seq: 1000,
-    typing: false,
     startedAt: now,
     rev: 0,
     writer: '',
@@ -88,8 +84,7 @@ function load(): State {
     const raw = localStorage.getItem(KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as State;
-      if (parsed.v === 3)
-        return { ...parsed, typing: false, rev: parsed.rev ?? 0, writer: parsed.writer ?? '' };
+      if (parsed.v === 4) return { ...parsed, rev: parsed.rev ?? 0, writer: parsed.writer ?? '' };
     }
   } catch {
     /* storage unavailable: fall through to a fresh demo */
@@ -141,7 +136,7 @@ function commit(next: State, local = true) {
 
 if (channel) {
   channel.onmessage = (e: MessageEvent<State>) => {
-    if (e.data?.v === 3 && !remote) commit(e.data, false);
+    if (e.data?.v === 4 && !remote) commit(e.data, false);
   };
 }
 if (typeof window !== 'undefined') {
@@ -205,7 +200,14 @@ function toWire(s: State) {
 
 function fromWire(w: unknown): State | null {
   const s = w as Partial<State> | null;
-  if (!s || s.v !== 3 || !Array.isArray(s.tickets) || typeof s.startedAt !== 'number') return null;
+  if (
+    !s ||
+    s.v !== 4 ||
+    !Array.isArray(s.tickets) ||
+    !Array.isArray(s.guests) ||
+    typeof s.startedAt !== 'number'
+  )
+    return null;
   return {
     ...(s as State),
     tickets: [...sampleHistory(s.startedAt), ...s.tickets],
@@ -264,21 +266,50 @@ function msgId() {
   return `m-${Date.now().toString(36)}-${msgCounter}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
+const tr = (lang: 'en' | 'ar', en: string, ar: string) => (lang === 'ar' ? ar : en);
+const stamp = (s: State) => Date.now() + s.clockOffset;
+const emitCreated = (created: Ticket[]) => {
+  if (created.length)
+    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+};
+
+export { DEMO_GUEST_ID };
+export const conversationId = (guestId: string) => `c-${guestId}`;
+
+export function guestById(s: State, guestId: string): Guest | undefined {
+  return s.guests.find((g) => g.id === guestId);
+}
+
+export function conversationOf(s: State, guestId: string): Conversation | undefined {
+  return s.conversations.find((c) => c.guestId === guestId);
+}
+
+export function messagesOf(s: State, guestId: string): Message[] {
+  const id = conversationId(guestId);
+  return s.messages.filter((m) => m.conversationId === id);
+}
+
+/** The guest and their conversation, created on first use. Undefined if the guest is unknown. */
+function party(s: State, guestId: string): { guest: Guest; conv: Conversation } | undefined {
+  const guest = guestById(s, guestId);
+  if (!guest) return undefined;
+  let conv = conversationOf(s, guestId);
+  if (!conv) {
+    conv = { id: conversationId(guestId), guestId, mode: 'ai', lang: 'en' };
+    s.conversations.push(conv);
+  }
+  return { guest, conv };
+}
+
 function pushMessage(
   s: State,
+  conv: Conversation,
   m: Omit<Message, 'id' | 'conversationId' | 'at'> & { at?: number },
 ): Message {
-  const msg: Message = {
-    id: msgId(),
-    conversationId: s.conversation.id,
-    at: m.at ?? Date.now() + s.clockOffset,
-    ...m,
-  };
+  const msg: Message = { id: msgId(), conversationId: conv.id, at: m.at ?? stamp(s), ...m };
   s.messages.push(msg);
   return msg;
 }
-
-const tr = (lang: 'en' | 'ar', en: string, ar: string) => (lang === 'ar' ? ar : en);
 
 // ------------------------------------------------------------------ tickets
 
@@ -303,6 +334,7 @@ export function validateDraft(d: TicketDraft): { ok: true } | { ok: false; error
 
 function createTickets(
   s: State,
+  guest: Guest,
   drafts: TicketDraft[],
   original: string | undefined,
   lang: Lang,
@@ -325,12 +357,12 @@ function createTickets(
       quantity: d.quantity,
       details: d.details,
       preferredTime: d.preferredTime,
-      room: s.guest.room,
-      guestId: s.guest.id,
-      guestName: `${s.guest.title} ${s.guest.lastName}`,
+      room: guest.room,
+      guestId: guest.id,
+      guestName: `${guest.title} ${guest.lastName}`.trim(),
       priority: d.priority,
       status: 'new',
-      createdAt: Date.now() + s.clockOffset,
+      createdAt: stamp(s),
       notes: [],
       escalationLevel: 0,
       originalMessage: original,
@@ -358,10 +390,75 @@ function guestItemName(t: Ticket, lang: 'en' | 'ar'): string {
   return map[t.item] ?? t.item;
 }
 
+// --------------------------------------------------------------- sign-in
+
+const norm = (v: string) =>
+  v
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9؀-ۿ]/g, '');
+
+/** Today's date in the hotel's time zone (UAE, UTC+4), as YYYY-MM-DD. */
+function hotelToday(s: State) {
+  return new Date(stamp(s) + 4 * 3_600_000).toISOString().slice(0, 10);
+}
+
+/**
+ * Finds an in-house stay by room number and surname, as the front office would.
+ * Room numbers ignore leading zeros; surnames ignore case, spaces and accents.
+ */
+export function findStay(room: string, surname: string): Guest | undefined {
+  const r = room.trim().replace(/^0+/, '');
+  const n = norm(surname);
+  if (!r || !n) return undefined;
+  const today = hotelToday(state);
+  return state.guests.find(
+    (g) =>
+      !g.checkedOutAt &&
+      g.room.replace(/^0+/, '') === r &&
+      norm(g.lastName) === n &&
+      g.arrival <= today &&
+      today <= g.departure,
+  );
+}
+
+/** Opens (or resumes) the guest's conversation, with a welcome message the first time. */
+export function signInGuest(guestId: string, lang: 'en' | 'ar') {
+  update((s) => {
+    const p = party(s, guestId);
+    if (!p) return;
+    const { guest, conv } = p;
+    conv.lang = lang;
+    const first = !conv.signedInAt;
+    conv.signedInAt = stamp(s);
+    if (first)
+      pushMessage(s, conv, {
+        sender: 'ai',
+        lang,
+        text: tr(
+          lang,
+          `Welcome to SO/, ${guest.firstName}. I'm your AI concierge for room ${guest.room}. Ask me anything in your own words, or tap Services. Your ambassador, ${guest.ambassador}, is always one tap away.`,
+          `أهلاً بك في SO/ يا ${guest.firstName}. أنا مساعد الكونسيرج الذكي لغرفتك ${guest.room}. اطلب ما تشاء بكلماتك، أو اختر من الخدمات. ${guest.ambassador} من فريق سفراء التجربة متاح دائماً بضغطة واحدة.`,
+        ),
+        chips:
+          lang === 'ar'
+            ? ['مناشف إضافية', 'طلب طعام', 'حجز طاولة', 'ساعات المسبح']
+            : ['Extra towels', 'Order food', 'Book a table', 'Pool hours'],
+      });
+  });
+}
+
 // ------------------------------------------------------------- guest flow
 
-function applyEngine(s: State, r: EngineResult, original: string) {
-  const created = createTickets(s, r.drafts, original, r.lang);
+function applyEngine(
+  s: State,
+  guest: Guest,
+  conv: Conversation,
+  r: EngineResult,
+  original: string,
+) {
+  const created = createTickets(s, guest, r.drafts, original, r.lang);
   const ids = created.map((t) => t.id);
   let usedIds = false;
   const fill = (cards?: Card[]) =>
@@ -377,7 +474,7 @@ function applyEngine(s: State, r: EngineResult, original: string) {
 
   let pendingCardMsg: string | undefined;
   r.replies.forEach((rep: Reply) => {
-    const m = pushMessage(s, {
+    const m = pushMessage(s, conv, {
       sender: 'ai',
       text: rep.text,
       lang: r.lang,
@@ -392,7 +489,7 @@ function applyEngine(s: State, r: EngineResult, original: string) {
       pendingCardMsg = m.id;
   });
   if (!usedIds && ids.length)
-    pushMessage(s, {
+    pushMessage(s, conv, {
       sender: 'ai',
       text: '',
       lang: r.lang,
@@ -400,31 +497,39 @@ function applyEngine(s: State, r: EngineResult, original: string) {
     });
 
   if (r.completeCardMessageId) completeCard(s, r.completeCardMessageId);
-  if (r.pending === null) delete s.conversation.pending;
+  if (r.pending === null) delete conv.pending;
   else if (r.pending) {
     const p = { ...r.pending };
     if ((p.type === 'order_confirm' || p.type === 'booking') && !p.messageId)
       p.messageId = pendingCardMsg;
-    s.conversation.pending = p;
+    conv.pending = p;
   }
-  if (r.handover && s.conversation.mode === 'ai') {
-    s.conversation.handoverRequested = {
-      reason: r.handover.reason,
-      at: Date.now() + s.clockOffset,
-      urgency: r.handover.urgency,
-    };
-    pushMessage(s, {
-      sender: 'system',
-      text: tr(
-        s.conversation.lang,
-        `${s.guest.ambassador}, your Experience Ambassador, has been notified and will join this chat.`,
-        `تم إبلاغ ${s.guest.ambassador} من فريق سفراء التجربة وسينضم إلى هذه المحادثة.`,
-      ),
-      lang: s.conversation.lang,
-      cards: [{ type: 'handover', staffName: s.guest.ambassador }],
-    });
-  }
+  if (r.handover && conv.mode === 'ai')
+    requestPerson(s, guest, conv, r.handover.reason, r.handover.urgency);
   return created;
+}
+
+/** Tells the guest a person is coming and flags the chat for staff. */
+function requestPerson(
+  s: State,
+  guest: Guest,
+  conv: Conversation,
+  reason: string,
+  urgency: Ticket['priority'],
+) {
+  const already = !!conv.handoverRequested;
+  conv.handoverRequested = { reason, at: stamp(s), urgency };
+  if (already) return;
+  pushMessage(s, conv, {
+    sender: 'system',
+    text: tr(
+      conv.lang,
+      `${guest.ambassador}, your Experience Ambassador, has been notified and will join this chat.`,
+      `تم إبلاغ ${guest.ambassador} من فريق سفراء التجربة وسينضم إلى هذه المحادثة.`,
+    ),
+    lang: conv.lang,
+    cards: [{ type: 'handover', staffName: guest.ambassador }],
+  });
 }
 
 function completeCard(s: State, messageId: string) {
@@ -435,42 +540,68 @@ function completeCard(s: State, messageId: string) {
   });
 }
 
+function engineCtx(guestId: string) {
+  const guest = guestById(state, guestId)!;
+  const conv = conversationOf(state, guestId) ?? {
+    id: conversationId(guestId),
+    guestId,
+    mode: 'ai' as const,
+    lang: 'en' as const,
+  };
+  return {
+    guest,
+    conversation: conv,
+    tickets: state.tickets.filter((t) => t.guestId === guestId && !t.sample),
+    knowledge: state.settings.knowledge,
+    uiLang: conv.lang,
+  };
+}
+
 const THINK_MS = { min: 650, max: 1200 };
 
 /** Sends a guest message. The concierge "thinks" briefly, then replies with streamed text. */
-export function sendGuestMessage(raw: string, opts: { thinkMs?: number } = {}): Promise<void> {
+export function sendGuestMessage(
+  guestId: string,
+  raw: string,
+  opts: { thinkMs?: number } = {},
+): Promise<void> {
   const text = raw.trim().slice(0, 1000);
-  if (!text) return Promise.resolve();
+  if (!text || !guestById(state, guestId)) return Promise.resolve();
   const { text: masked } = maskPii(text);
-  const lang = /[؀-ۿ]/.test(text) ? 'ar' : /\p{L}{2,}/u.test(text) ? 'en' : state.conversation.lang;
+  const current = conversationOf(state, guestId);
+  const lang = /[؀-ۿ]/.test(text) ? 'ar' : /\p{L}{2,}/u.test(text) ? 'en' : (current?.lang ?? 'en');
   update((s) => {
-    pushMessage(s, { sender: 'guest', text: masked, lang });
-    s.conversation.lang = lang === 'ar' ? 'ar' : 'en';
-    if (s.conversation.mode === 'ai') s.typing = true;
+    const p = party(s, guestId);
+    if (!p) return;
+    pushMessage(s, p.conv, { sender: 'guest', text: masked, lang });
+    p.conv.lang = lang;
+    p.conv.lastGuestAt = stamp(s);
+    if (p.conv.mode === 'ai') p.conv.typing = true;
   });
 
-  if (state.conversation.mode === 'human') {
+  if (conversationOf(state, guestId)?.mode === 'human') {
     // A person is handling the chat: the concierge stays quiet, except for safety.
-    const r = respond(text, engineCtx());
+    const r = respond(text, engineCtx(guestId));
     if (r.emergency || r.pii.length) {
+      let created: Ticket[] = [];
       update((s) => {
-        const created = applyEngine(
+        const p = party(s, guestId);
+        if (!p) return;
+        created = applyEngine(
           s,
+          p.guest,
+          p.conv,
           {
             ...r,
+            handover: undefined,
             replies: r.replies.filter((x) =>
               x.cards?.some((c) => c.type === 'emergency' || c.type === 'privacy'),
             ),
           },
           masked,
         );
-        if (created.length)
-          queueMicrotask(() =>
-            busListeners.forEach((l) =>
-              l({ type: 'tickets-created', ids: created.map((t) => t.id) }),
-            ),
-          );
       });
+      emitCreated(created);
     }
     return Promise.resolve();
   }
@@ -480,31 +611,41 @@ export function sendGuestMessage(raw: string, opts: { thinkMs?: number } = {}): 
     window.setTimeout(() => {
       let created: Ticket[] = [];
       try {
-        const r = respond(text, engineCtx());
+        // If a person took over while the concierge was thinking, stay quiet.
+        if (conversationOf(state, guestId)?.mode === 'human') {
+          update((s) => {
+            const c = conversationOf(s, guestId);
+            if (c) c.typing = false;
+          });
+          resolve();
+          return;
+        }
+        const r = respond(text, engineCtx(guestId));
         update((s) => {
-          s.typing = false;
-          created = applyEngine(s, r, masked);
+          const p = party(s, guestId);
+          if (!p) return;
+          p.conv.typing = false;
+          created = applyEngine(s, p.guest, p.conv, r, masked);
         });
       } catch (err) {
         console.error(err);
         update((s) => {
-          s.typing = false;
-          pushMessage(s, {
+          const p = party(s, guestId);
+          if (!p) return;
+          p.conv.typing = false;
+          pushMessage(s, p.conv, {
             sender: 'ai',
             text: tr(
-              s.conversation.lang,
+              p.conv.lang,
               "I'm sorry, I couldn't process that just now. I've asked your ambassador to help you personally.",
               'عذراً، لم أتمكن من معالجة ذلك الآن. طلبت من السفير مساعدتك شخصياً.',
             ),
-            lang: s.conversation.lang,
+            lang: p.conv.lang,
           });
-          s.conversation.handoverRequested = {
-            reason: 'Concierge error fallback',
-            at: Date.now() + s.clockOffset,
-            urgency: 'normal',
-          };
+          requestPerson(s, p.guest, p.conv, 'Concierge error fallback', 'high');
           createTickets(
             s,
+            p.guest,
             [
               {
                 department: 'frontoffice',
@@ -520,105 +661,106 @@ export function sendGuestMessage(raw: string, opts: { thinkMs?: number } = {}): 
           );
         });
       }
-      if (created.length)
-        busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+      emitCreated(created);
       resolve();
     }, delay);
   });
 }
 
-function engineCtx() {
-  return {
-    guest: state.guest,
-    conversation: state.conversation,
-    tickets: state.tickets.filter((t) => t.guestId === state.guest.id),
-    knowledge: state.settings.knowledge,
-    uiLang: state.conversation.lang,
-  };
-}
-
-export function setGuestLanguage(lang: 'en' | 'ar') {
+export function setGuestLanguage(guestId: string, lang: 'en' | 'ar') {
   update((s) => {
-    s.conversation.lang = lang;
+    const p = party(s, guestId);
+    if (p) p.conv.lang = lang;
   });
 }
 
 /** Menu card → read the order back and wait for a yes. */
-export function reviewOrder(order: DiningOrder) {
+export function reviewOrder(guestId: string, order: DiningOrder) {
   update((s) => {
-    const lang = s.conversation.lang;
-    const m = pushMessage(s, {
+    const p = party(s, guestId);
+    if (!p) return;
+    const lang = p.conv.lang;
+    const m = pushMessage(s, p.conv, {
       sender: 'ai',
       text: orderReadBack(order, s.settings.knowledge, lang),
       lang,
       cards: [{ type: 'order_confirm', order, state: 'pending' }],
       chips: lang === 'ar' ? ['نعم', 'تعديل'] : ['Yes, place it', 'Change'],
     });
-    s.conversation.pending = { type: 'order_confirm', order, messageId: m.id, lang };
+    p.conv.pending = { type: 'order_confirm', order, messageId: m.id, lang };
   });
 }
 
 /** Order card "Place order" button. */
-export function confirmOrder(messageId: string) {
+export function confirmOrder(guestId: string, messageId: string) {
   let created: Ticket[] = [];
   update((s) => {
+    const p = party(s, guestId);
     const m = s.messages.find((x) => x.id === messageId);
     const card = m?.cards?.find((c) => c.type === 'order_confirm');
-    if (!card || card.type !== 'order_confirm' || card.state !== 'pending') return;
-    const lang = s.conversation.lang;
-    pushMessage(s, {
+    if (!p || !card || card.type !== 'order_confirm' || card.state !== 'pending') return;
+    const { guest, conv } = p;
+    const lang = conv.lang;
+    pushMessage(s, conv, {
       sender: 'guest',
       text: tr(lang, 'Yes, place my order', 'نعم، أكد الطلب'),
       lang,
     });
-    created = createTickets(s, [orderDraft(card.order)], undefined, lang);
+    created = createTickets(s, guest, [orderDraft(card.order)], undefined, lang);
     card.state = 'placed';
-    delete s.conversation.pending;
-    pushMessage(s, {
+    delete conv.pending;
+    pushMessage(s, conv, {
       sender: 'ai',
       text: tr(
         lang,
-        `Your order is placed, ${s.guest.firstName}. I'll let you know when it's on the way. It will be charged to room ${s.guest.room} (${s.guest.lastName}).`,
-        `تم تأكيد طلبك يا ${s.guest.firstName}، وسأبلغك عندما يكون في الطريق. سيُضاف إلى حساب الغرفة ${s.guest.room}.`,
+        `Your order is placed, ${guest.firstName}. I'll let you know when it's on the way. It will be charged to room ${guest.room} (${guest.lastName}).`,
+        `تم تأكيد طلبك يا ${guest.firstName}، وسأبلغك عندما يكون في الطريق. سيُضاف إلى حساب الغرفة ${guest.room}.`,
       ),
       lang,
       cards: [{ type: 'tickets', ticketIds: created.map((t) => t.id) }],
     });
   });
-  if (created.length)
-    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+  emitCreated(created);
 }
 
 /** Booking card submit (restaurant, spa or transport). */
-export function submitBooking(messageId: string, booking: BookingDraft) {
+export function submitBooking(guestId: string, messageId: string, booking: BookingDraft) {
   let created: Ticket[] = [];
   update((s) => {
-    const lang = s.conversation.lang;
-    const draft = bookingDraftToTicket(booking, s.settings.knowledge);
-    created = createTickets(s, [draft], undefined, lang);
+    const p = party(s, guestId);
+    if (!p) return;
+    const lang = p.conv.lang;
+    created = createTickets(
+      s,
+      p.guest,
+      [bookingDraftToTicket(booking, s.settings.knowledge)],
+      undefined,
+      lang,
+    );
     if (!created.length) return;
-    const m = s.messages.find((x) => x.id === messageId);
-    m?.cards?.forEach((c) => {
-      if (c.type === 'booking') {
-        c.state = 'done';
-        c.booking = booking;
-      }
-    });
-    if (s.conversation.pending?.type === 'booking') delete s.conversation.pending;
-    pushMessage(s, {
+    s.messages
+      .find((x) => x.id === messageId)
+      ?.cards?.forEach((c) => {
+        if (c.type === 'booking') {
+          c.state = 'done';
+          c.booking = booking;
+        }
+      });
+    if (p.conv.pending?.type === 'booking') delete p.conv.pending;
+    pushMessage(s, p.conv, {
       sender: 'ai',
       text: bookingConfirmation(booking, s.settings.knowledge, lang),
       lang,
       cards: [{ type: 'tickets', ticketIds: created.map((t) => t.id) }],
     });
   });
-  if (created.length)
-    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+  emitCreated(created);
   return created.length > 0;
 }
 
 /** Services grid: a direct request without typing. */
 export function requestFromGrid(
+  guestId: string,
   itemKey: string,
   opts: { quantity?: number; time?: string; notes?: string },
 ) {
@@ -626,15 +768,19 @@ export function requestFromGrid(
   if (!item) return;
   let created: Ticket[] = [];
   update((s) => {
-    const lang = s.conversation.lang;
+    const p = party(s, guestId);
+    if (!p) return;
+    const lang = p.conv.lang;
     const label = lang === 'ar' ? item.ar : item.en;
-    pushMessage(s, {
+    pushMessage(s, p.conv, {
       sender: 'guest',
       text: `${opts.quantity && opts.quantity > 1 ? `${opts.quantity} × ` : ''}${label}${opts.time ? ` · ${opts.time}` : ''}`,
       lang,
     });
+    p.conv.lastGuestAt = stamp(s);
     created = createTickets(
       s,
+      p.guest,
       [
         {
           department: item.dept,
@@ -652,37 +798,78 @@ export function requestFromGrid(
       undefined,
       lang,
     );
-    pushMessage(s, {
+    pushMessage(s, p.conv, {
       sender: 'ai',
       text: tr(
         lang,
-        `Of course, ${s.guest.firstName}. I've sent this to our ${deptName(item.dept)} team.`,
-        `بالتأكيد يا ${s.guest.firstName}. أرسلت طلبك إلى فريق ${deptName(item.dept, 'ar')}.`,
+        `Of course, ${p.guest.firstName}. I've sent this to our ${deptName(item.dept)} team.`,
+        `بالتأكيد يا ${p.guest.firstName}. أرسلت طلبك إلى فريق ${deptName(item.dept, 'ar')}.`,
       ),
       lang,
       cards: [{ type: 'tickets', ticketIds: created.map((t) => t.id) }],
     });
   });
-  if (created.length)
-    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+  emitCreated(created);
 }
 
-export function requestAmbassador() {
-  const lang = state.conversation.lang;
+export function requestAmbassador(guestId: string) {
+  const lang = conversationOf(state, guestId)?.lang ?? 'en';
   return sendGuestMessage(
+    guestId,
     tr(lang, "I'd like to speak to my ambassador, please.", 'أود التحدث إلى السفير من فضلك.'),
   );
+}
+
+/** Services grid → booking picker card in the chat. */
+export function startBooking(
+  guestId: string,
+  kind: BookingDraft['kind'],
+  label: string,
+  context?: string,
+) {
+  update((s) => {
+    const p = party(s, guestId);
+    if (!p) return;
+    const lang = p.conv.lang;
+    pushMessage(s, p.conv, { sender: 'guest', text: label, lang });
+    const booking: BookingDraft = { kind };
+    if (kind === 'transport') {
+      booking.outlet = context === 'airport' ? 'airport_departure' : (context ?? 'taxi');
+      if (context === 'airport') booking.destination = 'Airport';
+    }
+    if (kind === 'spa' && context === 'couples') booking.outlet = 'couples';
+    if (context === 'beach or terrace table') booking.notes = 'Beach or terrace table';
+    const m = pushMessage(s, p.conv, {
+      sender: 'ai',
+      text: tr(
+        lang,
+        'Of course. Choose the details below and I will send the request to our team.',
+        'بالتأكيد. اختر التفاصيل أدناه وسأرسل الطلب إلى فريقنا.',
+      ),
+      lang,
+      cards: [{ type: 'booking', booking, state: 'pending' }],
+    });
+    p.conv.pending = {
+      type: 'booking',
+      booking,
+      asking: kind === 'spa' ? 'outlet' : 'time',
+      messageId: m.id,
+      lang,
+    };
+  });
 }
 
 // ---------------------------------------------------------------- staff
 
 function statusMessage(s: State, t: Ticket, status: TicketStatus, by: string) {
-  if (t.guestId !== s.guest.id) return;
-  const lang = s.conversation.lang;
+  const guest = guestById(s, t.guestId);
+  const conv = guest && conversationOf(s, guest.id);
+  if (!guest || !conv) return; // guest never opened the app: nothing to tell them in chat
+  const lang = conv.lang;
   const name = guestItemName(t, lang);
   const dept = deptName(t.department, lang);
   if (status === 'accepted')
-    pushMessage(s, {
+    pushMessage(s, conv, {
       sender: 'system',
       text: tr(
         lang,
@@ -693,7 +880,7 @@ function statusMessage(s: State, t: Ticket, status: TicketStatus, by: string) {
       cards: [{ type: 'tickets', ticketIds: [t.id] }],
     });
   if (status === 'on_the_way')
-    pushMessage(s, {
+    pushMessage(s, conv, {
       sender: 'system',
       text: tr(
         lang,
@@ -702,13 +889,13 @@ function statusMessage(s: State, t: Ticket, status: TicketStatus, by: string) {
       ),
       lang,
     });
-  if (status === 'done')
-    pushMessage(s, {
+  if (status === 'done' && t.kind !== 'handover' && t.kind !== 'recovery')
+    pushMessage(s, conv, {
       sender: 'ai',
       text: tr(
         lang,
-        `Your request “${name}” is complete, ${s.guest.firstName}. How did we do?`,
-        `اكتمل طلبك «${name}» يا ${s.guest.firstName}. كيف كانت الخدمة؟`,
+        `Your request “${name}” is complete, ${guest.firstName}. How did we do?`,
+        `اكتمل طلبك «${name}» يا ${guest.firstName}. كيف كانت الخدمة؟`,
       ),
       lang,
       cards: [{ type: 'rating', ticketId: t.id }],
@@ -719,7 +906,7 @@ export function setTicketStatus(id: string, status: TicketStatus, by?: string) {
   update((s) => {
     const t = s.tickets.find((x) => x.id === id);
     if (!t || t.status === status || t.status === 'done' || t.status === 'cancelled') return;
-    const at = Date.now() + s.clockOffset;
+    const at = stamp(s);
     const who = by ?? DEPT_BY_ID[t.department].staff;
     if (status === 'accepted') {
       t.acceptedAt = at;
@@ -739,6 +926,18 @@ export function setTicketStatus(id: string, status: TicketStatus, by?: string) {
     t.status = status;
     t.notes.push({ at, by: who, text: `Status → ${status.replace(/_/g, ' ')}` });
     statusMessage(s, t, status, who);
+    // Closing the last person-needed ticket clears the "waiting for a person" flag.
+    if (status === 'done' && (t.kind === 'handover' || t.kind === 'recovery')) {
+      const conv = conversationOf(s, t.guestId);
+      const stillOpen = s.tickets.some(
+        (x) =>
+          x.guestId === t.guestId &&
+          (x.kind === 'handover' || x.kind === 'recovery') &&
+          x.status !== 'done' &&
+          x.status !== 'cancelled',
+      );
+      if (conv && !stillOpen) delete conv.handoverRequested;
+    }
   });
 }
 
@@ -750,7 +949,7 @@ export function reassignTicket(id: string, dept: DepartmentId, by: string) {
   update((s) => {
     const t = s.tickets.find((x) => x.id === id);
     if (!t) return;
-    const at = Date.now() + s.clockOffset;
+    const at = stamp(s);
     t.notes.push({
       at,
       by,
@@ -769,56 +968,83 @@ export function addNote(id: string, by: string, text: string) {
   const clean = maskPii(text.trim().slice(0, 500)).text;
   if (!clean) return;
   update((s) => {
-    s.tickets
-      .find((x) => x.id === id)
-      ?.notes.push({ at: Date.now() + s.clockOffset, by, text: clean });
+    s.tickets.find((x) => x.id === id)?.notes.push({ at: stamp(s), by, text: clean });
   });
 }
 
-/** A staff member replies in the guest chat. This takes the conversation over from the AI. */
-export function staffReply(text: string, staffName: string, dept: DepartmentId) {
-  const clean = text.trim().slice(0, 1000);
+function joinChat(s: State, conv: Conversation, staffName: string, dept: DepartmentId) {
+  if (conv.mode === 'human' && conv.humanName === staffName) return;
+  pushMessage(s, conv, {
+    sender: 'system',
+    text: tr(
+      conv.lang,
+      `${staffName} (${deptName(dept)}) has joined the chat. You are now talking to a person.`,
+      `انضم ${staffName} (${deptName(dept, 'ar')}) إلى المحادثة. أنت الآن تتحدث مع موظف.`,
+    ),
+    lang: conv.lang,
+  });
+  conv.mode = 'human';
+  conv.humanName = staffName;
+  conv.typing = false;
+  delete conv.handoverRequested;
+  delete conv.pending;
+}
+
+/** A staff member takes the chat over from the AI without writing yet. */
+export function takeOverChat(guestId: string, staffName: string, dept: DepartmentId) {
+  update((s) => {
+    const p = party(s, guestId);
+    if (!p) return;
+    joinChat(s, p.conv, staffName, dept);
+    p.conv.staffReadAt = stamp(s);
+  });
+}
+
+/** A staff member replies in the guest chat, taking it over from the AI if needed. */
+export function staffReply(guestId: string, text: string, staffName: string, dept: DepartmentId) {
+  const clean = maskPii(text.trim().slice(0, 1000)).text;
   if (!clean) return;
   update((s) => {
-    const lang = s.conversation.lang;
-    if (s.conversation.mode !== 'human' || s.conversation.humanName !== staffName) {
-      pushMessage(s, {
-        sender: 'system',
-        text: tr(
-          lang,
-          `${staffName} (${deptName(dept)}) has joined the chat. You are now talking to a person.`,
-          `انضم ${staffName} (${deptName(dept, 'ar')}) إلى المحادثة. أنت الآن تتحدث مع موظف.`,
-        ),
-        lang,
-      });
-    }
-    s.conversation.mode = 'human';
-    s.conversation.humanName = staffName;
-    delete s.conversation.handoverRequested;
-    delete s.conversation.pending;
-    pushMessage(s, {
+    const p = party(s, guestId);
+    if (!p) return;
+    joinChat(s, p.conv, staffName, dept);
+    pushMessage(s, p.conv, {
       sender: 'staff',
       staffName: `${staffName} · ${DEPT_BY_ID[dept].short}`,
       text: clean,
-      lang,
+      lang: p.conv.lang,
+    });
+    p.conv.staffReadAt = stamp(s);
+  });
+}
+
+export function handBackToAi(guestId: string) {
+  update((s) => {
+    const conv = conversationOf(s, guestId);
+    if (!conv || conv.mode === 'ai') return;
+    conv.mode = 'ai';
+    delete conv.humanName;
+    delete conv.handoverRequested;
+    conv.staffReadAt = stamp(s);
+    pushMessage(s, conv, {
+      sender: 'system',
+      text: tr(
+        conv.lang,
+        'The AI concierge is replying again. Your ambassador is always one tap away.',
+        'عاد مساعد الكونسيرج الذكي للرد. السفير متاح دائماً بضغطة واحدة.',
+      ),
+      lang: conv.lang,
     });
   });
 }
 
-export function handBackToAi() {
+/** Staff opened the chat: clears its unread count on every device. */
+export function markChatRead(guestId: string) {
+  const conv = conversationOf(state, guestId);
+  if (!conv || (conv.staffReadAt ?? 0) >= (conv.lastGuestAt ?? 0)) return;
   update((s) => {
-    const lang = s.conversation.lang;
-    s.conversation.mode = 'ai';
-    delete s.conversation.humanName;
-    pushMessage(s, {
-      sender: 'system',
-      text: tr(
-        lang,
-        'The AI concierge is replying again. Your ambassador is always one tap away.',
-        'عاد مساعد الكونسيرج الذكي للرد. السفير متاح دائماً بضغطة واحدة.',
-      ),
-      lang,
-    });
+    const c = conversationOf(s, guestId);
+    if (c) c.staffReadAt = stamp(s);
   });
 }
 
@@ -827,15 +1053,20 @@ export function rateTicket(ticketId: string, value: number) {
   update((s) => {
     const t = s.tickets.find((x) => x.id === ticketId);
     if (!t || t.rating) return;
+    const p = party(s, t.guestId);
     t.rating = value;
-    s.ratings.push({ ticketId, value, at: Date.now() + s.clockOffset });
+    s.ratings.push({ ticketId, value, at: stamp(s) });
     s.messages.forEach((m) =>
       m.cards?.forEach((c) => c.type === 'rating' && c.ticketId === ticketId && (c.value = value)),
     );
-    const lang = s.conversation.lang;
+    if (!p) return;
+    const { guest, conv } = p;
+    const lang = conv.lang;
+    conv.lastGuestAt = stamp(s);
     if (value <= 2) {
       created = createTickets(
         s,
+        guest,
         [
           {
             department: 'frontoffice',
@@ -849,35 +1080,74 @@ export function rateTicket(ticketId: string, value: number) {
         undefined,
         lang,
       );
-      pushMessage(s, {
+      pushMessage(s, conv, {
         sender: 'ai',
         text: tr(
           lang,
-          `I'm very sorry we fell short, ${s.guest.firstName}. Your ambassador, ${s.guest.ambassador}, will contact you personally to put this right.`,
-          `نأسف جداً لأننا لم نكن عند حسن ظنك يا ${s.guest.firstName}. سيتواصل معك ${s.guest.ambassador} من فريق سفراء التجربة شخصياً لمعالجة الأمر.`,
+          `I'm very sorry we fell short, ${guest.firstName}. Your ambassador, ${guest.ambassador}, will contact you personally to put this right.`,
+          `نأسف جداً لأننا لم نكن عند حسن ظنك يا ${guest.firstName}. سيتواصل معك ${guest.ambassador} من فريق سفراء التجربة شخصياً لمعالجة الأمر.`,
         ),
         lang,
         cards: [{ type: 'tickets', ticketIds: created.map((x) => x.id) }],
       });
-      s.conversation.handoverRequested = {
-        reason: `Low rating (${value}/5)`,
-        at: Date.now() + s.clockOffset,
-        urgency: 'high',
-      };
+      if (conv.mode === 'ai') requestPerson(s, guest, conv, `Low rating (${value}/5)`, 'high');
     } else {
-      pushMessage(s, {
+      pushMessage(s, conv, {
         sender: 'ai',
         text: tr(
           lang,
-          `Thank you, ${s.guest.firstName}. We're delighted to hear it.`,
-          `شكراً لك يا ${s.guest.firstName}. يسعدنا ذلك.`,
+          `Thank you, ${guest.firstName}. We're delighted to hear it.`,
+          `شكراً لك يا ${guest.firstName}. يسعدنا ذلك.`,
         ),
         lang,
       });
     }
   });
-  if (created.length)
-    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((x) => x.id) }));
+  emitCreated(created);
+}
+
+// ------------------------------------------------------------- in-house guests
+
+export type NewGuest = Omit<Guest, 'id' | 'sample' | 'checkedOutAt'>;
+
+export function addGuest(g: NewGuest): string {
+  const id = `g-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  update((s) => {
+    s.guests.push({
+      ...g,
+      id,
+      title: g.title.trim(),
+      firstName: g.firstName.trim(),
+      lastName: g.lastName.trim(),
+      room: g.room.trim(),
+      ambassador: g.ambassador.trim() || 'Nadia',
+    });
+  });
+  return id;
+}
+
+/** Checks a guest out: they can no longer sign in, and any open chat closes. */
+export function checkOutGuest(guestId: string) {
+  update((s) => {
+    const g = guestById(s, guestId);
+    if (!g || g.checkedOutAt) return;
+    g.checkedOutAt = stamp(s);
+    const conv = conversationOf(s, guestId);
+    if (conv) {
+      conv.mode = 'ai';
+      delete conv.humanName;
+      delete conv.handoverRequested;
+      delete conv.pending;
+      conv.typing = false;
+    }
+  });
+}
+
+export function reinstateGuest(guestId: string) {
+  update((s) => {
+    const g = guestById(s, guestId);
+    if (g) delete g.checkedOutAt;
+  });
 }
 
 // ------------------------------------------------------------- escalation
@@ -936,43 +1206,14 @@ export function advanceClock(minutes: number) {
   tickEscalations();
 }
 
-export function resetDemo(opts: { keepSettings?: boolean } = {}) {
+/** Clears chats, tickets and ratings. Settings and the in-house list are kept unless asked. */
+export function resetDemo(opts: { keepSettings?: boolean; keepGuests?: boolean } = {}) {
   const fresh = initialState();
   update((s) => {
     const settings = s.settings;
+    const guests = s.guests.filter((g) => !g.sample);
     Object.assign(s, fresh, { rev: s.rev, writer: s.writer });
     if (opts.keepSettings) s.settings = settings;
-  });
-}
-
-/** Services grid → booking picker card in the chat. */
-export function startBooking(kind: BookingDraft['kind'], label: string, context?: string) {
-  update((s) => {
-    const lang = s.conversation.lang;
-    pushMessage(s, { sender: 'guest', text: label, lang });
-    const booking: BookingDraft = { kind };
-    if (kind === 'transport') {
-      booking.outlet = context === 'airport' ? 'airport_departure' : (context ?? 'taxi');
-      if (context === 'airport') booking.destination = 'Airport';
-    }
-    if (kind === 'spa' && context === 'couples') booking.outlet = 'couples';
-    if (context === 'beach or terrace table') booking.notes = 'Beach or terrace table';
-    const m = pushMessage(s, {
-      sender: 'ai',
-      text: tr(
-        lang,
-        'Of course. Choose the details below and I will send the request to our team.',
-        'بالتأكيد. اختر التفاصيل أدناه وسأرسل الطلب إلى فريقنا.',
-      ),
-      lang,
-      cards: [{ type: 'booking', booking, state: 'pending' }],
-    });
-    s.conversation.pending = {
-      type: 'booking',
-      booking,
-      asking: kind === 'spa' ? 'outlet' : 'time',
-      messageId: m.id,
-      lang,
-    };
+    if (opts.keepGuests !== false) s.guests = [...fresh.guests, ...guests];
   });
 }

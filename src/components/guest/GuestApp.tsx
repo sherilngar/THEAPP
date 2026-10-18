@@ -5,6 +5,7 @@ import {
   Languages,
   LayoutGrid,
   ListChecks,
+  LogOut,
   MessageCircle,
   Search,
   Sparkles,
@@ -16,6 +17,9 @@ import type { Message } from '../../domain/types';
 import { strings } from '../../i18n/strings';
 import {
   cancelTicket,
+  conversationOf,
+  guestById,
+  messagesOf,
   now,
   requestAmbassador,
   requestFromGrid,
@@ -24,6 +28,8 @@ import {
   startBooking,
   useStore,
 } from '../../store/store';
+import { setGuestSession, useGuestSession } from '../../store/guestSession';
+import { GuestSignIn } from './GuestSignIn';
 import { ChatCard } from '../cards/ChatCards';
 import { MenuBrowser } from '../cards/MenuBrowser';
 import { TicketRow } from '../cards/TicketsCard';
@@ -38,18 +44,35 @@ import { markAllMessagesSeen, seenMessages } from './seen';
 
 type Tab = 'chat' | 'services' | 'requests';
 
-export function GuestApp({ embedded = false }: { embedded?: boolean }) {
-  const lang = useStore((s) => s.conversation.lang);
+/**
+ * The guest app. In Present mode the guest is fixed; on a guest's own phone they
+ * sign in first with their room number and surname.
+ */
+export function GuestApp({ embedded = false, guestId }: { embedded?: boolean; guestId?: string }) {
+  const session = useGuestSession();
+  const id = guestId ?? session;
+  const guest = useStore((s) => (id ? guestById(s, id) : undefined));
+  if (!id || !guest || guest.checkedOutAt) {
+    return <GuestSignIn stayEnded={!!id && !!guest?.checkedOutAt} />;
+  }
+  return <GuestShell guestId={id} embedded={embedded} />;
+}
+
+function GuestShell({ embedded, guestId }: { embedded: boolean; guestId: string }) {
+  const lang = useStore((s) => conversationOf(s, guestId)?.lang ?? 'en');
   const t = strings(lang);
   const [tab, setTab] = useState<Tab>('chat');
   const [menu, setMenu] = useState<{ category?: string; filter?: string } | null>(null);
   const activeCount = useStore(
     (s) =>
       s.tickets.filter(
-        (x) => x.guestId === s.guest.id && x.status !== 'done' && x.status !== 'cancelled',
+        (x) => x.guestId === guestId && x.status !== 'done' && x.status !== 'cancelled',
       ).length,
   );
-  const ui = useMemo(() => ({ lang, t, embedded, goTo: setTab }), [lang, t, embedded]);
+  const ui = useMemo(
+    () => ({ guestId, lang, t, embedded, goTo: setTab }),
+    [guestId, lang, t, embedded],
+  );
 
   useEffect(() => {
     if (embedded) return;
@@ -148,9 +171,9 @@ export function GuestApp({ embedded = false }: { embedded?: boolean }) {
 }
 
 function GuestHeader() {
-  const { t, lang, embedded } = useGuestUi();
-  const guest = useStore((s) => s.guest);
-  const conv = useStore((s) => s.conversation);
+  const { t, lang, embedded, guestId } = useGuestUi();
+  const guest = useStore((s) => guestById(s, guestId)!);
+  const conv = useStore((s) => conversationOf(s, guestId));
   const fmt = (iso: string) =>
     new Date(iso).toLocaleDateString(lang === 'ar' ? 'ar-AE' : 'en-GB', {
       day: 'numeric',
@@ -164,16 +187,28 @@ function GuestHeader() {
         <Logo className="h-8" />
         <div className="ms-auto flex items-center gap-1">
           <SyncBadge compact />
-          <SampleBadge label={t.sampleContent} title={t.sampleTooltip} />
+          <SampleBadge label={t.sampleContent} title={t.sampleTooltip} compact />
           <button
             type="button"
-            onClick={() => setGuestLanguage(lang === 'ar' ? 'en' : 'ar')}
+            onClick={() => setGuestLanguage(guestId, lang === 'ar' ? 'en' : 'ar')}
             className="inline-flex h-11 items-center gap-1 rounded-full px-3 text-sm text-muted hover:bg-raised hover:text-fg"
             aria-label={`${t.language}: ${t.languageLabel}`}
           >
             <Languages size={16} aria-hidden /> {t.language}
           </button>
           {!embedded && <ThemeToggle />}
+          {!embedded && (
+            <button
+              type="button"
+              onClick={() => setGuestSession(null)}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full text-muted hover:bg-raised hover:text-fg"
+              aria-label={t.signOut}
+              title={t.signOut}
+              data-testid="guest-sign-out"
+            >
+              <LogOut size={17} aria-hidden className="rtl:-scale-x-100" />
+            </button>
+          )}
         </div>
       </div>
       <div className="px-4 pb-2.5 pt-1">
@@ -186,9 +221,9 @@ function GuestHeader() {
         </p>
       </div>
       <ModeBanner
-        mode={conv.mode}
-        human={conv.humanName}
-        pending={!!conv.handoverRequested}
+        mode={conv?.mode ?? 'ai'}
+        human={conv?.humanName}
+        pending={!!conv?.handoverRequested}
         ambassador={guest.ambassador}
       />
     </header>
@@ -211,7 +246,7 @@ function ModeBanner({
   pending: boolean;
   ambassador: string;
 }) {
-  const { t } = useGuestUi();
+  const { t, guestId } = useGuestUi();
   const text =
     mode === 'human'
       ? t.humanReplying(human ?? ambassador)
@@ -229,7 +264,7 @@ function ModeBanner({
       </span>
       <button
         type="button"
-        onClick={() => void requestAmbassador()}
+        onClick={() => void requestAmbassador(guestId)}
         className={`-my-1 -me-2 inline-flex min-h-[44px] shrink-0 items-center gap-1.5 rounded-full px-3 text-xs font-medium ${mode === 'human' ? 'text-accent-fg' : 'text-fg'} hover:underline`}
         data-testid="talk-ambassador"
       >
@@ -242,9 +277,9 @@ function ModeBanner({
 // ------------------------------------------------------------------- chat
 
 function ChatView({ onOpenMenu }: { onOpenMenu: (c?: string, f?: string) => void }) {
-  const { t } = useGuestUi();
-  const messages = useStore((s) => s.messages);
-  const typing = useStore((s) => s.typing);
+  const { t, guestId } = useGuestUi();
+  const messages = useStore((s) => messagesOf(s, guestId));
+  const typing = useStore((s) => !!conversationOf(s, guestId)?.typing);
   const scroller = useRef<HTMLDivElement>(null);
   if (!seenMessages.ready) markAllMessagesSeen(messages.map((m) => m.id));
   const last = messages[messages.length - 1];
@@ -433,7 +468,8 @@ function TypingDots() {
 }
 
 function Chips({ chips }: { chips: string[] }) {
-  const typing = useStore((s) => s.typing);
+  const { guestId } = useGuestUi();
+  const typing = useStore((s) => !!conversationOf(s, guestId)?.typing);
   if (!chips.length || typing) return null;
   return (
     <div className="scrollbar-none flex gap-2 overflow-x-auto px-4 pb-2" key={chips.join('|')}>
@@ -445,7 +481,7 @@ function Chips({ chips }: { chips: string[] }) {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 + i * 0.05, type: 'spring', stiffness: 400, damping: 30 }}
           className="chip shrink-0 whitespace-nowrap"
-          onClick={() => void sendGuestMessage(c)}
+          onClick={() => void sendGuestMessage(guestId, c)}
         >
           {c}
         </motion.button>
@@ -455,13 +491,13 @@ function Chips({ chips }: { chips: string[] }) {
 }
 
 function Composer() {
-  const { t } = useGuestUi();
+  const { t, guestId } = useGuestUi();
   const [text, setText] = useState('');
-  const typing = useStore((s) => s.typing);
+  const typing = useStore((s) => !!conversationOf(s, guestId)?.typing);
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!text.trim() || typing) return;
-    void sendGuestMessage(text);
+    void sendGuestMessage(guestId, text);
     setText('');
   };
   return (
@@ -636,7 +672,7 @@ function ItemSheet({
   onClose: () => void;
   onOpenMenu: (c?: string, f?: string) => void;
 }) {
-  const { t, lang, goTo } = useGuestUi();
+  const { t, lang, goTo, guestId } = useGuestUi();
   const [qty, setQty] = useState(1);
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
@@ -658,14 +694,14 @@ function ItemSheet({
         item.context === 'kids' || item.context === 'breakfast' ? item.context : undefined,
       );
     else if (action === 'restaurant' || action === 'spa' || action === 'transport') {
-      startBooking(action === 'restaurant' ? 'restaurant' : action, label, item.context);
+      startBooking(guestId, action === 'restaurant' ? 'restaurant' : action, label, item.context);
       goTo('chat');
     } else if (action === 'status') goTo('requests');
     else {
-      void sendGuestMessage(action === 'kb' ? `${label}?` : label);
+      void sendGuestMessage(guestId, action === 'kb' ? `${label}?` : label);
       goTo('chat');
     }
-  }, [item, lang, onClose, onOpenMenu, goTo]);
+  }, [item, lang, onClose, onOpenMenu, goTo, guestId]);
 
   if (item && (item.action ?? 'ticket') !== 'ticket') return null;
   return (
@@ -675,7 +711,7 @@ function ItemSheet({
           className="space-y-4"
           onSubmit={(e) => {
             e.preventDefault();
-            requestFromGrid(item.key, {
+            requestFromGrid(guestId, item.key, {
               quantity: item.qty ? qty : undefined,
               time: item.time ? time || 'now' : undefined,
               notes: notes.trim() || undefined,
@@ -759,9 +795,11 @@ function ItemSheet({
 // --------------------------------------------------------------- requests
 
 function RequestsView() {
-  const { t, lang } = useGuestUi();
+  const { t, lang, guestId } = useGuestUi();
   const tickets = useStore((s) =>
-    s.tickets.filter((x) => x.guestId === s.guest.id).sort((a, b) => b.createdAt - a.createdAt),
+    s.tickets
+      .filter((x) => x.guestId === guestId && !x.sample)
+      .sort((a, b) => b.createdAt - a.createdAt),
   );
   return (
     <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-6 pt-4" data-testid="requests">

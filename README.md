@@ -8,18 +8,19 @@ Prepared by Ahmed Elsayyad, Duty Manager, for the General Manager, senior manage
 
 ## Screens
 
-| Route            | What it shows                                                                                                                                            |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `#/`             | Landing page with entry points, a QR code for the guest app and “How it works”                                                                           |
-| `#/guest`        | Mobile guest app: chat, services grid, live request tracker, English and Arabic (right to left)                                                          |
-| `#/staff`        | Staff board: 12 department tabs, timer rings, accept / on the way / done / reassign / notes, escalation, search and filters, ticket drawer with the chat |
-| `#/insights`     | Management view: open vs completed, time to accept and complete, escalations, top 10 requests, ratings, dining orders                                    |
-| `#/present`      | Split screen (phone + board) with a guided six-step demo and a reset button                                                                              |
-| `#/architecture` | For IT: animated layer diagram, security notes, three-phase rollout                                                                                      |
-| `#/admin`        | Settings: response standards, outlet hours, full knowledge-base editor, reset demo data                                                                  |
+| Route            | What it shows                                                                                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `#/`             | Landing page with entry points, a QR code for the guest app and “How it works”                                                                                           |
+| `#/guest`        | Mobile guest app: sign-in with room number and surname, then chat, services grid, live request tracker, English and Arabic (right to left)                               |
+| `#/staff`        | Staff board: **Requests** (12 department tabs, timer rings, actions, escalation, search, filters), **Guest chats** (reply, take over, hand back) and **In-house guests** |
+| `#/insights`     | Management view: open vs completed, time to accept and complete, escalations, top 10 requests, ratings, dining orders                                                    |
+| `#/present`      | Split screen (phone + board) with a guided six-step demo and a reset button                                                                                              |
+| `#/architecture` | For IT: animated layer diagram, security notes, three-phase rollout                                                                                                      |
+| `#/admin`        | Settings: response standards, outlet hours, full knowledge-base editor, reset demo data                                                                                  |
 
 Demo access:
 
+- **Guests:** room number and surname of anyone on the in-house list (for example room `1207`, surname `Mitchell`), or the “Continue as Sarah Mitchell” link on the sign-in screen.
 - **Staff board:** any department, PIN `1234`.
 - **Settings:** password `so-admin-2026`. This only keeps casual viewers out. A static site cannot protect anything for real; the pilot uses staff single sign-on.
 
@@ -67,11 +68,27 @@ GitHub Pages on a free account needs a public repository. Nothing secret is in t
 
 Replies are in English or Arabic. Other languages are detected and answered in English with a note; the live AI answers in any language.
 
+## How guests sign in
+
+1. The front office adds the guest under **Staff board → In-house guests** (title, name, room, arrival, departure, ambassador). In a pilot this list comes from the property management system.
+2. The guest scans the QR code in the room or at check-in. **Sign-in link** on each row copies a link with the room number already filled in (`#/guest?room=1207`), so the guest types only their surname.
+3. The guest enters room number and surname, accepts the privacy note and taps **Start**. The stay must be current (today between arrival and departure, UAE time). Room numbers ignore leading zeros; surnames ignore case, spaces and accents.
+4. The phone stays signed in as that guest until they tap the sign-out icon or the front office presses **Check out**, which ends access and shows “Your stay has ended”.
+
+Each guest has their own chat and request list. The “Continue as Sarah Mitchell” link is for presentations; it disappears when Sarah (a sample guest) is checked out.
+
+## How staff handle chats
+
+- **Guest chats** lists every conversation. Chats that need a person (a complaint, a medical or safety concern, a low rating, a request for the ambassador, or a guest writing while a person is in charge) are marked **Needs a person**, sorted first, counted in red on the tab, and announced with a soft chime.
+- Replying, or pressing **Take over**, puts that staff member in charge. The guest is told by name, and the AI stays quiet (except for emergencies and card-number masking) until staff press **Hand back to AI**.
+- The same chat is available from any ticket (open the ticket, then **Guest conversation**), so staff can also message a guest first.
+- Marking the last person-needed ticket as **Done** clears the “Needs a person” flag.
+
 ## Data and sync across devices
 
 A guest on a phone and staff on a laptop see the same data, live, through the Supabase project **so-ai-concierge** (Mumbai region, free plan):
 
-- The whole demo is one record (`demo_state`, id `so-demo`) with a revision number. Each change shows on screen at once, then is sent with the revision it was based on. If another device changed something first, the app reloads the latest state, replays its pending changes on top and sends again, so nothing is lost (`src/store/remote.ts`).
+- The whole demo is one record (`demo_state`, id `so-live`) with a revision number. Each change shows on screen at once, then is sent with the revision it was based on. If another device changed something first, the app reloads the latest state, replays its pending changes on top and sends again, so nothing is lost (`src/store/remote.ts`).
 - Other devices are told through Supabase Realtime, with a 10-second check as a fallback if a network blocks live updates.
 - The browser holds only the publishable key. It can read the demo record and write only through `commit_demo_state`, which checks the revision, shape and size (`supabase/migrations/0002_demo_state_sync.sql`). Anyone with the link can still change or reset the demo, which is fine for a proposal but not for real guest data.
 - A badge in the header shows **Live on all devices**, **Offline · this device only** or **This device only**. If Supabase is unreachable the demo keeps working on the device and catches up when the connection returns.
@@ -80,13 +97,21 @@ A guest on a phone and staff on a laptop see the same data, live, through the Su
 
 The local store (`src/store/store.ts`) still keeps a copy in `localStorage` and, in device-only mode, syncs tabs with `BroadcastChannel`. One tab per device (chosen with the Web Locks API) runs the escalation clock.
 
-## Phase 2: real AI and live data across devices
+## Go-live checklist
 
-Cross-device sync is live (above). Still to build for a real pilot:
+What works today is right for the presentation and for a small pilot with **test guests or staff acting as guests**. Before real guests use it, these must be done:
 
-- A serverless function that calls Claude (`claude-haiku-5-5` by default, `claude-sonnet-5-5` optional) with the same tools, streaming and rate limits. It needs a host with server functions (for example Netlify), because the AI key must never reach the browser; GitHub Pages cannot do this.
-- Per-guest data with real sign-in, using the normalised schema in `supabase/migrations/0001_pilot_schema.sql` (not applied) instead of one shared demo record.
-- `.env.example` lists the variables the pilot needs and where each may live.
+| Area               | Today                                                                        | Needed for real guests                                                                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Guest data privacy | One shared record that anyone with the link could read (names, rooms, chats) | Per-guest records with row-level security and server-side sign-in checks (`supabase/migrations/0001_pilot_schema.sql` is the starting design, not applied) |
+| Staff sign-in      | Shared demo PIN `1234`                                                       | Individual staff accounts (Supabase Auth or the hotel's single sign-on), with roles per department                                                         |
+| In-house list      | Typed in by the front office                                                 | Fed from the property management system, with check-out removing access automatically                                                                      |
+| AI                 | Offline concierge in the browser (English and Arabic)                        | Claude through a server function (`claude-haiku-5-5` by default) with the key held server-side; needs a host with server functions such as Netlify         |
+| Content            | Sample outlets, hours, menus, policies                                       | Approved hotel content entered in Settings                                                                                                                 |
+| Compliance         | Not reviewed                                                                 | Privacy notice, retention period and UAE PDPL (Federal Decree-Law 45 of 2021) review with the data protection lead and IT                                  |
+| Scale              | Fine for a demo and a few rooms                                              | Per-guest tables (above) so 257 rooms do not share one record                                                                                              |
+
+`.env.example` lists the variables a pilot needs and where each may live.
 
 ## Sample content and what still needs real hotel data
 
@@ -126,8 +151,8 @@ Prompt caching of the fixed instructions and knowledge base reduces the input sh
 ## Quality checks (latest run)
 
 - TypeScript strict, ESLint and Prettier clean; no console errors in any tested flow
-- 38 unit tests (including cross-device sync against a simulated server) and 21 end-to-end tests passing (Present mode runs on desktop only)
-- Lighthouse (mobile) on `/` and `/guest`: Performance 91, Accessibility 100, Best Practices 100, SEO 100
+- 38 unit tests (including cross-device sync against a simulated server) and 33 end-to-end tests passing on phone and desktop sizes (Present mode runs on desktop only), covering sign-in, check-out, separate guest chats, staff replies and every guided-demo scenario in English and Arabic
+- Lighthouse (mobile) on `/` and `/guest`: Accessibility, Best Practices and SEO 100; Performance 91 on `/` and 89–96 on `/guest` across three runs (the sign-in screen sits right at the 90 target)
 - Respects `prefers-reduced-motion`; keyboard navigable with visible focus; live regions for new messages
 
 ## Project structure

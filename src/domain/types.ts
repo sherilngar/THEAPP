@@ -27,6 +27,10 @@ export interface Guest {
   arrival: string; // ISO date
   departure: string; // ISO date
   ambassador: string;
+  /** Placeholder guest created for the demo. */
+  sample?: boolean;
+  /** Set when the front office checks the guest out; they can no longer sign in. */
+  checkedOutAt?: number;
 }
 
 export interface TicketNote {
@@ -105,6 +109,12 @@ export interface Conversation {
   handoverRequested?: { reason: string; at: number; urgency: Priority };
   pending?: PendingState;
   lang: 'en' | 'ar';
+  /** The concierge is composing a reply. */
+  typing?: boolean;
+  /** Last time the guest wrote, and last time staff opened the chat (for unread counts). */
+  lastGuestAt?: number;
+  staffReadAt?: number;
+  signedInAt?: number;
 }
 
 export interface DiningItem {

@@ -5,7 +5,7 @@ For the General Manager, senior management and IT. Presenter: Ahmed Elsayyad, Du
 ## Before the meeting (5 minutes)
 
 1. Open the live site on the laptop and go to **Present** (`#/present`). Press **Reset**.
-2. On your phone, scan the QR code on the landing page and add the guest app to the home screen (optional).
+2. On your phone, scan the QR code on the landing page and sign in as a guest: room `1207`, surname `Mitchell` (or tap “Continue as Sarah Mitchell”). Use room `0412`, surname `Rahman` for a second guest.
 3. In a second laptop tab, open the **Staff board** (`#/staff`), sign in as Duty Manager with PIN `1234`, and choose **All departments**. Keep it ready for questions.
 4. Turn the laptop volume low (new tickets make a soft chime). Set the projector to light mode, or use the moon icon for dark mode.
 
@@ -78,6 +78,8 @@ Open **Insights** for management questions or **For IT** for architecture, secur
 ## Live extras, if time allows
 
 - Hand your phone to the General Manager with the guest app open. Their request appears on the laptop's staff board within a second; accept it on the laptop and the phone updates.
+- Show sign-in: on the staff board open **In-house guests**, add the GM as a guest (any free room), copy the **Sign-in link**, and let them sign in on their own phone with their surname.
+- Show a person taking over: ask the guest to type “I'd like to speak to someone”. On the laptop, **Guest chats** turns red with a chime; reply, and the phone shows “You're chatting with …”. Press **Hand back to AI** when done.
 
 - Type your own request on the phone, for example “Can I get a baby cot and an iron?”, or ask “What time is check-out?” (the answer carries a Sample content badge).
 - Type a card number to show masking, or “I need a doctor” to show the medical hand-over and emergency guidance.

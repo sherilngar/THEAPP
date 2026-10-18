@@ -1,3 +1,4 @@
+import { DEMO_GUEST_ID } from '../data/demo';
 import {
   advanceClock,
   getState,
@@ -20,7 +21,7 @@ export interface DemoStep {
 const findTicket = (pred: (t: ReturnType<typeof getState>['tickets'][number]) => boolean) =>
   [...getState().tickets]
     .reverse()
-    .find((t) => !t.sample && t.guestId === getState().guest.id && pred(t));
+    .find((t) => !t.sample && t.guestId === DEMO_GUEST_ID && pred(t));
 
 /** Time for a streamed reply to finish on screen before the next action. */
 const readTime = () => {
@@ -40,10 +41,11 @@ export const DEMO_STEPS: DemoStep[] = [
       'The guest writes one free sentence. The concierge creates an Engineering ticket and a Housekeeping ticket, and asks one short question before booking the table.',
     run: async ({ sleep }) => {
       await sendGuestMessage(
+        DEMO_GUEST_ID,
         'Hi, the AC in my room is quite loud, could you send two extra towels, and book a table at the Beach Grill for 8 tonight?',
       );
       await sleep(readTime() + 900);
-      await sendGuestMessage('Two of us, please');
+      await sendGuestMessage(DEMO_GUEST_ID, 'Two of us, please');
       await sleep(readTime());
     },
   },
@@ -72,10 +74,11 @@ export const DEMO_STEPS: DemoStep[] = [
       'The concierge matches dishes and options from the menu, flags the allergy, repeats the order and waits for a clear “yes” before sending it to the kitchen.',
     run: async ({ sleep }) => {
       await sendGuestMessage(
+        DEMO_GUEST_ID,
         "Could I order a club sandwich with brown bread and a fresh orange juice? I'm allergic to nuts.",
       );
       await sleep(readTime() + 1200);
-      await sendGuestMessage('Yes, please');
+      await sendGuestMessage(DEMO_GUEST_ID, 'Yes, please');
       await sleep(readTime());
     },
   },
@@ -108,6 +111,7 @@ export const DEMO_STEPS: DemoStep[] = [
       const recovery = findTicket((t) => t.kind === 'recovery');
       if (recovery) setTicketStatus(recovery.id, 'accepted', 'Nadia');
       staffReply(
+        DEMO_GUEST_ID,
         "I'm so sorry the noise is still bothering you, Ms Mitchell. I'm on my way up now, and if we can't fix it tonight we'll move you to a quieter room.",
         'Nadia',
         'frontoffice',
@@ -121,10 +125,10 @@ export const DEMO_STEPS: DemoStep[] = [
     narration:
       'The guest switches to Arabic. Replies and the whole layout follow; staff still receive English tickets with the original Arabic message attached.',
     run: async ({ sleep }) => {
-      setGuestLanguage('ar');
-      handBackToAi();
+      setGuestLanguage(DEMO_GUEST_ID, 'ar');
+      handBackToAi(DEMO_GUEST_ID);
       await sleep(900);
-      await sendGuestMessage('ممكن مخدتين إضافيتين وتنظيف الغرفة الساعة ٣ العصر؟');
+      await sendGuestMessage(DEMO_GUEST_ID, 'ممكن مخدتين إضافيتين وتنظيف الغرفة الساعة ٣ العصر؟');
       await sleep(readTime());
     },
   },

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { AnimatePresence, motion } from 'motion/react';
 import { ChevronRight, FastForward, Pause, Play, RotateCcw } from 'lucide-react';
 import { GuestApp } from '../components/guest/GuestApp';
+import { DEMO_GUEST_ID } from '../data/demo';
 import { markAllMessagesSeen } from '../components/guest/seen';
 import { StaffBoard } from '../components/staff/StaffBoard';
 import { Logo } from '../components/ui/Logo';
@@ -227,7 +228,7 @@ export default function Present() {
               className="absolute left-1/2 top-2 z-30 h-6 w-28 -translate-x-1/2 rounded-full bg-ink"
               aria-hidden
             />
-            <GuestApp embedded />
+            <GuestApp embedded guestId={DEMO_GUEST_ID} />
           </div>
         </div>
         <div

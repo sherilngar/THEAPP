@@ -1,8 +1,13 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { motion } from 'motion/react';
-import { KeyRound } from 'lucide-react';
+import { ClipboardList, KeyRound, LogOut, MessagesSquare, UsersRound } from 'lucide-react';
 import { SiteHeader } from '../components/ui/SiteHeader';
 import { StaffBoard } from '../components/staff/StaffBoard';
+import { ChatInbox } from '../components/staff/ChatInbox';
+import { summariseChats } from '../store/chats';
+import { GuestsPanel } from '../components/staff/GuestsPanel';
+import { chime } from '../components/staff/hooks';
+import { useStore } from '../store/store';
 import { DEPT_ICON } from '../components/ui/icons';
 import { DEPARTMENTS, DEPT_BY_ID } from '../domain/departments';
 import type { DepartmentId, StaffSession } from '../domain/types';
@@ -44,7 +49,84 @@ export default function Staff() {
   return (
     <>
       <SiteHeader wide />
-      {session ? <StaffBoard session={session} onSignOut={signOut} /> : <Login onSignIn={signIn} />}
+      {session ? <Workspace session={session} onSignOut={signOut} /> : <Login onSignIn={signIn} />}
+    </>
+  );
+}
+
+type View = 'requests' | 'chats' | 'guests';
+
+function Workspace({ session, onSignOut }: { session: StaffSession; onSignOut: () => void }) {
+  const [view, setView] = useState<View>('requests');
+  const waiting = useStore((s) => summariseChats(s).filter((c) => c.needsPerson).length);
+  const previous = useRef(waiting);
+
+  // A soft chime when a guest starts waiting for a person (same mute setting as new tickets).
+  useEffect(() => {
+    let soundOn = true;
+    try {
+      soundOn = localStorage.getItem('so-sound') !== 'off';
+    } catch {
+      /* ignore */
+    }
+    if (waiting > previous.current && soundOn) chime();
+    previous.current = waiting;
+  }, [waiting]);
+
+  const views: Array<[View, string, typeof ClipboardList, number]> = [
+    ['requests', 'Requests', ClipboardList, 0],
+    ['chats', 'Guest chats', MessagesSquare, waiting],
+    ['guests', 'In-house guests', UsersRound, 0],
+  ];
+
+  return (
+    <>
+      <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-2 px-4 pt-4 sm:px-6">
+        <div
+          className="inline-flex rounded-full border border-line bg-surface p-1"
+          role="tablist"
+          aria-label="Staff views"
+        >
+          {views.map(([id, label, Icon, badge]) => (
+            <button
+              key={id}
+              role="tab"
+              aria-selected={view === id}
+              onClick={() => setView(id)}
+              data-testid={`view-${id}`}
+              className={`relative inline-flex min-h-[40px] items-center gap-1.5 rounded-full px-3 text-sm transition-colors sm:px-4 ${
+                view === id ? 'bg-fg text-bg' : 'text-muted hover:text-fg'
+              }`}
+            >
+              <Icon size={15} aria-hidden />
+              <span className="hidden sm:inline">{label}</span>
+              <span className="sr-only sm:hidden">{label}</span>
+              {badge > 0 && (
+                <span
+                  className="rounded-full bg-st-escalated px-1.5 text-xs font-medium tabular-nums text-white"
+                  aria-label={`${badge} waiting for a person`}
+                >
+                  {badge}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+        <button className="btn-ghost ms-auto min-h-[40px] px-3 text-xs" onClick={onSignOut}>
+          <LogOut size={14} aria-hidden /> Sign out {session.name}
+        </button>
+      </div>
+      {view === 'requests' && <StaffBoard session={session} />}
+      {view === 'chats' && (
+        <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6">
+          <ChatInbox session={session} />
+        </div>
+      )}
+      {view === 'guests' && (
+        <div className="mx-auto max-w-[1600px] px-4 py-4 sm:px-6">
+          <GuestsPanel />
+        </div>
+      )}
     </>
   );
 }

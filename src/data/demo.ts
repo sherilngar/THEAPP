@@ -1,12 +1,15 @@
 import type { DepartmentId, Guest, Priority, Ticket } from '../domain/types';
 import { DEFAULT_STANDARDS } from '../domain/departments';
 
-/** Sample guest profile for the demo. Not a real person. */
+export const DEMO_GUEST_ID = 'guest-demo';
+
+const day = 86_400_000;
+const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
+
+/** Sample guest profile used by Present mode. Not a real person. */
 export function demoGuest(now: number): Guest {
-  const day = 86_400_000;
-  const iso = (t: number) => new Date(t).toISOString().slice(0, 10);
   return {
-    id: 'guest-demo',
+    id: DEMO_GUEST_ID,
     title: 'Ms',
     firstName: 'Sarah',
     lastName: 'Mitchell',
@@ -14,17 +17,36 @@ export function demoGuest(now: number): Guest {
     arrival: iso(now - 2 * day),
     departure: iso(now + 3 * day),
     ambassador: 'Nadia',
+    sample: true,
   };
 }
 
 const OTHER_GUESTS = [
-  { id: 'g-0412', name: 'Mr Rahman', room: '0412' },
-  { id: 'g-0918', name: 'Mrs Okafor', room: '0918' },
-  { id: 'g-1503', name: 'Mr & Mrs Laurent', room: '1503' },
-  { id: 'g-0721', name: 'Ms Novak', room: '0721' },
-  { id: 'g-1110', name: 'Mr Al Mansoori', room: '1110' },
-  { id: 'g-0305', name: 'Mr Tanaka', room: '0305' },
-];
+  { id: 'g-0412', title: 'Mr', firstName: 'Omar', lastName: 'Rahman', room: '0412' },
+  { id: 'g-0918', title: 'Mrs', firstName: 'Grace', lastName: 'Okafor', room: '0918' },
+  { id: 'g-1503', title: 'Mr & Mrs', firstName: 'Julien', lastName: 'Laurent', room: '1503' },
+  { id: 'g-0721', title: 'Ms', firstName: 'Petra', lastName: 'Novak', room: '0721' },
+  { id: 'g-1110', title: 'Mr', firstName: 'Khalid', lastName: 'Al Mansoori', room: '1110' },
+  { id: 'g-0305', title: 'Mr', firstName: 'Kenji', lastName: 'Tanaka', room: '0305' },
+].map((g) => ({ ...g, name: `${g.title} ${g.lastName}` }));
+
+/** The in-house list a guest signs in against. Sample names until the PMS supplies real arrivals. */
+export function demoGuests(now: number): Guest[] {
+  return [
+    demoGuest(now),
+    ...OTHER_GUESTS.map((g, i) => ({
+      id: g.id,
+      title: g.title,
+      firstName: g.firstName,
+      lastName: g.lastName,
+      room: g.room,
+      arrival: iso(now - (1 + (i % 3)) * day),
+      departure: iso(now + (2 + (i % 4)) * day),
+      ambassador: 'Nadia',
+      sample: true,
+    })),
+  ];
+}
 
 const HISTORY: Array<{
   dept: DepartmentId;

@@ -16,7 +16,7 @@ export function MenuBrowser({
   initialFilter?: string;
   onDone: () => void;
 }) {
-  const { lang, t } = useGuestUi();
+  const { lang, t, guestId } = useGuestUi();
   const menu = useStore((s) => s.settings.knowledge.ird);
   const [cat, setCat] = useState<string>(initialCategory ?? 'all');
   const [filters, setFilters] = useState<string[]>(initialFilter ? [initialFilter] : []);
@@ -194,7 +194,7 @@ export function MenuBrowser({
           className="btn-primary w-full"
           disabled={!count}
           onClick={() => {
-            reviewOrder({ items: cart, allergies: allergies.trim() || undefined });
+            reviewOrder(guestId, { items: cart, allergies: allergies.trim() || undefined });
             onDone();
           }}
         >

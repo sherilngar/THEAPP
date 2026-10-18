@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
-import { boardCard, freshStart, sendGuest, watchConsole } from './helpers';
+import { boardCard, freshStart, sendGuest, signIn, watchConsole } from './helpers';
 
 const COPY = {
   en: {
@@ -48,7 +48,7 @@ for (const lang of ['en', 'ar'] as const) {
   test.describe(`Guest scenarios in ${lang === 'en' ? 'English' : 'Arabic'}`, () => {
     test.beforeEach(async ({ page }) => {
       await freshStart(page);
-      await page.goto('/#/guest');
+      await signIn(page);
       if (lang === 'ar') {
         await page.getByRole('button', { name: /Switch to Arabic/ }).click();
         await expect(page.getByTestId('guest-app')).toHaveAttribute('dir', 'rtl');
@@ -134,7 +134,7 @@ test('Arabic message gets an Arabic reply and English tickets with the original 
 }) => {
   const noErrors = watchConsole(page);
   await freshStart(page);
-  await page.goto('/#/guest');
+  await signIn(page);
   const staff = await openStaff(page);
   await sendGuest(page, 'ممكن مخدتين إضافيتين وتنظيف الغرفة الساعة ٣ العصر؟');
   await expect(page.getByText(/بالتأكيد يا Sarah/).last()).toBeVisible();
@@ -154,7 +154,7 @@ test('Arabic message gets an Arabic reply and English tickets with the original 
 test('services grid, privacy masking and emergency guidance', async ({ page }) => {
   const noErrors = watchConsole(page);
   await freshStart(page);
-  await page.goto('/#/guest');
+  await signIn(page);
   await sendGuest(page, 'My card is 4111 1111 1111 1111');
   await expect(page.getByText('Number hidden for your safety').last()).toBeVisible();
   await expect(page.getByText('4111 1111 1111 1111')).toHaveCount(0);

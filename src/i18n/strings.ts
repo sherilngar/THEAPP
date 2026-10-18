@@ -103,6 +103,22 @@ const en = {
   sensitiveNote: 'A team member will contact you personally.',
   retry: 'Try again',
   chatLog: 'Conversation with the concierge',
+  signOut: 'Sign out',
+  signInTitle: 'Welcome to SO/',
+  signInIntro:
+    'Sign in with your room number and the surname on your reservation to chat with our concierge.',
+  roomNumber: 'Room number',
+  surname: 'Surname',
+  consent: 'I agree to the privacy note below',
+  signInButton: 'Start',
+  notFound:
+    "We couldn't find a current stay with those details. Please check them, or dial 0 from your room phone to reach the front desk.",
+  needConsent: 'Please agree to the privacy note to continue.',
+  stayEnded:
+    'Your stay has ended. Thank you for staying with us; we hope to welcome you back soon.',
+  demoShortcut: 'Presenting the demo? Continue as Sarah Mitchell, room 1207',
+  privacyLong:
+    'We use your room number and surname only to confirm your stay. Your messages and requests are seen only by our hotel team, to look after you. Never share card, passport or ID numbers in chat.',
 };
 
 export type Strings = typeof en;
@@ -211,6 +227,20 @@ const ar: Strings = {
   sensitiveNote: 'سيتواصل معك أحد أعضاء الفريق شخصياً.',
   retry: 'حاول مجدداً',
   chatLog: 'المحادثة مع الكونسيرج',
+  signOut: 'تسجيل الخروج',
+  signInTitle: 'أهلاً بك في SO/',
+  signInIntro: 'سجّل الدخول برقم غرفتك واسم العائلة المسجل في الحجز للتحدث مع الكونسيرج.',
+  roomNumber: 'رقم الغرفة',
+  surname: 'اسم العائلة',
+  consent: 'أوافق على ملاحظة الخصوصية أدناه',
+  signInButton: 'ابدأ',
+  notFound:
+    'لم نجد إقامة حالية بهذه البيانات. يرجى التحقق منها، أو الاتصال بالرقم 0 من هاتف الغرفة للتواصل مع الاستقبال.',
+  needConsent: 'يرجى الموافقة على ملاحظة الخصوصية للمتابعة.',
+  stayEnded: 'انتهت إقامتك. شكراً لإقامتك معنا، ونتطلع إلى استقبالك مجدداً.',
+  demoShortcut: 'تقدّم العرض؟ تابع باسم Sarah Mitchell، الغرفة 1207',
+  privacyLong:
+    'نستخدم رقم غرفتك واسم العائلة فقط لتأكيد إقامتك. يطّلع فريق الفندق وحده على رسائلك وطلباتك لخدمتك. لا تشارك أرقام البطاقات أو جواز السفر أو الهوية في المحادثة.',
 };
 
 export const STRINGS = { en, ar };
