@@ -445,7 +445,9 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
   const catalogueEntries = CATALOGUE.flatMap((s) => s.items).map((i) => ({ key: i.key, kw: i.kw }));
   const menu = menuItems(k);
   const menuEntries = menu.map((m) => ({ key: `menu:${m.id}`, kw: [m.name, m.nameAr, ...m.kw] }));
-  const entries = [...catalogueEntries, ...menuEntries];
+  // Outlet names compete in the same pool so "Beach Grill" is not read as "beach".
+  const outletEntries = k.outlets.map((o) => ({ key: `outlet:${o.id}`, kw: [o.name, o.nameAr, ...o.kw.filter((w) => w.split(' ').length > 1)] }));
+  const entries = [...catalogueEntries, ...menuEntries, ...outletEntries];
 
   const segMatches: Array<{ seg: string; matches: Match[] }> = segments.map((s) => {
     let matches = findMatches(s.text, entries);
@@ -537,6 +539,7 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
 
   for (const { seg, matches } of segMatches) {
     for (const m of matches) {
+      if (m.key.startsWith('outlet:')) continue;
       if (m.key.startsWith('menu:')) {
         const mi = menu.find((x) => `menu:${x.id}` === m.key);
         if (!mi) continue;
@@ -551,8 +554,7 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
       if (!item) continue;
       const action = item.action ?? 'ticket';
       if (action === 'kb' && item.kb) {
-        if (!request || question) kbIds.push(item.kb);
-        else kbIds.push(item.kb);
+        kbIds.push(item.kb);
         continue;
       }
       if (action === 'menu') {
@@ -664,7 +666,13 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
     if (last) last.cards = [...(last.cards ?? []), { type: 'tickets', ticketIds: [NEW_TICKETS] }];
   }
 
-  if (kbIds.length) kbAnswer([...new Set(kbIds)].slice(0, 2));
+  // Information answers only when asked, not as a side effect of a request.
+  const actionable = ticketDrafts.length || bookings.length || order.length || sensitive || asks.length || timeAsks.length;
+  if (kbIds.length && (question || !actionable)) kbAnswer([...new Set(kbIds)].slice(0, 2));
+  else if (!actionable && !kbIds.length && question) {
+    const outletHit = allMatches.find((m) => m.key.startsWith('outlet:'));
+    if (outletHit) kbAnswer([outletHit.key]);
+  }
 
   if (order.length) {
     const allergyList = detectAllergies(text);

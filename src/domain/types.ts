@@ -42,6 +42,7 @@ export interface Ticket {
   alsoNotify?: DepartmentId;
   category: string;
   item: string;
+  itemKey?: string;
   quantity?: number;
   details?: string;
   preferredTime?: string;
@@ -97,9 +98,13 @@ export interface Message {
 export interface Conversation {
   id: string;
   guestId: string;
+  /** 'ai' = concierge replies; 'human' = a staff member has taken over. */
   mode: 'ai' | 'human';
   humanName?: string;
+  /** Set when the guest has been promised a person but nobody has joined yet. */
+  handoverRequested?: { reason: string; at: number; urgency: Priority };
   pending?: PendingState;
+  lang: 'en' | 'ar';
 }
 
 export interface DiningItem {

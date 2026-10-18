@@ -6,7 +6,7 @@ import type { Conversation, PendingState } from '../../src/domain/types';
 
 const now = Date.UTC(2026, 9, 18, 12);
 function ctx(pending?: PendingState): EngineContext {
-  const conversation: Conversation = { id: 'c1', guestId: 'guest-demo', mode: 'ai', pending };
+  const conversation: Conversation = { id: 'c1', guestId: 'guest-demo', mode: 'ai', pending, lang: 'en' };
   return { guest: demoGuest(now), conversation, tickets: [], knowledge: DEFAULT_KNOWLEDGE, uiLang: 'en' };
 }
 
@@ -124,5 +124,16 @@ describe('hand-offs and safety', () => {
     const r = respond('Charge it to 4111 1111 1111 1111 please', ctx());
     expect(r.maskedText).not.toContain('4111 1111 1111 1111');
     expect(r.pii).toEqual(['card']);
+  });
+});
+
+describe('knowledge answers stay out of the way of requests', () => {
+  it('does not read "Beach Grill" as a question about the beach', () => {
+    const r = respond('Book a table at the Beach Grill for 8 tonight', ctx());
+    expect(r.replies.some((x) => x.cards?.some((c) => c.type === 'info'))).toBe(false);
+  });
+  it('answers outlet questions by name', () => {
+    const r = respond('When is the Beach Grill open?', ctx());
+    expect(r.replies[0]?.text).toMatch(/Beach Grill/);
   });
 });
