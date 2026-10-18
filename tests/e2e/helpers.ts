@@ -34,7 +34,8 @@ export async function signIn(page: Page, room = '1207', surname = 'Mitchell') {
   await page.goto(`/#/guest?room=${room}`);
   // Another tab on the same device may already be signed in as someone else.
   await expect(page.getByTestId('guest-sign-in').or(page.getByTestId('guest-app'))).toBeVisible();
-  if (await page.getByTestId('guest-app').isVisible()) await page.getByTestId('guest-sign-out').click();
+  if (await page.getByTestId('guest-app').isVisible())
+    await page.getByTestId('guest-sign-out').click();
   await page.locator('#si-room').fill(room);
   await page.locator('#si-surname').fill(surname);
   await page.getByRole('checkbox').check();
