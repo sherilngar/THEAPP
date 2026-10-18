@@ -78,7 +78,7 @@ export function sampleHistory(now: number): Ticket[] {
     const acceptAfter = Math.floor(std * (0.25 + rand() * (rand() < 0.12 ? 2.4 : 0.9)));
     const doneAfter = acceptAfter + Math.floor(std * (1 + rand() * 4));
     const escalation = acceptAfter >= std * 2 ? 2 : acceptAfter >= std ? 1 : 0;
-    const rating = rand() < 0.7 ? Math.min(5, Math.max(1, Math.round(4.5 - rand() * 2.2 + (escalation ? -1 : 0)))) : undefined;
+    const rating = rand() < 0.7 ? Math.min(5, Math.max(1, Math.round(5.2 - rand() * 1.6 - escalation * 1.1))) : undefined;
     out.push({
       id: `S-${String(1000 + i)}`,
       department: h.dept,

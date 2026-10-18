@@ -65,6 +65,7 @@
   .display {
     @apply font-display tracking-tight;
     font-weight: 500;
+    font-variant-numeric: lining-nums;
   }
   .eyebrow {
     @apply text-[11px] font-medium uppercase tracking-[0.18em] text-muted;
