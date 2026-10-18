@@ -86,7 +86,9 @@ type Bus = { type: 'tickets-created'; ids: string[] };
 const busListeners = new Set<(e: Bus) => void>();
 export function onStoreEvent(fn: (e: Bus) => void) {
   busListeners.add(fn);
-  return () => busListeners.delete(fn);
+  return () => {
+    busListeners.delete(fn);
+  };
 }
 
 function emit() {
