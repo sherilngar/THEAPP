@@ -18,7 +18,9 @@ export interface DemoStep {
 }
 
 const findTicket = (pred: (t: ReturnType<typeof getState>['tickets'][number]) => boolean) =>
-  [...getState().tickets].reverse().find((t) => !t.sample && t.guestId === getState().guest.id && pred(t));
+  [...getState().tickets]
+    .reverse()
+    .find((t) => !t.sample && t.guestId === getState().guest.id && pred(t));
 
 /** Time for a streamed reply to finish on screen before the next action. */
 const readTime = () => {
@@ -37,7 +39,9 @@ export const DEMO_STEPS: DemoStep[] = [
     narration:
       'The guest writes one free sentence. The concierge creates an Engineering ticket and a Housekeeping ticket, and asks one short question before booking the table.',
     run: async ({ sleep }) => {
-      await sendGuestMessage('Hi, the AC in my room is quite loud, could you send two extra towels, and book a table at the Beach Grill for 8 tonight?');
+      await sendGuestMessage(
+        'Hi, the AC in my room is quite loud, could you send two extra towels, and book a table at the Beach Grill for 8 tonight?',
+      );
       await sleep(readTime() + 900);
       await sendGuestMessage('Two of us, please');
       await sleep(readTime());
@@ -46,7 +50,8 @@ export const DEMO_STEPS: DemoStep[] = [
   {
     id: 'respond',
     title: 'Departments act, the guest is updated',
-    narration: 'Engineering and Housekeeping accept from the board. Each step appears in the guest’s chat and on the My requests tracker.',
+    narration:
+      'Engineering and Housekeeping accept from the board. Each step appears in the guest’s chat and on the My requests tracker.',
     run: async ({ sleep }) => {
       const ac = findTicket((t) => t.itemKey === 'ac');
       const towels = findTicket((t) => t.itemKey === 'towels');
@@ -63,9 +68,12 @@ export const DEMO_STEPS: DemoStep[] = [
   {
     id: 'dining',
     title: 'In-room dining, read back before ordering',
-    narration: 'The concierge matches dishes and options from the menu, flags the allergy, repeats the order and waits for a clear “yes” before sending it to the kitchen.',
+    narration:
+      'The concierge matches dishes and options from the menu, flags the allergy, repeats the order and waits for a clear “yes” before sending it to the kitchen.',
     run: async ({ sleep }) => {
-      await sendGuestMessage("Could I order a club sandwich with brown bread and a fresh orange juice? I'm allergic to nuts.");
+      await sendGuestMessage(
+        "Could I order a club sandwich with brown bread and a fresh orange juice? I'm allergic to nuts.",
+      );
       await sleep(readTime() + 1200);
       await sendGuestMessage('Yes, please');
       await sleep(readTime());
@@ -99,14 +107,19 @@ export const DEMO_STEPS: DemoStep[] = [
       await sleep(2600);
       const recovery = findTicket((t) => t.kind === 'recovery');
       if (recovery) setTicketStatus(recovery.id, 'accepted', 'Nadia');
-      staffReply("I'm so sorry the noise is still bothering you, Ms Mitchell. I'm on my way up now, and if we can't fix it tonight we'll move you to a quieter room.", 'Nadia', 'frontoffice');
+      staffReply(
+        "I'm so sorry the noise is still bothering you, Ms Mitchell. I'm on my way up now, and if we can't fix it tonight we'll move you to a quieter room.",
+        'Nadia',
+        'frontoffice',
+      );
       await sleep(2200);
     },
   },
   {
     id: 'arabic',
     title: 'Arabic, right to left',
-    narration: 'The guest switches to Arabic. Replies and the whole layout follow; staff still receive English tickets with the original Arabic message attached.',
+    narration:
+      'The guest switches to Arabic. Replies and the whole layout follow; staff still receive English tickets with the original Arabic message attached.',
     run: async ({ sleep }) => {
       setGuestLanguage('ar');
       handBackToAi();

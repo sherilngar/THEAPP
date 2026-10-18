@@ -6,7 +6,8 @@
 export type PiiKind = 'card' | 'passport' | 'emirates_id';
 
 const ARABIC_DIGITS = /[٠-٩]/g;
-const toLatinDigits = (s: string) => s.replace(ARABIC_DIGITS, (d) => String(d.charCodeAt(0) - 0x0660));
+const toLatinDigits = (s: string) =>
+  s.replace(ARABIC_DIGITS, (d) => String(d.charCodeAt(0) - 0x0660));
 
 function luhn(digits: string): boolean {
   let sum = 0;

@@ -1,7 +1,10 @@
 import type { EscalationLevel, Standards, Ticket } from './types';
 
 /** Response standard in minutes for this ticket's department and priority. */
-export function standardMinutes(ticket: Pick<Ticket, 'department' | 'priority'>, standards: Standards): number {
+export function standardMinutes(
+  ticket: Pick<Ticket, 'department' | 'priority'>,
+  standards: Standards,
+): number {
   const s = standards[ticket.department];
   if (ticket.priority === 'urgent' && s.urgent) return s.urgent;
   return s.normal;
@@ -36,5 +39,9 @@ export function timerProgress(
 }
 
 export function escalationLabel(level: EscalationLevel): string {
-  return level === 2 ? 'Escalated to Duty Manager' : level === 1 ? 'Escalated to Supervisor' : 'Within standard';
+  return level === 2
+    ? 'Escalated to Duty Manager'
+    : level === 1
+      ? 'Escalated to Supervisor'
+      : 'Within standard';
 }

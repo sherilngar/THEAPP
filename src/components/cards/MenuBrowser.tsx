@@ -7,7 +7,15 @@ import { reviewOrder, useStore } from '../../store/store';
 import { useGuestUi } from '../guest/context';
 import { SampleBadge } from '../ui/SampleBadge';
 
-export function MenuBrowser({ initialCategory, initialFilter, onDone }: { initialCategory?: string; initialFilter?: string; onDone: () => void }) {
+export function MenuBrowser({
+  initialCategory,
+  initialFilter,
+  onDone,
+}: {
+  initialCategory?: string;
+  initialFilter?: string;
+  onDone: () => void;
+}) {
   const { lang, t } = useGuestUi();
   const menu = useStore((s) => s.settings.knowledge.ird);
   const [cat, setCat] = useState<string>(initialCategory ?? 'all');
@@ -24,32 +32,60 @@ export function MenuBrowser({ initialCategory, initialFilter, onDone }: { initia
   const change = (item: MenuItem, delta: number) =>
     setCart((prev) => {
       const ex = prev.find((c) => c.id === item.id);
-      if (!ex) return delta > 0 ? [...prev, { id: item.id, name: item.name, qty: 1, modifiers: [] }] : prev;
+      if (!ex)
+        return delta > 0
+          ? [...prev, { id: item.id, name: item.name, qty: 1, modifiers: [] }]
+          : prev;
       const qty = ex.qty + delta;
-      return qty <= 0 ? prev.filter((c) => c.id !== item.id) : prev.map((c) => (c.id === item.id ? { ...c, qty: Math.min(qty, 20) } : c));
+      return qty <= 0
+        ? prev.filter((c) => c.id !== item.id)
+        : prev.map((c) => (c.id === item.id ? { ...c, qty: Math.min(qty, 20) } : c));
     });
   const toggleMod = (id: string, mod: string) =>
-    setCart((prev) => prev.map((c) => (c.id === id ? { ...c, modifiers: c.modifiers.includes(mod) ? c.modifiers.filter((m) => m !== mod) : [...c.modifiers, mod] } : c)));
+    setCart((prev) =>
+      prev.map((c) =>
+        c.id === id
+          ? {
+              ...c,
+              modifiers: c.modifiers.includes(mod)
+                ? c.modifiers.filter((m) => m !== mod)
+                : [...c.modifiers, mod],
+            }
+          : c,
+      ),
+    );
   const count = cart.reduce((s, c) => s + c.qty, 0);
 
   return (
     <div>
       <div className="mb-3 flex items-center justify-between gap-2">
-        <p className="text-xs text-muted">{menu.hours === '24 hours' ? (lang === 'ar' ? 'متاح على مدار الساعة' : 'Available 24 hours') : menu.hours}</p>
+        <p className="text-xs text-muted">
+          {menu.hours === '24 hours'
+            ? lang === 'ar'
+              ? 'متاح على مدار الساعة'
+              : 'Available 24 hours'
+            : menu.hours}
+        </p>
         <SampleBadge label={t.sampleContent} />
       </div>
-      <div className="scrollbar-none -mx-5 mb-3 flex gap-2 overflow-x-auto px-5" role="tablist" aria-label="Menu categories">
-        {[{ id: 'all', name: t.allCategories, nameAr: t.allCategories }, ...menu.categories].map((c) => (
-          <button
-            key={c.id}
-            role="tab"
-            aria-selected={cat === c.id}
-            onClick={() => setCat(c.id)}
-            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors ${cat === c.id ? 'bg-fg text-bg' : 'bg-raised text-fg'}`}
-          >
-            {lang === 'ar' ? c.nameAr : c.name}
-          </button>
-        ))}
+      <div
+        className="scrollbar-none -mx-5 mb-3 flex gap-2 overflow-x-auto px-5"
+        role="tablist"
+        aria-label="Menu categories"
+      >
+        {[{ id: 'all', name: t.allCategories, nameAr: t.allCategories }, ...menu.categories].map(
+          (c) => (
+            <button
+              key={c.id}
+              role="tab"
+              aria-selected={cat === c.id}
+              onClick={() => setCat(c.id)}
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-sm transition-colors ${cat === c.id ? 'bg-fg text-bg' : 'bg-raised text-fg'}`}
+            >
+              {lang === 'ar' ? c.nameAr : c.name}
+            </button>
+          ),
+        )}
       </div>
       <div className="mb-4 flex flex-wrap gap-1.5" aria-label="Dietary filters">
         {DIETARY_TAGS.map((f) => {
@@ -67,7 +103,11 @@ export function MenuBrowser({ initialCategory, initialFilter, onDone }: { initia
         })}
       </div>
       <ul className="divide-y divide-line/60">
-        {items.length === 0 && <li className="py-8 text-center text-sm text-muted">{lang === 'ar' ? 'لا توجد أصناف تطابق هذه الخيارات.' : 'No dishes match these filters.'}</li>}
+        {items.length === 0 && (
+          <li className="py-8 text-center text-sm text-muted">
+            {lang === 'ar' ? 'لا توجد أصناف تطابق هذه الخيارات.' : 'No dishes match these filters.'}
+          </li>
+        )}
         {items.map((i) => {
           const q = qtyOf(i.id);
           const inCart = cart.find((c) => c.id === i.id);
@@ -76,19 +116,38 @@ export function MenuBrowser({ initialCategory, initialFilter, onDone }: { initia
               <div className="flex items-center gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium">{lang === 'ar' ? i.nameAr : i.name}</p>
-                  <p className="text-xs text-muted">{i.tags.map((tag) => t.filters[tag]).filter(Boolean).join(' · ')}</p>
+                  <p className="text-xs text-muted">
+                    {i.tags
+                      .map((tag) => t.filters[tag])
+                      .filter(Boolean)
+                      .join(' · ')}
+                  </p>
                 </div>
                 {q === 0 ? (
-                  <button className="btn-ghost min-h-[40px] px-4 py-1" onClick={() => change(i, 1)} aria-label={`${t.addToOrder} ${lang === 'ar' ? i.nameAr : i.name}`}>
+                  <button
+                    className="btn-ghost min-h-[40px] px-4 py-1"
+                    onClick={() => change(i, 1)}
+                    aria-label={`${t.addToOrder} ${lang === 'ar' ? i.nameAr : i.name}`}
+                  >
                     <Plus size={14} aria-hidden /> {t.addToOrder}
                   </button>
                 ) : (
                   <div className="flex items-center gap-1 rounded-full border border-line">
-                    <button className="inline-flex h-10 w-10 items-center justify-center" onClick={() => change(i, -1)} aria-label={`Remove one ${i.name}`}>
+                    <button
+                      className="inline-flex h-10 w-10 items-center justify-center"
+                      onClick={() => change(i, -1)}
+                      aria-label={`Remove one ${i.name}`}
+                    >
                       <Minus size={14} aria-hidden />
                     </button>
-                    <span className="w-5 text-center text-sm tabular-nums" aria-live="polite">{q}</span>
-                    <button className="inline-flex h-10 w-10 items-center justify-center" onClick={() => change(i, 1)} aria-label={`Add one ${i.name}`}>
+                    <span className="w-5 text-center text-sm tabular-nums" aria-live="polite">
+                      {q}
+                    </span>
+                    <button
+                      className="inline-flex h-10 w-10 items-center justify-center"
+                      onClick={() => change(i, 1)}
+                      aria-label={`Add one ${i.name}`}
+                    >
                       <Plus size={14} aria-hidden />
                     </button>
                   </div>
@@ -96,7 +155,12 @@ export function MenuBrowser({ initialCategory, initialFilter, onDone }: { initia
               </div>
               <AnimatePresence initial={false}>
                 {inCart && i.modifiers.length > 0 && (
-                  <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-2 flex flex-wrap gap-1.5">
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="mt-2 flex flex-wrap gap-1.5"
+                  >
                     {i.modifiers.map((m) => (
                       <button
                         key={m}
@@ -118,7 +182,14 @@ export function MenuBrowser({ initialCategory, initialFilter, onDone }: { initia
         <label className="label" htmlFor="menu-allergies">
           {t.allergies}
         </label>
-        <input id="menu-allergies" className="field mb-3" placeholder={t.allergiesPlaceholder} value={allergies} onChange={(e) => setAllergies(e.target.value)} maxLength={120} />
+        <input
+          id="menu-allergies"
+          className="field mb-3"
+          placeholder={t.allergiesPlaceholder}
+          value={allergies}
+          onChange={(e) => setAllergies(e.target.value)}
+          maxLength={120}
+        />
         <button
           className="btn-primary w-full"
           disabled={!count}

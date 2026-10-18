@@ -14,7 +14,7 @@ type StatusFilter = 'all' | 'new' | 'progress' | 'done';
 
 const isOpen = (t: Ticket) => t.status !== 'done' && t.status !== 'cancelled';
 
-export function belongsTo(t: Ticket, tab: TabId) {
+function belongsTo(t: Ticket, tab: TabId) {
   if (tab === 'all') return true;
   if (tab === 'dutymanager') return t.department === 'dutymanager' || t.escalationLevel === 2;
   return t.department === tab || t.alsoNotify === tab;
@@ -27,7 +27,15 @@ function sortTickets(a: Ticket, b: Ticket) {
   return a.createdAt - b.createdAt;
 }
 
-export function StaffBoard({ session, embedded = false, onSignOut }: { session: StaffSession; embedded?: boolean; onSignOut?: () => void }) {
+export function StaffBoard({
+  session,
+  embedded = false,
+  onSignOut,
+}: {
+  session: StaffSession;
+  embedded?: boolean;
+  onSignOut?: () => void;
+}) {
   const all = useStore((s) => s.tickets.filter((t) => !t.sample));
   const [tab, setTab] = useState<TabId>(embedded ? 'all' : session.department);
   const [query, setQuery] = useState('');
@@ -57,15 +65,31 @@ export function StaffBoard({ session, embedded = false, onSignOut }: { session: 
     }
     return c;
   }, [all]);
-  const escalatedCount = all.filter((t) => isOpen(t) && t.status === 'new' && t.escalationLevel > 0).length;
+  const escalatedCount = all.filter(
+    (t) => isOpen(t) && t.status === 'new' && t.escalationLevel > 0,
+  ).length;
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     return all
       .filter((t) => belongsTo(t, tab))
       .filter((t) => priority === 'all' || t.priority === priority)
-      .filter((t) => (status === 'all' ? t.status !== 'cancelled' : status === 'new' ? t.status === 'new' : status === 'progress' ? t.status === 'accepted' || t.status === 'on_the_way' : t.status === 'done'))
-      .filter((t) => !q || [t.id, t.room, t.guestName, t.item, t.details ?? '', t.originalMessage ?? ''].some((v) => v.toLowerCase().includes(q)))
+      .filter((t) =>
+        status === 'all'
+          ? t.status !== 'cancelled'
+          : status === 'new'
+            ? t.status === 'new'
+            : status === 'progress'
+              ? t.status === 'accepted' || t.status === 'on_the_way'
+              : t.status === 'done',
+      )
+      .filter(
+        (t) =>
+          !q ||
+          [t.id, t.room, t.guestName, t.item, t.details ?? '', t.originalMessage ?? ''].some((v) =>
+            v.toLowerCase().includes(q),
+          ),
+      )
       .sort(sortTickets);
   }, [all, tab, query, status, priority]);
 
@@ -82,22 +106,36 @@ export function StaffBoard({ session, embedded = false, onSignOut }: { session: 
 
   return (
     <LayoutGroup>
-      <div className={`flex flex-col ${embedded ? 'h-full' : 'min-h-[calc(100dvh-4rem)]'}`} data-testid="staff-board">
-        <div className={`border-b border-line/60 bg-bg/90 ${embedded ? '' : 'sticky top-16 z-20 backdrop-blur'}`}>
+      <div
+        className={`flex flex-col ${embedded ? 'h-full' : 'min-h-[calc(100dvh-4rem)]'}`}
+        data-testid="staff-board"
+      >
+        <div
+          className={`border-b border-line/60 bg-bg/90 ${embedded ? '' : 'sticky top-16 z-20 backdrop-blur'}`}
+        >
           <div className="flex flex-wrap items-center gap-2 px-4 pt-3 sm:px-6">
             {!embedded && (
               <p className="me-auto text-sm">
-                <span className="text-muted">Signed in as</span> <span className="font-medium">{session.name}</span>
+                <span className="text-muted">Signed in as</span>{' '}
+                <span className="font-medium">{session.name}</span>
                 <span className="text-muted"> · {DEPT_BY_ID[session.department].en}</span>
               </p>
             )}
             {embedded && <p className="eyebrow me-auto">Staff board · live</p>}
             {escalatedCount > 0 && (
-              <span className="rounded-full border border-st-escalated/50 bg-st-escalated/10 px-2.5 py-1 text-xs font-medium text-st-escalated" role="status">
+              <span
+                className="rounded-full border border-st-escalated/50 bg-st-escalated/10 px-2.5 py-1 text-xs font-medium text-st-escalated"
+                role="status"
+              >
                 {escalatedCount} escalated
               </span>
             )}
-            <button className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-raised" onClick={toggleSound} aria-pressed={sound} aria-label={sound ? 'Mute new-ticket sound' : 'Turn on new-ticket sound'}>
+            <button
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted hover:bg-raised"
+              onClick={toggleSound}
+              aria-pressed={sound}
+              aria-label={sound ? 'Mute new-ticket sound' : 'Turn on new-ticket sound'}
+            >
               {sound ? <BellRing size={16} aria-hidden /> : <BellOff size={16} aria-hidden />}
             </button>
             {onSignOut && (
@@ -106,7 +144,11 @@ export function StaffBoard({ session, embedded = false, onSignOut }: { session: 
               </button>
             )}
           </div>
-          <div className="scrollbar-none flex gap-1 overflow-x-auto px-4 py-2 sm:px-6" role="tablist" aria-label="Departments">
+          <div
+            className="scrollbar-none flex gap-1 overflow-x-auto px-4 py-2 sm:px-6"
+            role="tablist"
+            aria-label="Departments"
+          >
             {[{ id: 'all' as const, short: 'All departments' }, ...DEPARTMENTS].map((d) => {
               const Icon = d.id === 'all' ? Inbox : DEPT_ICON[d.id];
               const n = counts[d.id] ?? 0;
@@ -119,7 +161,13 @@ export function StaffBoard({ session, embedded = false, onSignOut }: { session: 
                   onClick={() => setTab(d.id)}
                   className={`relative inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3 text-sm transition-colors ${active ? 'text-bg' : 'text-muted hover:bg-raised hover:text-fg'}`}
                 >
-                  {active && <motion.span layoutId={embedded ? 'dept-pill-e' : 'dept-pill'} className="absolute inset-0 rounded-full bg-fg" transition={{ type: 'spring', stiffness: 400, damping: 34 }} />}
+                  {active && (
+                    <motion.span
+                      layoutId={embedded ? 'dept-pill-e' : 'dept-pill'}
+                      className="absolute inset-0 rounded-full bg-fg"
+                      transition={{ type: 'spring', stiffness: 400, damping: 34 }}
+                    />
+                  )}
                   <Icon size={14} aria-hidden className="relative" />
                   <span className="relative whitespace-nowrap">{d.short}</span>
                   <motion.span
@@ -138,17 +186,32 @@ export function StaffBoard({ session, embedded = false, onSignOut }: { session: 
           {!embedded && (
             <div className="flex flex-wrap items-end gap-2 px-4 pb-3 sm:px-6">
               <div className="relative min-w-[200px] flex-1">
-                <Search size={14} className="pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted ltr:left-3 rtl:right-3" aria-hidden />
+                <Search
+                  size={14}
+                  className="pointer-events-none absolute top-1/2 -translate-y-1/2 text-muted ltr:left-3 rtl:right-3"
+                  aria-hidden
+                />
                 <label htmlFor="board-search" className="sr-only">
                   Search tickets
                 </label>
-                <input id="board-search" className="field py-2 ps-9 text-sm" placeholder="Search room, guest, request or ticket id" value={query} onChange={(e) => setQuery(e.target.value)} />
+                <input
+                  id="board-search"
+                  className="field py-2 ps-9 text-sm"
+                  placeholder="Search room, guest, request or ticket id"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
               </div>
               <div>
                 <label htmlFor="f-status" className="sr-only">
                   Status
                 </label>
-                <select id="f-status" className="field py-2 text-sm" value={status} onChange={(e) => setStatus(e.target.value as StatusFilter)}>
+                <select
+                  id="f-status"
+                  className="field py-2 text-sm"
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value as StatusFilter)}
+                >
                   <option value="all">All statuses</option>
                   <option value="new">New</option>
                   <option value="progress">In progress</option>
@@ -159,7 +222,12 @@ export function StaffBoard({ session, embedded = false, onSignOut }: { session: 
                 <label htmlFor="f-priority" className="sr-only">
                   Priority
                 </label>
-                <select id="f-priority" className="field py-2 text-sm" value={priority} onChange={(e) => setPriority(e.target.value as 'all' | Priority)}>
+                <select
+                  id="f-priority"
+                  className="field py-2 text-sm"
+                  value={priority}
+                  onChange={(e) => setPriority(e.target.value as 'all' | Priority)}
+                >
                   <option value="all">All priorities</option>
                   <option value="urgent">Urgent</option>
                   <option value="high">High</option>
@@ -172,9 +240,22 @@ export function StaffBoard({ session, embedded = false, onSignOut }: { session: 
 
         <div className={`flex-1 px-4 py-4 sm:px-6 ${embedded ? 'overflow-y-auto' : ''}`}>
           {tab === 'all' ? (
-            <AllLanes tickets={filtered} now={now} session={session} fresh={fresh} compact={embedded} onOpen={setOpenId} />
+            <AllLanes
+              tickets={filtered}
+              now={now}
+              session={session}
+              fresh={fresh}
+              compact={embedded}
+              onOpen={setOpenId}
+            />
           ) : (
-            <Columns tickets={filtered} now={now} session={session} fresh={fresh} onOpen={setOpenId} />
+            <Columns
+              tickets={filtered}
+              now={now}
+              session={session}
+              fresh={fresh}
+              onOpen={setOpenId}
+            />
           )}
         </div>
       </div>
@@ -202,24 +283,51 @@ function Empty({ text }: { text: string }) {
 }
 
 function AllLanes({ tickets, now, session, fresh, compact, onOpen }: ViewProps) {
-  const visible = tickets.filter((t) => t.status !== 'done' || (t.doneAt && now - t.doneAt < 30 * 60_000));
-  const lanes = DEPARTMENTS.map((d) => ({ d, items: visible.filter((t) => t.department === d.id) })).filter((l) => l.items.length);
-  if (!lanes.length) return <Empty text="No open requests. New tickets appear here the moment a guest asks." />;
+  const visible = tickets.filter(
+    (t) => t.status !== 'done' || (t.doneAt && now - t.doneAt < 30 * 60_000),
+  );
+  const lanes = DEPARTMENTS.map((d) => ({
+    d,
+    items: visible.filter((t) => t.department === d.id),
+  })).filter((l) => l.items.length);
+  if (!lanes.length)
+    return <Empty text="No open requests. New tickets appear here the moment a guest asks." />;
   return (
-    <div className={`grid gap-4 ${compact ? 'grid-cols-1 xl:grid-cols-2' : 'md:grid-cols-2 xl:grid-cols-3'}`}>
+    <div
+      className={`grid gap-4 ${compact ? 'grid-cols-1 xl:grid-cols-2' : 'md:grid-cols-2 xl:grid-cols-3'}`}
+    >
       <AnimatePresence initial={false}>
         {lanes.map(({ d, items }) => {
           const Icon = DEPT_ICON[d.id];
           return (
-            <motion.section key={d.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-2xl bg-raised/50 p-3" data-dept-lane={d.id} aria-label={d.en}>
+            <motion.section
+              key={d.id}
+              layout
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="rounded-2xl bg-raised/50 p-3"
+              data-dept-lane={d.id}
+              aria-label={d.en}
+            >
               <h3 className="mb-2 flex items-center gap-2 px-1 text-sm font-medium">
                 <Icon size={14} className="text-accent" aria-hidden /> {d.en}
-                <span className="ms-auto text-xs text-muted">{items.filter(isOpen).length} open</span>
+                <span className="ms-auto text-xs text-muted">
+                  {items.filter(isOpen).length} open
+                </span>
               </h3>
               <div className="space-y-2">
                 <AnimatePresence initial={false}>
                   {items.map((t) => (
-                    <TicketCard key={t.id} ticket={t} now={now} session={session} fresh={fresh.has(t.id)} compact={compact} onOpen={() => onOpen(t.id)} />
+                    <TicketCard
+                      key={t.id}
+                      ticket={t}
+                      now={now}
+                      session={session}
+                      fresh={fresh.has(t.id)}
+                      compact={compact}
+                      onOpen={() => onOpen(t.id)}
+                    />
                   ))}
                 </AnimatePresence>
               </div>
@@ -234,25 +342,56 @@ function AllLanes({ tickets, now, session, fresh, compact, onOpen }: ViewProps) 
 function Columns({ tickets, now, session, fresh, onOpen }: ViewProps) {
   const cols = [
     { id: 'new', title: 'New', items: tickets.filter((t) => t.status === 'new') },
-    { id: 'progress', title: 'In progress', items: tickets.filter((t) => t.status === 'accepted' || t.status === 'on_the_way') },
-    { id: 'done', title: 'Done', items: tickets.filter((t) => t.status === 'done').sort((a, b) => (b.doneAt ?? 0) - (a.doneAt ?? 0)).slice(0, 15) },
+    {
+      id: 'progress',
+      title: 'In progress',
+      items: tickets.filter((t) => t.status === 'accepted' || t.status === 'on_the_way'),
+    },
+    {
+      id: 'done',
+      title: 'Done',
+      items: tickets
+        .filter((t) => t.status === 'done')
+        .sort((a, b) => (b.doneAt ?? 0) - (a.doneAt ?? 0))
+        .slice(0, 15),
+    },
   ];
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       {cols.map((c) => (
         <section key={c.id} aria-label={c.title} className="min-w-0">
           <h3 className="mb-3 flex items-center gap-2 text-sm font-medium">
-            <span className={`h-2 w-2 rounded-full ${c.id === 'new' ? 'bg-st-new' : c.id === 'progress' ? 'bg-st-progress' : 'bg-st-done'}`} aria-hidden />
+            <span
+              className={`h-2 w-2 rounded-full ${c.id === 'new' ? 'bg-st-new' : c.id === 'progress' ? 'bg-st-progress' : 'bg-st-done'}`}
+              aria-hidden
+            />
             {c.title}
             <span className="text-muted">{c.items.length}</span>
           </h3>
           <div className="space-y-2">
             <AnimatePresence initial={false}>
               {c.items.map((t) => (
-                <TicketCard key={t.id} ticket={t} now={now} session={session} fresh={fresh.has(t.id)} onOpen={() => onOpen(t.id)} />
+                <TicketCard
+                  key={t.id}
+                  ticket={t}
+                  now={now}
+                  session={session}
+                  fresh={fresh.has(t.id)}
+                  onOpen={() => onOpen(t.id)}
+                />
               ))}
             </AnimatePresence>
-            {c.items.length === 0 && <Empty text={c.id === 'new' ? 'Nothing waiting. Well done.' : c.id === 'progress' ? 'Nothing in progress.' : 'Nothing completed yet today.'} />}
+            {c.items.length === 0 && (
+              <Empty
+                text={
+                  c.id === 'new'
+                    ? 'Nothing waiting. Well done.'
+                    : c.id === 'progress'
+                      ? 'Nothing in progress.'
+                      : 'Nothing completed yet today.'
+                }
+              />
+            )}
           </div>
         </section>
       ))}

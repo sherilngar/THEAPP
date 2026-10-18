@@ -78,20 +78,140 @@ type L = 'en' | 'ar';
 const tr = (lang: L, en: string, ar: string) => (lang === 'ar' ? ar : en);
 
 const INJECTION = [
-  'ignore previous', 'ignore all previous', 'ignore your instructions', 'ignore the rules', 'disregard your', 'disregard all', 'system prompt', 'you are now', 'pretend to be', 'pretend you are', 'act as if', 'developer mode', 'jailbreak', 'new instructions', 'reveal your prompt', 'تجاهل التعليمات', 'تجاهل كل', 'انت الان',
+  'ignore previous',
+  'ignore all previous',
+  'ignore your instructions',
+  'ignore the rules',
+  'disregard your',
+  'disregard all',
+  'system prompt',
+  'you are now',
+  'pretend to be',
+  'pretend you are',
+  'act as if',
+  'developer mode',
+  'jailbreak',
+  'new instructions',
+  'reveal your prompt',
+  'تجاهل التعليمات',
+  'تجاهل كل',
+  'انت الان',
 ];
 const EMERGENCY = [
-  'emergency', 'fire', 'there is smoke', 'smell smoke', 'smoke in', 'smoke alarm', "can't breathe", 'cannot breathe', 'not breathing', 'unconscious', 'heart attack', 'chest pain', 'ambulance', 'call 999', 'call 998', 'help me', 'drowning', 'حريق', 'دخان', 'طوارئ', 'طارئ', 'اسعاف', 'لا يتنفس', 'ما يتنفس', 'نوبه قلبيه', 'الم في الصدر', 'ساعدوني', 'غرق',
+  'emergency',
+  'fire',
+  'there is smoke',
+  'smell smoke',
+  'smoke in',
+  'smoke alarm',
+  "can't breathe",
+  'cannot breathe',
+  'not breathing',
+  'unconscious',
+  'heart attack',
+  'chest pain',
+  'ambulance',
+  'call 999',
+  'call 998',
+  'help me',
+  'drowning',
+  'حريق',
+  'دخان',
+  'طوارئ',
+  'طارئ',
+  'اسعاف',
+  'لا يتنفس',
+  'ما يتنفس',
+  'نوبه قلبيه',
+  'الم في الصدر',
+  'ساعدوني',
+  'غرق',
 ];
 const COMPLAINT = [
-  'complaint', 'complain', 'unacceptable', 'disgusting', 'terrible', 'awful', 'horrible', 'worst', 'disappointed', 'disappointing', 'not happy', 'unhappy', 'angry', 'furious', 'rude', 'ridiculous', 'very bad', 'so bad', 'still waiting', 'nobody came', 'no one came', 'شكوى', 'اشتكي', 'سيء', 'سيئ', 'زعلان', 'غير مقبول', 'مستاء', 'محد جا', 'ما احد جا', 'متضايق',
+  'complaint',
+  'complain',
+  'unacceptable',
+  'disgusting',
+  'terrible',
+  'awful',
+  'horrible',
+  'worst',
+  'disappointed',
+  'disappointing',
+  'not happy',
+  'unhappy',
+  'angry',
+  'furious',
+  'rude',
+  'ridiculous',
+  'very bad',
+  'so bad',
+  'still waiting',
+  'nobody came',
+  'no one came',
+  'شكوى',
+  'اشتكي',
+  'سيء',
+  'سيئ',
+  'زعلان',
+  'غير مقبول',
+  'مستاء',
+  'محد جا',
+  'ما احد جا',
+  'متضايق',
 ];
-const REFUND = ['refund', 'compensation', 'money back', 'discount', 'charge me less', 'استرجاع', 'تعويض', 'استرداد', 'خصم'];
-const OTHER_GUEST = ['another guest', 'other guest', 'the guest in room', 'guest next door', 'neighbour', 'neighbor', 'next door', 'room next to', 'نزيل اخر', 'الجيران', 'الغرفه المجاوره'];
-const CANCEL = ['cancel', 'cancel my', "don't need", 'no longer need', 'الغاء', 'الغي', 'ما ابي', 'ما ابغي'];
-const STATUS = ['my requests', 'status of my', 'request status', 'any update', 'update on my', 'how long', 'is it coming', 'طلباتي', 'حاله طلباتي', 'حاله الطلب', 'متي يوصل', 'وين وصل'];
-const GREETING = /^(hi|hello|hey|good (morning|afternoon|evening)|salam|مرحبا|السلام عليكم|اهلا|هلا|صباح الخير|مساء الخير)\b/;
-const THANKS = /^(thanks|thank you|thx|cheers|great,? thanks|perfect,? thanks|شكرا|مشكور|يعطيك العافيه|تسلم)/;
+const REFUND = [
+  'refund',
+  'compensation',
+  'money back',
+  'discount',
+  'charge me less',
+  'استرجاع',
+  'تعويض',
+  'استرداد',
+  'خصم',
+];
+const OTHER_GUEST = [
+  'another guest',
+  'other guest',
+  'the guest in room',
+  'guest next door',
+  'neighbour',
+  'neighbor',
+  'next door',
+  'room next to',
+  'نزيل اخر',
+  'الجيران',
+  'الغرفه المجاوره',
+];
+const CANCEL = [
+  'cancel',
+  'cancel my',
+  "don't need",
+  'no longer need',
+  'الغاء',
+  'الغي',
+  'ما ابي',
+  'ما ابغي',
+];
+const STATUS = [
+  'my requests',
+  'status of my',
+  'request status',
+  'any update',
+  'update on my',
+  'how long',
+  'is it coming',
+  'طلباتي',
+  'حاله طلباتي',
+  'حاله الطلب',
+  'متي يوصل',
+  'وين وصل',
+];
+const GREETING =
+  /^(hi|hello|hey|good (morning|afternoon|evening)|salam|مرحبا|السلام عليكم|اهلا|هلا|صباح الخير|مساء الخير)\b/;
+const THANKS =
+  /^(thanks|thank you|thx|cheers|great,? thanks|perfect,? thanks|شكرا|مشكور|يعطيك العافيه|تسلم)/;
 
 export const DEFAULT_CHIPS: Record<L, string[]> = {
   en: ['Extra towels', 'Order food', 'Book a table', 'Spa treatment', 'Pool hours', 'My requests'],
@@ -115,13 +235,28 @@ function detectAllergies(text: string): string[] {
       text,
     );
   if (!allergyContext) return [];
-  return ALLERGENS.filter(([re]) => re.test(text)).map(([, name]) => name).filter((v, i, a) => a.indexOf(v) === i && !(v === 'nuts' && a.includes('peanuts') && !/\bnuts\b/.test(text)));
+  return ALLERGENS.filter(([re]) => re.test(text))
+    .map(([, name]) => name)
+    .filter(
+      (v, i, a) =>
+        a.indexOf(v) === i && !(v === 'nuts' && a.includes('peanuts') && !/\bnuts\b/.test(text)),
+    );
 }
 
 function fmtTime(time: string | undefined, date: string | undefined, lang: L): string {
-  const d = date === 'tomorrow' ? tr(lang, 'tomorrow', 'غداً') : date === 'today' ? tr(lang, 'today', 'اليوم') : '';
+  const d =
+    date === 'tomorrow'
+      ? tr(lang, 'tomorrow', 'غداً')
+      : date === 'today'
+        ? tr(lang, 'today', 'اليوم')
+        : '';
   if (!time) return d;
-  const t = time === 'now' ? tr(lang, 'now', 'الآن') : time.startsWith('in ') ? tr(lang, time, `بعد ${time.slice(3).replace('min', 'دقيقة')}`) : time;
+  const t =
+    time === 'now'
+      ? tr(lang, 'now', 'الآن')
+      : time.startsWith('in ')
+        ? tr(lang, time, `بعد ${time.slice(3).replace('min', 'دقيقة')}`)
+        : time;
   return d ? `${d} ${tr(lang, 'at', 'الساعة')} ${t}` : t;
 }
 
@@ -178,30 +313,49 @@ function bookingQuestion(b: BookingDraft, field: BookingField, k: Knowledge, lan
       if (b.kind === 'spa')
         return {
           text: tr(lang, 'Which treatment would you like?', 'ما العلاج الذي تفضله؟'),
-          chips: k.spa.treatments.slice(0, 4).map((t) => (lang === 'ar' ? t.nameAr : t.name).split(' · ')[0] ?? t.name),
+          chips: k.spa.treatments
+            .slice(0, 4)
+            .map((t) => (lang === 'ar' ? t.nameAr : t.name).split(' · ')[0] ?? t.name),
         };
       return {
         text: tr(lang, 'Which restaurant would you like?', 'أي مطعم تفضّل؟'),
-        chips: k.outlets.filter((o) => o.reservations).map((o) => (lang === 'ar' ? o.nameAr : o.name)),
+        chips: k.outlets
+          .filter((o) => o.reservations)
+          .map((o) => (lang === 'ar' ? o.nameAr : o.name)),
       };
     case 'date':
-      return { text: tr(lang, 'Which day would you like?', 'أي يوم تفضّل؟'), chips: lang === 'ar' ? ['اليوم', 'غداً'] : ['Today', 'Tomorrow'] };
+      return {
+        text: tr(lang, 'Which day would you like?', 'أي يوم تفضّل؟'),
+        chips: lang === 'ar' ? ['اليوم', 'غداً'] : ['Today', 'Tomorrow'],
+      };
     case 'time':
       return {
         text: tr(lang, 'What time would suit you?', 'ما الوقت المناسب لك؟'),
-        chips: b.kind === 'restaurant' ? ['19:00', '19:30', '20:00', '20:30'] : ['10:00', '14:00', '16:00', '18:00'],
+        chips:
+          b.kind === 'restaurant'
+            ? ['19:00', '19:30', '20:00', '20:30']
+            : ['10:00', '14:00', '16:00', '18:00'],
       };
     case 'partySize':
-      return { text: tr(lang, 'How many guests will be joining?', 'كم عدد الضيوف؟'), chips: ['1', '2', '3', '4', '5', '6'] };
+      return {
+        text: tr(lang, 'How many guests will be joining?', 'كم عدد الضيوف؟'),
+        chips: ['1', '2', '3', '4', '5', '6'],
+      };
     case 'passengers':
-      return { text: tr(lang, 'How many passengers?', 'كم عدد الركاب؟'), chips: ['1', '2', '3', '4'] };
+      return {
+        text: tr(lang, 'How many passengers?', 'كم عدد الركاب؟'),
+        chips: ['1', '2', '3', '4'],
+      };
     case 'destination':
       return { text: tr(lang, 'Where would you like to go?', 'إلى أين تود الذهاب؟') };
   }
 }
 
 function resolveOutlet(text: string, k: Knowledge): string | undefined {
-  const matches = findMatches(text, k.outlets.map((o) => ({ key: o.id, kw: [o.name, o.nameAr, ...o.kw] })));
+  const matches = findMatches(
+    text,
+    k.outlets.map((o) => ({ key: o.id, kw: [o.name, o.nameAr, ...o.kw] })),
+  );
   const hit = matches.find((m) => k.outlets.find((o) => o.id === m.key)?.reservations);
   return hit?.key;
 }
@@ -212,14 +366,24 @@ function resolveTreatment(text: string, k: Knowledge, context?: string): string 
     text,
     k.spa.treatments.map((t) => ({
       key: t.id,
-      kw: [t.name.split(' · ')[0] ?? t.name, (t.nameAr.split(' · ')[0] ?? t.nameAr), t.id === 'deeptissue' ? 'deep tissue' : t.id, t.id === 'hotstone' ? 'hot stone' : t.id],
+      kw: [
+        t.name.split(' · ')[0] ?? t.name,
+        t.nameAr.split(' · ')[0] ?? t.nameAr,
+        t.id === 'deeptissue' ? 'deep tissue' : t.id,
+        t.id === 'hotstone' ? 'hot stone' : t.id,
+      ],
     })),
   );
   return matches[0]?.key;
 }
 
 /** Merges whatever this message says into a booking draft. */
-export function fillBooking(b: BookingDraft, raw: string, k: Knowledge, asking?: BookingField): BookingDraft {
+export function fillBooking(
+  b: BookingDraft,
+  raw: string,
+  k: Knowledge,
+  asking?: BookingField,
+): BookingDraft {
   const text = normalize(raw);
   const next = { ...b };
   const pt = parseTime(raw);
@@ -239,7 +403,9 @@ export function fillBooking(b: BookingDraft, raw: string, k: Knowledge, asking?:
   if (b.kind === 'spa') next.outlet = resolveTreatment(text, k) ?? next.outlet;
   if (b.kind === 'transport') {
     next.partySize = parsePartySize(raw) ?? next.partySize;
-    const dest = text.match(/\bto (?:the )?([a-z][a-z\s]{2,40}?)(?:\s+(?:at|for|tomorrow|today|tonight|please)\b|[,.]|$)/);
+    const dest = text.match(
+      /\bto (?:the )?([a-z][a-z\s]{2,40}?)(?:\s+(?:at|for|tomorrow|today|tonight|please)\b|[,.]|$)/,
+    );
     if (dest && !/^(airport|hotel)$/.test(dest[1] ?? '')) next.destination = dest[1]?.trim();
   }
   // A bare answer to the question we just asked.
@@ -247,9 +413,11 @@ export function fillBooking(b: BookingDraft, raw: string, k: Knowledge, asking?:
   const n = bare ? wordToNumber(bare[1] ?? '') : undefined;
   if (asking && n !== undefined) {
     if (asking === 'partySize' || asking === 'passengers') next.partySize = n;
-    if (asking === 'time') next.time = `${String(n <= 11 && b.kind === 'restaurant' ? n + 12 : n).padStart(2, '0')}:00`;
+    if (asking === 'time')
+      next.time = `${String(n <= 11 && b.kind === 'restaurant' ? n + 12 : n).padStart(2, '0')}:00`;
   }
-  if (asking === 'destination' && !next.destination && text.length > 1 && n === undefined) next.destination = raw.trim();
+  if (asking === 'destination' && !next.destination && text.length > 1 && n === undefined)
+    next.destination = raw.trim();
   if (/^(today|اليوم)$/.test(text)) next.date = 'today';
   if (/^(tomorrow|غدا|بكره)$/.test(text)) next.date = 'tomorrow';
   return next;
@@ -264,11 +432,20 @@ export function bookingDraftToTicket(b: BookingDraft, k: Knowledge): TicketDraft
       item: 'Table reservation',
       itemKey: 'book_table',
       quantity: b.partySize,
-      details: [outlet?.name, `${b.date} ${b.time}`, `${b.partySize} guests`, b.occasion, b.notes].filter(Boolean).join(' · '),
+      details: [outlet?.name, `${b.date} ${b.time}`, `${b.partySize} guests`, b.occasion, b.notes]
+        .filter(Boolean)
+        .join(' · '),
       preferredTime: `${b.date} ${b.time}`,
       priority: 'normal',
       kind: 'reservation',
-      payload: { outlet: outlet?.name ?? b.outlet, date: b.date, time: b.time, party_size: b.partySize, occasion: b.occasion, notes: b.notes },
+      payload: {
+        outlet: outlet?.name ?? b.outlet,
+        date: b.date,
+        time: b.time,
+        party_size: b.partySize,
+        occasion: b.occasion,
+        notes: b.notes,
+      },
     };
   }
   if (b.kind === 'spa') {
@@ -278,11 +455,24 @@ export function bookingDraftToTicket(b: BookingDraft, k: Knowledge): TicketDraft
       category: 'Spa & Wellness',
       item: 'Spa booking',
       itemKey: 'spa_book',
-      details: [t?.name, `${b.date} ${b.time}`, b.therapist && b.therapist !== 'none' ? `${b.therapist} therapist preferred` : '', b.notes].filter(Boolean).join(' · '),
+      details: [
+        t?.name,
+        `${b.date} ${b.time}`,
+        b.therapist && b.therapist !== 'none' ? `${b.therapist} therapist preferred` : '',
+        b.notes,
+      ]
+        .filter(Boolean)
+        .join(' · '),
       preferredTime: `${b.date} ${b.time}`,
       priority: 'normal',
       kind: 'spa',
-      payload: { treatment: t?.name ?? b.outlet, date: b.date, time: b.time, therapist_preference: b.therapist ?? 'none', notes: b.notes },
+      payload: {
+        treatment: t?.name ?? b.outlet,
+        date: b.date,
+        time: b.time,
+        therapist_preference: b.therapist ?? 'none',
+        notes: b.notes,
+      },
     };
   }
   const type = b.outlet ?? 'taxi';
@@ -299,11 +489,27 @@ export function bookingDraftToTicket(b: BookingDraft, k: Knowledge): TicketDraft
     item: label[type] ?? 'Transport',
     itemKey: type.startsWith('airport') ? 'airport_transfer' : type,
     quantity: b.partySize,
-    details: [`${b.pickup ?? 'Hotel main entrance'} → ${b.destination}`, `${b.date} ${b.time}`, `${b.partySize} passengers`, b.luggage ? `${b.luggage} bags` : '', b.notes].filter(Boolean).join(' · '),
+    details: [
+      `${b.pickup ?? 'Hotel main entrance'} → ${b.destination}`,
+      `${b.date} ${b.time}`,
+      `${b.partySize} passengers`,
+      b.luggage ? `${b.luggage} bags` : '',
+      b.notes,
+    ]
+      .filter(Boolean)
+      .join(' · '),
     preferredTime: `${b.date} ${b.time}`,
     priority: 'normal',
     kind: 'transport',
-    payload: { type, date: b.date, time: b.time, pickup: b.pickup ?? 'Hotel main entrance', destination: b.destination, passengers: b.partySize, luggage: b.luggage ?? 0 },
+    payload: {
+      type,
+      date: b.date,
+      time: b.time,
+      pickup: b.pickup ?? 'Hotel main entrance',
+      destination: b.destination,
+      passengers: b.partySize,
+      luggage: b.luggage ?? 0,
+    },
   };
 }
 
@@ -311,7 +517,11 @@ export function bookingSummary(b: BookingDraft, k: Knowledge, lang: L): string {
   const when = fmtTime(b.time, b.date, lang);
   if (b.kind === 'restaurant') {
     const o = k.outlets.find((x) => x.id === b.outlet);
-    return tr(lang, `a table at ${o?.name} ${when} for ${b.partySize}`, `طاولة في ${o?.nameAr} ${when} لـ ${b.partySize} أشخاص`);
+    return tr(
+      lang,
+      `a table at ${o?.name} ${when} for ${b.partySize}`,
+      `طاولة في ${o?.nameAr} ${when} لـ ${b.partySize} أشخاص`,
+    );
   }
   if (b.kind === 'spa') {
     const t = k.spa.treatments.find((x) => x.id === b.outlet);
@@ -321,7 +531,12 @@ export function bookingSummary(b: BookingDraft, k: Knowledge, lang: L): string {
 }
 
 export function bookingConfirmation(b: BookingDraft, k: Knowledge, lang: L): string {
-  const dept = b.kind === 'restaurant' ? tr(lang, 'restaurant', 'المطعم') : b.kind === 'spa' ? tr(lang, 'spa', 'السبا') : tr(lang, 'concierge', 'الكونسيرج');
+  const dept =
+    b.kind === 'restaurant'
+      ? tr(lang, 'restaurant', 'المطعم')
+      : b.kind === 'spa'
+        ? tr(lang, 'spa', 'السبا')
+        : tr(lang, 'concierge', 'الكونسيرج');
   return tr(
     lang,
     `I've requested ${bookingSummary(b, k, lang)}. Our ${dept} team will confirm availability shortly, and I'll update you here.`,
@@ -338,7 +553,12 @@ export function orderDraft(order: DiningOrder): TicketDraft {
     item: 'In-room dining order',
     itemKey: 'ird_order',
     quantity: order.items.reduce((s, i) => s + i.qty, 0),
-    details: order.items.map((i) => `${i.qty} × ${i.name}${i.modifiers.length ? ` (${i.modifiers.join(', ')})` : ''}`).join('; ') + (order.allergies ? ` · ALLERGY: ${order.allergies}` : ''),
+    details:
+      order.items
+        .map(
+          (i) => `${i.qty} × ${i.name}${i.modifiers.length ? ` (${i.modifiers.join(', ')})` : ''}`,
+        )
+        .join('; ') + (order.allergies ? ` · ALLERGY: ${order.allergies}` : ''),
     preferredTime: order.deliveryTime ?? 'As soon as possible',
     priority: order.allergies ? 'high' : 'normal',
     kind: 'dining',
@@ -363,20 +583,36 @@ export function orderReadBack(order: DiningOrder, k: Knowledge, lang: L): string
     const allergens = order.allergies.split(/,\s*/);
     for (const i of order.items) {
       const m = all.find((x) => x.id === i.id);
-      const hit = m?.contains.filter((c) => allergens.some((a) => a.startsWith(c) || c.startsWith(a)));
+      const hit = m?.contains.filter((c) =>
+        allergens.some((a) => a.startsWith(c) || c.startsWith(a)),
+      );
       if (m && hit?.length)
         warnings.push(
-          tr(lang, `Please note: ${m.name} contains ${hit.join(', ')}. Our kitchen will call you to suggest an alternative.`, `تنبيه: ${m.nameAr} يحتوي على مكونات قد تسبب الحساسية. سيتصل بك المطبخ لاقتراح بديل.`),
+          tr(
+            lang,
+            `Please note: ${m.name} contains ${hit.join(', ')}. Our kitchen will call you to suggest an alternative.`,
+            `تنبيه: ${m.nameAr} يحتوي على مكونات قد تسبب الحساسية. سيتصل بك المطبخ لاقتراح بديل.`,
+          ),
         );
     }
   }
   return [
     tr(lang, 'Let me repeat your order:', 'دعني أكرر طلبك:'),
     ...lines,
-    order.allergies ? tr(lang, `Allergies: ${order.allergies}`, `الحساسية: ${order.allergies}`) : '',
-    tr(lang, `Delivery: ${order.deliveryTime && order.deliveryTime !== 'now' ? order.deliveryTime : 'as soon as possible'}`, `التوصيل: ${order.deliveryTime && order.deliveryTime !== 'now' ? order.deliveryTime : 'في أقرب وقت'}`),
+    order.allergies
+      ? tr(lang, `Allergies: ${order.allergies}`, `الحساسية: ${order.allergies}`)
+      : '',
+    tr(
+      lang,
+      `Delivery: ${order.deliveryTime && order.deliveryTime !== 'now' ? order.deliveryTime : 'as soon as possible'}`,
+      `التوصيل: ${order.deliveryTime && order.deliveryTime !== 'now' ? order.deliveryTime : 'في أقرب وقت'}`,
+    ),
     ...warnings,
-    tr(lang, 'Shall I place it? Please reply “yes” to confirm.', 'هل أؤكد الطلب؟ يرجى الرد بـ «نعم» للتأكيد.'),
+    tr(
+      lang,
+      'Shall I place it? Please reply “yes” to confirm.',
+      'هل أؤكد الطلب؟ يرجى الرد بـ «نعم» للتأكيد.',
+    ),
   ]
     .filter(Boolean)
     .join('\n');
@@ -390,28 +626,45 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
   const detected = detectLang(masked);
   const pendingLang = ctx.conversation.pending?.lang;
   const hasLetters = /\p{L}{2,}/u.test(masked);
-  const lang: Lang = hasLetters ? detected : pendingLang ?? ctx.uiLang;
+  const lang: Lang = hasLetters ? detected : (pendingLang ?? ctx.uiLang);
   const L: L = lang === 'ar' ? 'ar' : 'en';
   const name = ctx.guest.firstName;
   const k = ctx.knowledge;
 
-  const res: EngineResult = { lang, maskedText: masked, pii: found, replies: [], drafts: [], cancel: [] };
+  const res: EngineResult = {
+    lang,
+    maskedText: masked,
+    pii: found,
+    replies: [],
+    drafts: [],
+    cancel: [],
+  };
   const replies = res.replies;
 
   if (found.length) {
     replies.push({
-      text: tr(L, 'For your security I have hidden that number. Please never share card, passport or ID numbers in chat; our team will never ask for them here.', 'حرصاً على أمانك أخفيت ذلك الرقم. يرجى عدم مشاركة أرقام البطاقات أو جواز السفر أو الهوية في المحادثة؛ لن يطلبها فريقنا هنا أبداً.'),
+      text: tr(
+        L,
+        'For your security I have hidden that number. Please never share card, passport or ID numbers in chat; our team will never ask for them here.',
+        'حرصاً على أمانك أخفيت ذلك الرقم. يرجى عدم مشاركة أرقام البطاقات أو جواز السفر أو الهوية في المحادثة؛ لن يطلبها فريقنا هنا أبداً.',
+      ),
       cards: [{ type: 'privacy' }],
     });
   }
   if (lang === 'other') {
-    replies.push({ text: 'This offline demo replies in English or Arabic. The live AI version answers in your own language.' });
+    replies.push({
+      text: 'This offline demo replies in English or Arabic. The live AI version answers in your own language.',
+    });
   }
 
   // 1. Prompt injection: decline and do nothing else.
   if (containsAny(text, INJECTION)) {
     replies.push({
-      text: tr(L, `I'm here to help with your stay, ${name}, and I can't change how I work. How may I help you today?`, `أنا هنا لخدمتك خلال إقامتك يا ${name}، ولا يمكنني تغيير طريقة عملي. كيف يمكنني مساعدتك اليوم؟`),
+      text: tr(
+        L,
+        `I'm here to help with your stay, ${name}, and I can't change how I work. How may I help you today?`,
+        `أنا هنا لخدمتك خلال إقامتك يا ${name}، ولا يمكنني تغيير طريقة عملي. كيف يمكنني مساعدتك اليوم؟`,
+      ),
       chips: DEFAULT_CHIPS[L],
     });
     res.pending = null;
@@ -422,11 +675,21 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
   if (containsAny(text, EMERGENCY)) {
     res.emergency = true;
     res.pending = null;
-    const base = { category: 'Emergency', item: 'Guest emergency alert', priority: 'urgent' as const, kind: 'handover' as const, details: 'Guest reported an emergency in chat. Respond immediately.' };
+    const base = {
+      category: 'Emergency',
+      item: 'Guest emergency alert',
+      priority: 'urgent' as const,
+      kind: 'handover' as const,
+      details: 'Guest reported an emergency in chat. Respond immediately.',
+    };
     res.drafts.push({ ...base, department: 'security' }, { ...base, department: 'dutymanager' });
     res.handover = { reason: 'Emergency reported by guest', urgency: 'urgent' };
     replies.push({
-      text: tr(L, `${name}, I have alerted Security and the Duty Manager; they are on their way to room ${ctx.guest.room} now. Please follow the emergency instructions below.`, `${name}، أبلغت فريق الأمن ومدير المناوبة وهم في طريقهم إلى غرفتك ${ctx.guest.room} الآن. يرجى اتباع تعليمات الطوارئ أدناه.`),
+      text: tr(
+        L,
+        `${name}, I have alerted Security and the Duty Manager; they are on their way to room ${ctx.guest.room} now. Please follow the emergency instructions below.`,
+        `${name}، أبلغت فريق الأمن ومدير المناوبة وهم في طريقهم إلى غرفتك ${ctx.guest.room} الآن. يرجى اتباع تعليمات الطوارئ أدناه.`,
+      ),
       cards: [{ type: 'emergency' }, { type: 'tickets', ticketIds: [NEW_TICKETS] }],
     });
     return res;
@@ -446,7 +709,10 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
   const menu = menuItems(k);
   const menuEntries = menu.map((m) => ({ key: `menu:${m.id}`, kw: [m.name, m.nameAr, ...m.kw] }));
   // Outlet names compete in the same pool so "Beach Grill" is not read as "beach".
-  const outletEntries = k.outlets.map((o) => ({ key: `outlet:${o.id}`, kw: [o.name, o.nameAr, ...o.kw.filter((w) => w.split(' ').length > 1)] }));
+  const outletEntries = k.outlets.map((o) => ({
+    key: `outlet:${o.id}`,
+    kw: [o.name, o.nameAr, ...o.kw.filter((w) => w.split(' ').length > 1)],
+  }));
   const entries = [...catalogueEntries, ...menuEntries, ...outletEntries];
 
   const segMatches: Array<{ seg: string; matches: Match[] }> = segments.map((s) => {
@@ -465,11 +731,24 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
 
   if (!allMatches.length && !complaint && !refund && !otherGuest && !wantsCancel && !wantsStatus) {
     if (THANKS.test(text)) {
-      replies.push({ text: tr(L, `It's my pleasure, ${name}. I'm here whenever you need anything.`, `بكل سرور يا ${name}. أنا هنا متى احتجت أي شيء.`) });
+      replies.push({
+        text: tr(
+          L,
+          `It's my pleasure, ${name}. I'm here whenever you need anything.`,
+          `بكل سرور يا ${name}. أنا هنا متى احتجت أي شيء.`,
+        ),
+      });
       return res;
     }
     if (GREETING.test(text) && text.split(' ').length <= 4) {
-      replies.push({ text: tr(L, `Hello ${name}, welcome. How may I help you today?`, `أهلاً ${name}، مرحباً بك. كيف يمكنني مساعدتك اليوم؟`), chips: DEFAULT_CHIPS[L] });
+      replies.push({
+        text: tr(
+          L,
+          `Hello ${name}, welcome. How may I help you today?`,
+          `أهلاً ${name}، مرحباً بك. كيف يمكنني مساعدتك اليوم؟`,
+        ),
+        chips: DEFAULT_CHIPS[L],
+      });
       return res;
     }
   }
@@ -479,8 +758,22 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
     const open = ctx.tickets.filter((t) => t.status !== 'done' && t.status !== 'cancelled');
     replies.push(
       open.length
-        ? { text: tr(L, `Here is the latest on your requests, ${name}:`, `إليك آخر المستجدات على طلباتك يا ${name}:`), cards: [{ type: 'tickets', ticketIds: open.map((t) => t.id) }] }
-        : { text: tr(L, 'You have no open requests at the moment. Is there anything I can arrange for you?', 'ليس لديك طلبات مفتوحة حالياً. هل يمكنني ترتيب شيء لك؟'), chips: DEFAULT_CHIPS[L] },
+        ? {
+            text: tr(
+              L,
+              `Here is the latest on your requests, ${name}:`,
+              `إليك آخر المستجدات على طلباتك يا ${name}:`,
+            ),
+            cards: [{ type: 'tickets', ticketIds: open.map((t) => t.id) }],
+          }
+        : {
+            text: tr(
+              L,
+              'You have no open requests at the moment. Is there anything I can arrange for you?',
+              'ليس لديك طلبات مفتوحة حالياً. هل يمكنني ترتيب شيء لك؟',
+            ),
+            chips: DEFAULT_CHIPS[L],
+          },
     );
     return res;
   }
@@ -493,15 +786,33 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
     const target = keys.size ? cancellable.find((t) => names.has(t.item)) : cancellable[0];
     if (target) {
       res.cancel.push(target.id);
-      replies.push({ text: tr(L, `Done. I've cancelled “${target.item}” (${target.id}).`, `تم. ألغيت طلب «${target.item}» (${target.id}).`) });
+      replies.push({
+        text: tr(
+          L,
+          `Done. I've cancelled “${target.item}” (${target.id}).`,
+          `تم. ألغيت طلب «${target.item}» (${target.id}).`,
+        ),
+      });
     } else {
       const onTheWay = ctx.tickets.find((t) => t.status === 'on_the_way');
       replies.push({
         text: onTheWay
-          ? tr(L, `That request is already on its way, so I've asked your ambassador to help with the change.`, 'هذا الطلب في الطريق إليك بالفعل، لذلك طلبت من السفير مساعدتك في التعديل.')
-          : tr(L, "I couldn't find an open request to cancel. Could you tell me which one?", 'لم أجد طلباً مفتوحاً لإلغائه. هل يمكنك تحديده؟'),
+          ? tr(
+              L,
+              `That request is already on its way, so I've asked your ambassador to help with the change.`,
+              'هذا الطلب في الطريق إليك بالفعل، لذلك طلبت من السفير مساعدتك في التعديل.',
+            )
+          : tr(
+              L,
+              "I couldn't find an open request to cancel. Could you tell me which one?",
+              'لم أجد طلباً مفتوحاً لإلغائه. هل يمكنك تحديده؟',
+            ),
       });
-      if (onTheWay) res.handover = { reason: `Guest wants to change ${onTheWay.item} (${onTheWay.id}) already on the way`, urgency: 'normal' };
+      if (onTheWay)
+        res.handover = {
+          reason: `Guest wants to change ${onTheWay.item} (${onTheWay.id}) already on the way`,
+          urgency: 'normal',
+        };
     }
     return res;
   }
@@ -519,7 +830,10 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
     }
   };
   if (question && !request && !complaint) {
-    const kbMatches = findMatches(text, kbTopics.map((t) => ({ key: t.id, kw: t.kw })));
+    const kbMatches = findMatches(
+      text,
+      kbTopics.map((t) => ({ key: t.id, kw: t.kw })),
+    );
     if (kbMatches.length) {
       kbAnswer([...new Set(kbMatches.map((m) => m.key))].slice(0, 2));
       return res;
@@ -558,8 +872,30 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
         continue;
       }
       if (action === 'menu') {
-        const filter = item.context === 'dietary' ? ['vegan', 'vegetarian', 'gluten free', 'gluten-free', 'dairy free', 'nut free', 'halal', 'نباتي', 'حلال'].find((f) => text.includes(normalize(f))) : undefined;
-        if (!menuCards.length) menuCards.push({ type: 'menu', category: item.context === 'kids' || item.context === 'breakfast' ? item.context : undefined, filter: filter?.replace(/[- ]/g, '_').replace('نباتي', 'vegetarian').replace('حلال', 'halal') });
+        const filter =
+          item.context === 'dietary'
+            ? [
+                'vegan',
+                'vegetarian',
+                'gluten free',
+                'gluten-free',
+                'dairy free',
+                'nut free',
+                'halal',
+                'نباتي',
+                'حلال',
+              ].find((f) => text.includes(normalize(f)))
+            : undefined;
+        if (!menuCards.length)
+          menuCards.push({
+            type: 'menu',
+            category:
+              item.context === 'kids' || item.context === 'breakfast' ? item.context : undefined,
+            filter: filter
+              ?.replace(/[- ]/g, '_')
+              .replace('نباتي', 'vegetarian')
+              .replace('حلال', 'halal'),
+          });
         continue;
       }
       if (action === 'restaurant' || action === 'spa' || action === 'transport') {
@@ -568,15 +904,28 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
         let booking: BookingDraft = { kind };
         if (kind === 'transport') {
           const ctxType = item.context ?? 'taxi';
-          booking.outlet = ctxType === 'airport' ? (/\b(from the airport|arriv|pick (me|us) up from)\b|من المطار/.test(text) ? 'airport_arrival' : 'airport_departure') : ctxType;
-          if (ctxType === 'airport') booking.destination = booking.outlet === 'airport_arrival' ? 'Hotel' : 'Airport';
+          booking.outlet =
+            ctxType === 'airport'
+              ? /\b(from the airport|arriv|pick (me|us) up from)\b|من المطار/.test(text)
+                ? 'airport_arrival'
+                : 'airport_departure'
+              : ctxType;
+          if (ctxType === 'airport')
+            booking.destination = booking.outlet === 'airport_arrival' ? 'Hotel' : 'Airport';
           if (booking.outlet === 'airport_arrival') booking.pickup = 'Airport';
         }
         if (kind === 'spa') booking.outlet = resolveTreatment(text, k, item.context);
         if (item.context === 'beach or terrace table') booking.notes = 'Beach or terrace table';
         booking = fillBooking(booking, masked, k);
-        const occasion = ['birthday', 'anniversary', 'honeymoon', 'عيد ميلاد', 'ذكري'].find((o) => text.includes(o));
-        if (occasion && kind === 'restaurant') booking.occasion = /عيد/.test(occasion) ? 'Birthday' : /ذكر/.test(occasion) ? 'Anniversary' : occasion[0]!.toUpperCase() + occasion.slice(1);
+        const occasion = ['birthday', 'anniversary', 'honeymoon', 'عيد ميلاد', 'ذكري'].find((o) =>
+          text.includes(o),
+        );
+        if (occasion && kind === 'restaurant')
+          booking.occasion = /عيد/.test(occasion)
+            ? 'Birthday'
+            : /ذكر/.test(occasion)
+              ? 'Anniversary'
+              : occasion[0]!.toUpperCase() + occasion.slice(1);
         bookings.push({ booking });
         continue;
       }
@@ -585,10 +934,22 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
         continue;
       }
       // Plain service ticket.
-      const hint = item.hints ? Object.entries(item.hints).find(([w]) => findKeyword(seg, normalize(w)).length || seg.includes(normalize(w)))?.[1] : undefined;
+      const hint = item.hints
+        ? Object.entries(item.hints).find(
+            ([w]) => findKeyword(seg, normalize(w)).length || seg.includes(normalize(w)),
+          )?.[1]
+        : undefined;
       const pt = parseTime(seg);
-      const preferred = item.time ? (pt.time || pt.date ? fmtTime(pt.time, pt.date, 'en') : undefined) : undefined;
-      const quantity = item.qty ? (m.impliedQty ?? quantityNear(seg, m.start, m.end) ?? (item.qty === 'default' ? 1 : undefined)) : undefined;
+      const preferred = item.time
+        ? pt.time || pt.date
+          ? fmtTime(pt.time, pt.date, 'en')
+          : undefined
+        : undefined;
+      const quantity = item.qty
+        ? (m.impliedQty ??
+          quantityNear(seg, m.start, m.end) ??
+          (item.qty === 'default' ? 1 : undefined))
+        : undefined;
       const draft = draftFromItem(item, {
         quantity,
         details: [hint, item.context].filter(Boolean).join(' · ') || undefined,
@@ -615,9 +976,16 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
     const dept = sensitive?.dept ?? 'frontoffice';
     res.drafts.push({
       department: dept,
-      alsoNotify: sensitive?.also ?? (sensitive?.sensitive === 'security' ? 'dutymanager' : undefined),
+      alsoNotify:
+        sensitive?.also ?? (sensitive?.sensitive === 'security' ? 'dutymanager' : undefined),
       category: sensitive ? sectionName(sensitive) : 'Guest Relations',
-      item: sensitive ? sensitive.en : complaint ? 'Guest complaint' : refund ? 'Refund / compensation request' : 'Matter concerning another guest',
+      item: sensitive
+        ? sensitive.en
+        : complaint
+          ? 'Guest complaint'
+          : refund
+            ? 'Refund / compensation request'
+            : 'Matter concerning another guest',
       itemKey: sensitive?.key,
       details: handoverReasons.join(' · '),
       priority: urgency,
@@ -631,34 +999,69 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
   // Compose replies -------------------------------------------------------
   if (complaint || refund) {
     replies.push({
-      text: tr(L, `I'm truly sorry, ${name}. I've asked your ambassador, ${ctx.guest.ambassador}, to look after this personally and contact you right away.`, `أعتذر بشدة يا ${name}. طلبت من ${ctx.guest.ambassador} من فريق سفراء التجربة متابعة الأمر شخصياً وللتواصل معك فوراً.`),
+      text: tr(
+        L,
+        `I'm truly sorry, ${name}. I've asked your ambassador, ${ctx.guest.ambassador}, to look after this personally and contact you right away.`,
+        `أعتذر بشدة يا ${name}. طلبت من ${ctx.guest.ambassador} من فريق سفراء التجربة متابعة الأمر شخصياً وللتواصل معك فوراً.`,
+      ),
     });
   }
   if (sensitive?.sensitive === 'medical') {
     replies.push({
-      text: tr(L, `${name}, I've alerted our team and the Duty Manager; a colleague will call you within minutes. If this is an emergency, please follow the guidance below now.`, `${name}، أبلغت فريقنا ومدير المناوبة، وسيتصل بك زميل خلال دقائق. إذا كانت حالة طارئة فيرجى اتباع الإرشادات أدناه الآن.`),
+      text: tr(
+        L,
+        `${name}, I've alerted our team and the Duty Manager; a colleague will call you within minutes. If this is an emergency, please follow the guidance below now.`,
+        `${name}، أبلغت فريقنا ومدير المناوبة، وسيتصل بك زميل خلال دقائق. إذا كانت حالة طارئة فيرجى اتباع الإرشادات أدناه الآن.`,
+      ),
       cards: [{ type: 'emergency' }],
     });
   } else if (sensitive?.sensitive === 'security') {
     replies.push({
-      text: tr(L, `${name}, I've alerted our Security team and the Duty Manager; someone will be with you shortly. If you are in immediate danger, please call the emergency extension on your room phone.`, `${name}، أبلغت فريق الأمن ومدير المناوبة وسيصل إليك أحدهم قريباً. إذا كنت في خطر مباشر فيرجى الاتصال برقم الطوارئ من هاتف الغرفة.`),
+      text: tr(
+        L,
+        `${name}, I've alerted our Security team and the Duty Manager; someone will be with you shortly. If you are in immediate danger, please call the emergency extension on your room phone.`,
+        `${name}، أبلغت فريق الأمن ومدير المناوبة وسيصل إليك أحدهم قريباً. إذا كنت في خطر مباشر فيرجى الاتصال برقم الطوارئ من هاتف الغرفة.`,
+      ),
     });
   } else if (sensitive) {
     replies.push({
-      text: sensitive.key === 'ambassador'
-        ? tr(L, `Of course. I've let ${ctx.guest.ambassador}, your ambassador, know; they will join this chat shortly.`, `بالتأكيد. أبلغت ${ctx.guest.ambassador} من فريق سفراء التجربة، وسينضم إلى المحادثة قريباً.`)
-        : tr(L, `I've passed this to your ambassador, ${ctx.guest.ambassador}, who will take care of it personally.`, `أحلت هذا إلى ${ctx.guest.ambassador} من فريق سفراء التجربة، لمتابعته شخصياً.`),
+      text:
+        sensitive.key === 'ambassador'
+          ? tr(
+              L,
+              `Of course. I've let ${ctx.guest.ambassador}, your ambassador, know; they will join this chat shortly.`,
+              `بالتأكيد. أبلغت ${ctx.guest.ambassador} من فريق سفراء التجربة، وسينضم إلى المحادثة قريباً.`,
+            )
+          : tr(
+              L,
+              `I've passed this to your ambassador, ${ctx.guest.ambassador}, who will take care of it personally.`,
+              `أحلت هذا إلى ${ctx.guest.ambassador} من فريق سفراء التجربة، لمتابعته شخصياً.`,
+            ),
     });
   } else if (otherGuest && !complaint) {
-    replies.push({ text: tr(L, `Thank you, ${name}. Matters involving other guests are handled personally by our team, so I've passed this to your ambassador.`, `شكراً ${name}. نتعامل مع الأمور المتعلقة بالنزلاء الآخرين بشكل شخصي، لذلك أحلت هذا إلى السفير.`) });
+    replies.push({
+      text: tr(
+        L,
+        `Thank you, ${name}. Matters involving other guests are handled personally by our team, so I've passed this to your ambassador.`,
+        `شكراً ${name}. نتعامل مع الأمور المتعلقة بالنزلاء الآخرين بشكل شخصي، لذلك أحلت هذا إلى السفير.`,
+      ),
+    });
   }
 
   if (ticketDrafts.length) {
     const lead = complaint
       ? tr(L, 'I have also logged the issue as a priority:', 'وسجلت المشكلة كأولوية:')
       : ticketDrafts.length > 1
-        ? tr(L, `Of course, ${name}. I've arranged the following:`, `بالتأكيد يا ${name}. رتبت لك ما يلي:`)
-        : tr(L, `Of course, ${name}. I've sent this to our ${ticketDrafts[0]!.department === 'engineering' ? 'engineering' : 'team'} and will update you here.`, `بالتأكيد يا ${name}. أرسلت طلبك إلى الفريق المختص وسأبلغك بالمستجدات هنا.`);
+        ? tr(
+            L,
+            `Of course, ${name}. I've arranged the following:`,
+            `بالتأكيد يا ${name}. رتبت لك ما يلي:`,
+          )
+        : tr(
+            L,
+            `Of course, ${name}. I've sent this to our ${ticketDrafts[0]!.department === 'engineering' ? 'engineering' : 'team'} and will update you here.`,
+            `بالتأكيد يا ${name}. أرسلت طلبك إلى الفريق المختص وسأبلغك بالمستجدات هنا.`,
+          );
     replies.push({ text: lead, cards: [{ type: 'tickets', ticketIds: [NEW_TICKETS] }] });
   } else if (res.drafts.length) {
     // Handover tickets only: show their status too.
@@ -667,7 +1070,13 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
   }
 
   // Information answers only when asked, not as a side effect of a request.
-  const actionable = ticketDrafts.length || bookings.length || order.length || sensitive || asks.length || timeAsks.length;
+  const actionable =
+    ticketDrafts.length ||
+    bookings.length ||
+    order.length ||
+    sensitive ||
+    asks.length ||
+    timeAsks.length;
   if (kbIds.length && (question || !actionable)) kbAnswer([...new Set(kbIds)].slice(0, 2));
   else if (!actionable && !kbIds.length && question) {
     const outletHit = allMatches.find((m) => m.key.startsWith('outlet:'));
@@ -682,28 +1091,58 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
       allergies: allergyList.length ? allergyList.join(', ') : undefined,
       deliveryTime: pt.time && pt.time !== 'now' ? fmtTime(pt.time, pt.date, 'en') : undefined,
     };
-    replies.push({ text: orderReadBack(dining, k, L), cards: [{ type: 'order_confirm', order: dining, state: 'pending' }], chips: L === 'ar' ? ['نعم', 'تعديل'] : ['Yes, place it', 'Change'] });
+    replies.push({
+      text: orderReadBack(dining, k, L),
+      cards: [{ type: 'order_confirm', order: dining, state: 'pending' }],
+      chips: L === 'ar' ? ['نعم', 'تعديل'] : ['Yes, place it', 'Change'],
+    });
     res.pending = { type: 'order_confirm', order: dining, lang };
   } else if (menuCards.length) {
-    replies.push({ text: tr(L, 'Here is our in-room dining menu. Tap to add items, and tell me about any allergies.', 'هذه قائمة الطعام في الغرفة. اضغط لإضافة الأصناف، وأخبرني بأي حساسية غذائية.'), cards: menuCards });
+    replies.push({
+      text: tr(
+        L,
+        'Here is our in-room dining menu. Tap to add items, and tell me about any allergies.',
+        'هذه قائمة الطعام في الغرفة. اضغط لإضافة الأصناف، وأخبرني بأي حساسية غذائية.',
+      ),
+      cards: menuCards,
+    });
   }
 
   for (const { booking } of bookings) {
     const missing = missingBookingField(booking);
     if (!missing) {
       res.drafts.push(bookingDraftToTicket(booking, k));
-      replies.push({ text: bookingConfirmation(booking, k, L), cards: [{ type: 'booking', booking, state: 'done' }, { type: 'tickets', ticketIds: [NEW_TICKETS] }] });
+      replies.push({
+        text: bookingConfirmation(booking, k, L),
+        cards: [
+          { type: 'booking', booking, state: 'done' },
+          { type: 'tickets', ticketIds: [NEW_TICKETS] },
+        ],
+      });
     } else if (res.pending === undefined || res.pending === null) {
       const q = bookingQuestion(booking, missing, k, L);
-      replies.push({ text: q.text, chips: q.chips, cards: [{ type: 'booking', booking, state: 'pending' }] });
+      replies.push({
+        text: q.text,
+        chips: q.chips,
+        cards: [{ type: 'booking', booking, state: 'pending' }],
+      });
       res.pending = { type: 'booking', booking, asking: missing, lang };
     } else {
-      replies.push({ text: tr(L, 'You can complete this booking here:', 'يمكنك إكمال هذا الحجز هنا:'), cards: [{ type: 'booking', booking, state: 'pending' }] });
+      replies.push({
+        text: tr(L, 'You can complete this booking here:', 'يمكنك إكمال هذا الحجز هنا:'),
+        cards: [{ type: 'booking', booking, state: 'pending' }],
+      });
     }
   }
 
   if (verify.length && !res.pending) {
-    replies.push({ text: tr(L, `For your privacy, could you confirm the surname on the reservation for room ${ctx.guest.room}?`, `حفاظاً على خصوصيتك، هل يمكنك تأكيد اسم العائلة المسجل في حجز الغرفة ${ctx.guest.room}؟`) });
+    replies.push({
+      text: tr(
+        L,
+        `For your privacy, could you confirm the surname on the reservation for room ${ctx.guest.room}?`,
+        `حفاظاً على خصوصيتك، هل يمكنك تأكيد اسم العائلة المسجل في حجز الغرفة ${ctx.guest.room}؟`,
+      ),
+    });
     res.pending = { type: 'verify', draft: verify[0]!, lang };
   }
 
@@ -714,43 +1153,87 @@ export function respond(raw: string, ctx: EngineContext): EngineResult {
     const label = item ? itemName(item, L).toLowerCase() : first.item.toLowerCase();
     replies.push(
       isTime
-        ? { text: tr(L, `What time would you like the ${label}?`, `في أي وقت تود ${label}؟`), chips: ['06:30', '07:00', '07:30', '08:00'] }
-        : { text: tr(L, `How many ${label.replace(/^extra /, '')} would you like?`, `كم ${label} تحتاج؟`), chips: ['1', '2', '3', '4'] },
+        ? {
+            text: tr(L, `What time would you like the ${label}?`, `في أي وقت تود ${label}؟`),
+            chips: ['06:30', '07:00', '07:30', '08:00'],
+          }
+        : {
+            text: tr(
+              L,
+              `How many ${label.replace(/^extra /, '')} would you like?`,
+              `كم ${label} تحتاج؟`,
+            ),
+            chips: ['1', '2', '3', '4'],
+          },
     );
-    res.pending = { type: isTime ? 'time' : 'quantity', draft: first, rest: [...asks, ...timeAsks].slice(1), lang };
+    res.pending = {
+      type: isTime ? 'time' : 'quantity',
+      draft: first,
+      rest: [...asks, ...timeAsks].slice(1),
+      lang,
+    };
   }
 
-  if (!replies.length || (replies.length === (found.length ? 1 : 0) + (lang === 'other' ? 1 : 0))) {
+  if (!replies.length || replies.length === (found.length ? 1 : 0) + (lang === 'other' ? 1 : 0)) {
     if (question || !hasLetters) {
-      res.drafts.push({ department: 'frontoffice', category: 'Guest Relations', item: 'Guest question to answer', details: 'Concierge could not answer from the knowledge base.', priority: 'normal', kind: 'handover' });
+      res.drafts.push({
+        department: 'frontoffice',
+        category: 'Guest Relations',
+        item: 'Guest question to answer',
+        details: 'Concierge could not answer from the knowledge base.',
+        priority: 'normal',
+        kind: 'handover',
+      });
       replies.push({
-        text: tr(L, `I'm sorry, ${name}, I don't have that information yet, and I'd rather not guess. I've passed your question to your ambassador, ${ctx.guest.ambassador}, who will reply here shortly.`, `عذراً يا ${name}، لا تتوفر لدي هذه المعلومة حالياً ولا أريد التخمين. أحلت سؤالك إلى ${ctx.guest.ambassador} من فريق سفراء التجربة للرد عليك هنا قريباً.`),
+        text: tr(
+          L,
+          `I'm sorry, ${name}, I don't have that information yet, and I'd rather not guess. I've passed your question to your ambassador, ${ctx.guest.ambassador}, who will reply here shortly.`,
+          `عذراً يا ${name}، لا تتوفر لدي هذه المعلومة حالياً ولا أريد التخمين. أحلت سؤالك إلى ${ctx.guest.ambassador} من فريق سفراء التجربة للرد عليك هنا قريباً.`,
+        ),
         cards: [{ type: 'tickets', ticketIds: [NEW_TICKETS] }],
       });
     } else {
       replies.push({
-        text: tr(L, `I want to get this exactly right, ${name}. Could you tell me a little more, or choose an option below? You can also speak to your ambassador at any time.`, `أريد أن أخدمك بدقة يا ${name}. هل يمكنك توضيح طلبك قليلاً، أو اختيار أحد الخيارات أدناه؟ ويمكنك التحدث إلى السفير في أي وقت.`),
-        chips: [...DEFAULT_CHIPS[L].slice(0, 4), L === 'ar' ? 'التحدث إلى السفير' : 'Speak to my ambassador'],
+        text: tr(
+          L,
+          `I want to get this exactly right, ${name}. Could you tell me a little more, or choose an option below? You can also speak to your ambassador at any time.`,
+          `أريد أن أخدمك بدقة يا ${name}. هل يمكنك توضيح طلبك قليلاً، أو اختيار أحد الخيارات أدناه؟ ويمكنك التحدث إلى السفير في أي وقت.`,
+        ),
+        chips: [
+          ...DEFAULT_CHIPS[L].slice(0, 4),
+          L === 'ar' ? 'التحدث إلى السفير' : 'Speak to my ambassador',
+        ],
       });
     }
   }
   return res;
 }
 
-function resolvePending(raw: string, text: string, pending: PendingState, ctx: EngineContext, res: EngineResult, L: L): boolean {
+function resolvePending(
+  raw: string,
+  text: string,
+  pending: PendingState,
+  ctx: EngineContext,
+  res: EngineResult,
+  L: L,
+): boolean {
   const replies = res.replies;
   const k = ctx.knowledge;
   if (pending.type === 'quantity' || pending.type === 'time') {
     const draft = { ...pending.draft };
     if (pending.type === 'quantity') {
-      const n = wordToNumber(text.split(' ')[0] ?? '') ?? quantityNear(text, text.length, text.length) ?? text.match(/\d+/)?.[0];
+      const n =
+        wordToNumber(text.split(' ')[0] ?? '') ??
+        quantityNear(text, text.length, text.length) ??
+        text.match(/\d+/)?.[0];
       const qty = typeof n === 'string' ? Number(n) : n;
       if (!qty) return false;
       draft.quantity = Math.min(qty, 20);
     } else {
       const pt = parseTime(raw);
       const bare = text.match(/^(\d{1,2})(?::(\d{2}))?$/);
-      const time = pt.time ?? (bare ? `${bare[1]!.padStart(2, '0')}:${bare[2] ?? '00'}` : undefined);
+      const time =
+        pt.time ?? (bare ? `${bare[1]!.padStart(2, '0')}:${bare[2] ?? '00'}` : undefined);
       if (!time) return false;
       draft.preferredTime = fmtTime(time, pt.date, 'en');
     }
@@ -758,7 +1241,11 @@ function resolvePending(raw: string, text: string, pending: PendingState, ctx: E
     const item = draft.itemKey ? ITEM_BY_KEY[draft.itemKey] : undefined;
     const label = item ? itemName(item, L) : draft.item;
     replies.push({
-      text: tr(L, `Thank you. ${draft.quantity && pending.type === 'quantity' ? `${draft.quantity} × ` : ''}${label} ${pending.type === 'time' ? `at ${draft.preferredTime} ` : ''}is on its way to our team.`, `شكراً. تم إرسال طلب ${label}${draft.quantity && pending.type === 'quantity' ? ` (${draft.quantity})` : ''} إلى الفريق.`),
+      text: tr(
+        L,
+        `Thank you. ${draft.quantity && pending.type === 'quantity' ? `${draft.quantity} × ` : ''}${label} ${pending.type === 'time' ? `at ${draft.preferredTime} ` : ''}is on its way to our team.`,
+        `شكراً. تم إرسال طلب ${label}${draft.quantity && pending.type === 'quantity' ? ` (${draft.quantity})` : ''} إلى الفريق.`,
+      ),
       cards: [{ type: 'tickets', ticketIds: [NEW_TICKETS] }],
     });
     const [next, ...rest] = pending.rest;
@@ -766,7 +1253,12 @@ function resolvePending(raw: string, text: string, pending: PendingState, ctx: E
       const nItem = next.itemKey ? ITEM_BY_KEY[next.itemKey] : undefined;
       const nLabel = nItem ? itemName(nItem, L).toLowerCase() : next.item.toLowerCase();
       const isTime = nItem?.time === 'ask' && !nItem.qty;
-      replies.push({ text: isTime ? tr(L, `And what time would you like the ${nLabel}?`, `وفي أي وقت تود ${nLabel}؟`) : tr(L, `And how many ${nLabel.replace(/^extra /, '')}?`, `وكم ${nLabel}؟`), chips: isTime ? ['06:30', '07:00', '07:30'] : ['1', '2', '3', '4'] });
+      replies.push({
+        text: isTime
+          ? tr(L, `And what time would you like the ${nLabel}?`, `وفي أي وقت تود ${nLabel}؟`)
+          : tr(L, `And how many ${nLabel.replace(/^extra /, '')}?`, `وكم ${nLabel}؟`),
+        chips: isTime ? ['06:30', '07:00', '07:30'] : ['1', '2', '3', '4'],
+      });
       res.pending = { type: isTime ? 'time' : 'quantity', draft: next, rest, lang: pending.lang };
     } else res.pending = null;
     return true;
@@ -777,22 +1269,42 @@ function resolvePending(raw: string, text: string, pending: PendingState, ctx: E
       res.completeCardMessageId = pending.messageId;
       res.pending = null;
       replies.push({
-        text: tr(L, `Your order is placed, ${ctx.guest.firstName}. Our in-room dining team has it now; I'll let you know when it's on the way. It will be charged to room ${ctx.guest.room} (${ctx.guest.lastName}).`, `تم تأكيد طلبك يا ${ctx.guest.firstName}. فريق خدمة الطعام في الغرفة يعمل عليه الآن، وسأبلغك عندما يكون في الطريق. سيُضاف إلى حساب الغرفة ${ctx.guest.room}.`),
+        text: tr(
+          L,
+          `Your order is placed, ${ctx.guest.firstName}. Our in-room dining team has it now; I'll let you know when it's on the way. It will be charged to room ${ctx.guest.room} (${ctx.guest.lastName}).`,
+          `تم تأكيد طلبك يا ${ctx.guest.firstName}. فريق خدمة الطعام في الغرفة يعمل عليه الآن، وسأبلغك عندما يكون في الطريق. سيُضاف إلى حساب الغرفة ${ctx.guest.room}.`,
+        ),
         cards: [{ type: 'tickets', ticketIds: [NEW_TICKETS] }],
       });
       return true;
     }
     if (isNegative(raw)) {
       res.pending = null;
-      replies.push({ text: tr(L, 'Of course. What would you like to change? You can also pick from the menu.', 'بالتأكيد. ما الذي تود تعديله؟ يمكنك أيضاً الاختيار من القائمة.'), cards: [{ type: 'menu' }] });
+      replies.push({
+        text: tr(
+          L,
+          'Of course. What would you like to change? You can also pick from the menu.',
+          'بالتأكيد. ما الذي تود تعديله؟ يمكنك أيضاً الاختيار من القائمة.',
+        ),
+        cards: [{ type: 'menu' }],
+      });
       return true;
     }
     // Adding allergies to a pending order keeps the order open.
     const extra = detectAllergies(text);
     if (extra.length) {
-      const order = { ...pending.order, allergies: [...new Set([...(pending.order.allergies?.split(', ') ?? []), ...extra])].join(', ') };
+      const order = {
+        ...pending.order,
+        allergies: [...new Set([...(pending.order.allergies?.split(', ') ?? []), ...extra])].join(
+          ', ',
+        ),
+      };
       res.pending = { ...pending, order, messageId: undefined };
-      replies.push({ text: orderReadBack(order, k, L), cards: [{ type: 'order_confirm', order, state: 'pending' }], chips: L === 'ar' ? ['نعم', 'تعديل'] : ['Yes, place it', 'Change'] });
+      replies.push({
+        text: orderReadBack(order, k, L),
+        cards: [{ type: 'order_confirm', order, state: 'pending' }],
+        chips: L === 'ar' ? ['نعم', 'تعديل'] : ['Yes, place it', 'Change'],
+      });
       return true;
     }
     return false;
@@ -806,7 +1318,10 @@ function resolvePending(raw: string, text: string, pending: PendingState, ctx: E
       res.drafts.push(bookingDraftToTicket(booking, k));
       res.completeCardMessageId = pending.messageId;
       res.pending = null;
-      replies.push({ text: bookingConfirmation(booking, k, L), cards: [{ type: 'tickets', ticketIds: [NEW_TICKETS] }] });
+      replies.push({
+        text: bookingConfirmation(booking, k, L),
+        cards: [{ type: 'tickets', ticketIds: [NEW_TICKETS] }],
+      });
       return true;
     }
     const q = bookingQuestion(booking, missing, k, L);
@@ -820,13 +1335,27 @@ function resolvePending(raw: string, text: string, pending: PendingState, ctx: E
     if (text.includes(surname)) {
       res.drafts.push(pending.draft);
       replies.push({
-        text: tr(L, `Thank you, ${ctx.guest.firstName}, that matches our records. I've asked the front office to send it to the email on your reservation.`, `شكراً ${ctx.guest.firstName}، البيانات مطابقة. طلبت من المكتب الأمامي إرسالها إلى بريدك الإلكتروني المسجل.`),
+        text: tr(
+          L,
+          `Thank you, ${ctx.guest.firstName}, that matches our records. I've asked the front office to send it to the email on your reservation.`,
+          `شكراً ${ctx.guest.firstName}، البيانات مطابقة. طلبت من المكتب الأمامي إرسالها إلى بريدك الإلكتروني المسجل.`,
+        ),
         cards: [{ type: 'tickets', ticketIds: [NEW_TICKETS] }],
       });
     } else {
       res.handover = { reason: 'Billing request: surname did not match', urgency: 'normal' };
-      res.drafts.push({ ...pending.draft, kind: 'handover', details: 'Surname did not match reservation. Verify in person.' });
-      replies.push({ text: tr(L, "That doesn't match our records, so for your security I've asked your ambassador to help you in person.", 'البيانات غير مطابقة لسجلاتنا، لذلك حرصاً على أمانك طلبت من السفير مساعدتك شخصياً.') });
+      res.drafts.push({
+        ...pending.draft,
+        kind: 'handover',
+        details: 'Surname did not match reservation. Verify in person.',
+      });
+      replies.push({
+        text: tr(
+          L,
+          "That doesn't match our records, so for your security I've asked your ambassador to help you in person.",
+          'البيانات غير مطابقة لسجلاتنا، لذلك حرصاً على أمانك طلبت من السفير مساعدتك شخصياً.',
+        ),
+      });
     }
     return true;
   }

@@ -8,7 +8,10 @@ export function Logo({ className = 'h-10' }: { className?: string }) {
   const [failed, setFailed] = useState(false);
   if (failed)
     return (
-      <span className={`inline-flex items-center font-display text-2xl tracking-wide ${className}`} aria-label="SO/ Hotels & Resorts">
+      <span
+        className={`inline-flex items-center font-display text-2xl tracking-wide ${className}`}
+        aria-label="SO/ Hotels & Resorts"
+      >
         SO/
       </span>
     );

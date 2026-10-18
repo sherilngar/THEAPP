@@ -32,7 +32,17 @@
       "hours": "Breakfast 06:30–10:30 · Lunch 12:30–15:30 · Dinner 18:30–22:30",
       "dressCode": "Smart casual",
       "reservations": true,
-      "kw": ["all-day restaurant", "all day restaurant", "all-day dining", "buffet", "breakfast", "مطعم اليوم الكامل", "الفطور", "فطور", "البوفيه"]
+      "kw": [
+        "all-day restaurant",
+        "all day restaurant",
+        "all-day dining",
+        "buffet",
+        "breakfast",
+        "مطعم اليوم الكامل",
+        "الفطور",
+        "فطور",
+        "البوفيه"
+      ]
     },
     {
       "id": "grill",
@@ -44,7 +54,15 @@
       "hours": "Lunch 12:30–16:00 · Dinner 18:30–23:00",
       "dressCode": "Smart casual; beach and terrace tables available",
       "reservations": true,
-      "kw": ["beach grill", "the grill", "grill", "seafood", "مشويات الشاطئ", "المشويات", "مأكولات بحرية"]
+      "kw": [
+        "beach grill",
+        "the grill",
+        "grill",
+        "seafood",
+        "مشويات الشاطئ",
+        "المشويات",
+        "مأكولات بحرية"
+      ]
     },
     {
       "id": "lounge",
@@ -76,10 +94,26 @@
     "hours": "10:00–22:00",
     "inRoomMassage": "Available on request, subject to therapist availability.",
     "treatments": [
-      { "id": "signature", "name": "Signature massage · 60 min", "nameAr": "المساج المميز · ٦٠ دقيقة" },
-      { "id": "deeptissue", "name": "Deep tissue massage · 60 min", "nameAr": "مساج الأنسجة العميقة · ٦٠ دقيقة" },
-      { "id": "hotstone", "name": "Hot stone massage · 75 min", "nameAr": "مساج الأحجار الساخنة · ٧٥ دقيقة" },
-      { "id": "facial", "name": "Hydrating facial · 50 min", "nameAr": "علاج الوجه المرطب · ٥٠ دقيقة" },
+      {
+        "id": "signature",
+        "name": "Signature massage · 60 min",
+        "nameAr": "المساج المميز · ٦٠ دقيقة"
+      },
+      {
+        "id": "deeptissue",
+        "name": "Deep tissue massage · 60 min",
+        "nameAr": "مساج الأنسجة العميقة · ٦٠ دقيقة"
+      },
+      {
+        "id": "hotstone",
+        "name": "Hot stone massage · 75 min",
+        "nameAr": "مساج الأحجار الساخنة · ٧٥ دقيقة"
+      },
+      {
+        "id": "facial",
+        "name": "Hydrating facial · 50 min",
+        "nameAr": "علاج الوجه المرطب · ٥٠ دقيقة"
+      },
       { "id": "couples", "name": "Couples massage · 60 min", "nameAr": "مساج للزوجين · ٦٠ دقيقة" }
     ]
   },
@@ -120,11 +154,51 @@
         "name": "Breakfast",
         "nameAr": "الفطور",
         "items": [
-          { "id": "continental", "name": "Continental breakfast", "nameAr": "فطور كونتيننتال", "tags": ["vegetarian"], "contains": ["gluten", "dairy"], "modifiers": [], "kw": ["continental"] },
-          { "id": "eggs", "name": "Eggs your way", "nameAr": "بيض حسب رغبتك", "tags": ["vegetarian", "gluten_free", "halal", "nut_free"], "contains": ["egg"], "modifiers": ["Fried", "Scrambled", "Poached", "Omelette"], "kw": ["eggs", "omelette", "omelet", "بيض", "أومليت"] },
-          { "id": "arabic", "name": "Arabic breakfast", "nameAr": "فطور عربي", "tags": ["vegetarian", "halal"], "contains": ["gluten", "dairy", "sesame"], "modifiers": [], "kw": ["arabic breakfast", "فطور عربي"] },
-          { "id": "pancakes", "name": "Pancakes with berries", "nameAr": "بان كيك بالتوت", "tags": ["vegetarian", "nut_free"], "contains": ["gluten", "dairy", "egg"], "modifiers": ["Maple syrup", "Honey"], "kw": ["pancakes", "pancake", "بان كيك"] },
-          { "id": "fruitplate", "name": "Seasonal fruit plate", "nameAr": "طبق فواكه موسمية", "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"], "contains": [], "modifiers": [], "kw": ["fruit plate", "طبق فواكه"] }
+          {
+            "id": "continental",
+            "name": "Continental breakfast",
+            "nameAr": "فطور كونتيننتال",
+            "tags": ["vegetarian"],
+            "contains": ["gluten", "dairy"],
+            "modifiers": [],
+            "kw": ["continental"]
+          },
+          {
+            "id": "eggs",
+            "name": "Eggs your way",
+            "nameAr": "بيض حسب رغبتك",
+            "tags": ["vegetarian", "gluten_free", "halal", "nut_free"],
+            "contains": ["egg"],
+            "modifiers": ["Fried", "Scrambled", "Poached", "Omelette"],
+            "kw": ["eggs", "omelette", "omelet", "بيض", "أومليت"]
+          },
+          {
+            "id": "arabic",
+            "name": "Arabic breakfast",
+            "nameAr": "فطور عربي",
+            "tags": ["vegetarian", "halal"],
+            "contains": ["gluten", "dairy", "sesame"],
+            "modifiers": [],
+            "kw": ["arabic breakfast", "فطور عربي"]
+          },
+          {
+            "id": "pancakes",
+            "name": "Pancakes with berries",
+            "nameAr": "بان كيك بالتوت",
+            "tags": ["vegetarian", "nut_free"],
+            "contains": ["gluten", "dairy", "egg"],
+            "modifiers": ["Maple syrup", "Honey"],
+            "kw": ["pancakes", "pancake", "بان كيك"]
+          },
+          {
+            "id": "fruitplate",
+            "name": "Seasonal fruit plate",
+            "nameAr": "طبق فواكه موسمية",
+            "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"],
+            "contains": [],
+            "modifiers": [],
+            "kw": ["fruit plate", "طبق فواكه"]
+          }
         ]
       },
       {
@@ -132,15 +206,87 @@
         "name": "All day",
         "nameAr": "طوال اليوم",
         "items": [
-          { "id": "club", "name": "Club sandwich", "nameAr": "كلوب ساندويتش", "tags": ["halal", "nut_free"], "contains": ["gluten", "egg"], "modifiers": ["White bread", "Brown bread", "Gluten-free bread", "No mayonnaise"], "kw": ["club sandwich", "sandwich", "كلوب ساندويتش", "ساندويتش", "سندويش"] },
-          { "id": "caesar", "name": "Caesar salad", "nameAr": "سلطة سيزر", "tags": ["halal"], "contains": ["gluten", "dairy", "egg", "fish"], "modifiers": ["Add chicken", "Add prawns", "Dressing on the side"], "kw": ["caesar salad", "caesar", "salad", "سلطة سيزر", "سلطة"] },
-          { "id": "burger", "name": "Beef burger", "nameAr": "برجر لحم", "tags": ["halal", "nut_free"], "contains": ["gluten", "dairy"], "modifiers": ["Medium", "Well done", "No cheese", "Gluten-free bun"], "kw": ["beef burger", "burger", "hamburger", "برجر", "برغر"] },
-          { "id": "pizza", "name": "Margherita pizza", "nameAr": "بيتزا مارجريتا", "tags": ["vegetarian", "halal", "nut_free"], "contains": ["gluten", "dairy"], "modifiers": ["Extra cheese", "Add olives"], "kw": ["margherita", "pizza", "بيتزا"] },
-          { "id": "salmon", "name": "Grilled salmon", "nameAr": "سلمون مشوي", "tags": ["gluten_free", "halal", "nut_free", "dairy_free"], "contains": ["fish"], "modifiers": ["With vegetables", "With rice"], "kw": ["salmon", "سلمون"] },
-          { "id": "mezze", "name": "Mezze platter", "nameAr": "طبق مقبلات", "tags": ["vegetarian", "vegan", "halal", "dairy_free"], "contains": ["gluten", "sesame"], "modifiers": [], "kw": ["mezze", "hummus", "مقبلات", "حمص", "متبل"] },
-          { "id": "biryani", "name": "Chicken biryani", "nameAr": "برياني دجاج", "tags": ["halal", "gluten_free"], "contains": ["dairy", "nuts"], "modifiers": ["Mild", "Medium", "Spicy"], "kw": ["biryani", "برياني"] },
-          { "id": "curry", "name": "Vegetable curry", "nameAr": "كاري خضار", "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"], "contains": [], "modifiers": ["Mild", "Medium", "Spicy"], "kw": ["vegetable curry", "curry", "كاري"] },
-          { "id": "penne", "name": "Penne arrabbiata", "nameAr": "بيني أرابياتا", "tags": ["vegan", "vegetarian", "halal", "nut_free", "dairy_free"], "contains": ["gluten"], "modifiers": [], "kw": ["penne", "pasta", "arrabbiata", "باستا", "مكرونة"] }
+          {
+            "id": "club",
+            "name": "Club sandwich",
+            "nameAr": "كلوب ساندويتش",
+            "tags": ["halal", "nut_free"],
+            "contains": ["gluten", "egg"],
+            "modifiers": ["White bread", "Brown bread", "Gluten-free bread", "No mayonnaise"],
+            "kw": ["club sandwich", "sandwich", "كلوب ساندويتش", "ساندويتش", "سندويش"]
+          },
+          {
+            "id": "caesar",
+            "name": "Caesar salad",
+            "nameAr": "سلطة سيزر",
+            "tags": ["halal"],
+            "contains": ["gluten", "dairy", "egg", "fish"],
+            "modifiers": ["Add chicken", "Add prawns", "Dressing on the side"],
+            "kw": ["caesar salad", "caesar", "salad", "سلطة سيزر", "سلطة"]
+          },
+          {
+            "id": "burger",
+            "name": "Beef burger",
+            "nameAr": "برجر لحم",
+            "tags": ["halal", "nut_free"],
+            "contains": ["gluten", "dairy"],
+            "modifiers": ["Medium", "Well done", "No cheese", "Gluten-free bun"],
+            "kw": ["beef burger", "burger", "hamburger", "برجر", "برغر"]
+          },
+          {
+            "id": "pizza",
+            "name": "Margherita pizza",
+            "nameAr": "بيتزا مارجريتا",
+            "tags": ["vegetarian", "halal", "nut_free"],
+            "contains": ["gluten", "dairy"],
+            "modifiers": ["Extra cheese", "Add olives"],
+            "kw": ["margherita", "pizza", "بيتزا"]
+          },
+          {
+            "id": "salmon",
+            "name": "Grilled salmon",
+            "nameAr": "سلمون مشوي",
+            "tags": ["gluten_free", "halal", "nut_free", "dairy_free"],
+            "contains": ["fish"],
+            "modifiers": ["With vegetables", "With rice"],
+            "kw": ["salmon", "سلمون"]
+          },
+          {
+            "id": "mezze",
+            "name": "Mezze platter",
+            "nameAr": "طبق مقبلات",
+            "tags": ["vegetarian", "vegan", "halal", "dairy_free"],
+            "contains": ["gluten", "sesame"],
+            "modifiers": [],
+            "kw": ["mezze", "hummus", "مقبلات", "حمص", "متبل"]
+          },
+          {
+            "id": "biryani",
+            "name": "Chicken biryani",
+            "nameAr": "برياني دجاج",
+            "tags": ["halal", "gluten_free"],
+            "contains": ["dairy", "nuts"],
+            "modifiers": ["Mild", "Medium", "Spicy"],
+            "kw": ["biryani", "برياني"]
+          },
+          {
+            "id": "curry",
+            "name": "Vegetable curry",
+            "nameAr": "كاري خضار",
+            "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"],
+            "contains": [],
+            "modifiers": ["Mild", "Medium", "Spicy"],
+            "kw": ["vegetable curry", "curry", "كاري"]
+          },
+          {
+            "id": "penne",
+            "name": "Penne arrabbiata",
+            "nameAr": "بيني أرابياتا",
+            "tags": ["vegan", "vegetarian", "halal", "nut_free", "dairy_free"],
+            "contains": ["gluten"],
+            "modifiers": [],
+            "kw": ["penne", "pasta", "arrabbiata", "باستا", "مكرونة"]
+          }
         ]
       },
       {
@@ -148,10 +294,42 @@
         "name": "Kids",
         "nameAr": "الأطفال",
         "items": [
-          { "id": "minburger", "name": "Mini burger", "nameAr": "برجر صغير", "tags": ["halal", "nut_free"], "contains": ["gluten", "dairy"], "modifiers": [], "kw": ["mini burger", "برجر صغير"] },
-          { "id": "tenders", "name": "Chicken tenders", "nameAr": "أصابع دجاج", "tags": ["halal", "nut_free", "dairy_free"], "contains": ["gluten", "egg"], "modifiers": [], "kw": ["chicken tenders", "nuggets", "chicken fingers", "أصابع دجاج", "ناغتس"] },
-          { "id": "kidspasta", "name": "Pasta with tomato sauce", "nameAr": "باستا بصلصة الطماطم", "tags": ["vegetarian", "vegan", "halal", "nut_free", "dairy_free"], "contains": ["gluten"], "modifiers": [], "kw": ["kids pasta"] },
-          { "id": "fruitcup", "name": "Fruit cup", "nameAr": "كوب فواكه", "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"], "contains": [], "modifiers": [], "kw": ["fruit cup", "كوب فواكه"] }
+          {
+            "id": "minburger",
+            "name": "Mini burger",
+            "nameAr": "برجر صغير",
+            "tags": ["halal", "nut_free"],
+            "contains": ["gluten", "dairy"],
+            "modifiers": [],
+            "kw": ["mini burger", "برجر صغير"]
+          },
+          {
+            "id": "tenders",
+            "name": "Chicken tenders",
+            "nameAr": "أصابع دجاج",
+            "tags": ["halal", "nut_free", "dairy_free"],
+            "contains": ["gluten", "egg"],
+            "modifiers": [],
+            "kw": ["chicken tenders", "nuggets", "chicken fingers", "أصابع دجاج", "ناغتس"]
+          },
+          {
+            "id": "kidspasta",
+            "name": "Pasta with tomato sauce",
+            "nameAr": "باستا بصلصة الطماطم",
+            "tags": ["vegetarian", "vegan", "halal", "nut_free", "dairy_free"],
+            "contains": ["gluten"],
+            "modifiers": [],
+            "kw": ["kids pasta"]
+          },
+          {
+            "id": "fruitcup",
+            "name": "Fruit cup",
+            "nameAr": "كوب فواكه",
+            "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"],
+            "contains": [],
+            "modifiers": [],
+            "kw": ["fruit cup", "كوب فواكه"]
+          }
         ]
       },
       {
@@ -159,9 +337,33 @@
         "name": "Desserts",
         "nameAr": "الحلويات",
         "items": [
-          { "id": "fondant", "name": "Chocolate fondant", "nameAr": "فوندان الشوكولاتة", "tags": ["vegetarian"], "contains": ["gluten", "dairy", "egg", "nuts"], "modifiers": ["With vanilla ice cream"], "kw": ["chocolate fondant", "fondant", "chocolate cake", "فوندان"] },
-          { "id": "icecream", "name": "Ice cream, two scoops", "nameAr": "آيس كريم، كرتين", "tags": ["vegetarian", "gluten_free", "nut_free"], "contains": ["dairy"], "modifiers": ["Vanilla", "Chocolate", "Strawberry"], "kw": ["ice cream", "ice-cream", "آيس كريم", "ايسكريم"] },
-          { "id": "kunafa", "name": "Kunafa", "nameAr": "كنافة", "tags": ["vegetarian", "halal"], "contains": ["gluten", "dairy", "nuts"], "modifiers": [], "kw": ["kunafa", "knafeh", "كنافة"] }
+          {
+            "id": "fondant",
+            "name": "Chocolate fondant",
+            "nameAr": "فوندان الشوكولاتة",
+            "tags": ["vegetarian"],
+            "contains": ["gluten", "dairy", "egg", "nuts"],
+            "modifiers": ["With vanilla ice cream"],
+            "kw": ["chocolate fondant", "fondant", "chocolate cake", "فوندان"]
+          },
+          {
+            "id": "icecream",
+            "name": "Ice cream, two scoops",
+            "nameAr": "آيس كريم، كرتين",
+            "tags": ["vegetarian", "gluten_free", "nut_free"],
+            "contains": ["dairy"],
+            "modifiers": ["Vanilla", "Chocolate", "Strawberry"],
+            "kw": ["ice cream", "ice-cream", "آيس كريم", "ايسكريم"]
+          },
+          {
+            "id": "kunafa",
+            "name": "Kunafa",
+            "nameAr": "كنافة",
+            "tags": ["vegetarian", "halal"],
+            "contains": ["gluten", "dairy", "nuts"],
+            "modifiers": [],
+            "kw": ["kunafa", "knafeh", "كنافة"]
+          }
         ]
       },
       {
@@ -169,11 +371,51 @@
         "name": "Drinks",
         "nameAr": "المشروبات",
         "items": [
-          { "id": "oj", "name": "Fresh orange juice", "nameAr": "عصير برتقال طازج", "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"], "contains": [], "modifiers": [], "kw": ["fresh orange juice", "orange juice", "oj", "عصير برتقال", "برتقال"] },
-          { "id": "lemonmint", "name": "Lemon mint", "nameAr": "ليمون بالنعناع", "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"], "contains": [], "modifiers": [], "kw": ["lemon mint", "lemonade", "ليمون نعناع", "ليمون بالنعناع"] },
-          { "id": "cappuccino", "name": "Cappuccino", "nameAr": "كابتشينو", "tags": ["vegetarian", "gluten_free", "halal", "nut_free"], "contains": ["dairy"], "modifiers": ["Oat milk", "Almond milk", "Decaf"], "kw": ["cappuccino", "coffee", "latte", "كابتشينو", "قهوة"] },
-          { "id": "tea", "name": "Pot of tea", "nameAr": "إبريق شاي", "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"], "contains": [], "modifiers": ["English breakfast", "Green tea", "Chamomile", "With milk"], "kw": ["pot of tea", "tea", "شاي"] },
-          { "id": "sparkling", "name": "Sparkling water", "nameAr": "مياه فوارة", "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"], "contains": [], "modifiers": [], "kw": ["sparkling water", "مياه فوارة", "مياه غازية"] }
+          {
+            "id": "oj",
+            "name": "Fresh orange juice",
+            "nameAr": "عصير برتقال طازج",
+            "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"],
+            "contains": [],
+            "modifiers": [],
+            "kw": ["fresh orange juice", "orange juice", "oj", "عصير برتقال", "برتقال"]
+          },
+          {
+            "id": "lemonmint",
+            "name": "Lemon mint",
+            "nameAr": "ليمون بالنعناع",
+            "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"],
+            "contains": [],
+            "modifiers": [],
+            "kw": ["lemon mint", "lemonade", "ليمون نعناع", "ليمون بالنعناع"]
+          },
+          {
+            "id": "cappuccino",
+            "name": "Cappuccino",
+            "nameAr": "كابتشينو",
+            "tags": ["vegetarian", "gluten_free", "halal", "nut_free"],
+            "contains": ["dairy"],
+            "modifiers": ["Oat milk", "Almond milk", "Decaf"],
+            "kw": ["cappuccino", "coffee", "latte", "كابتشينو", "قهوة"]
+          },
+          {
+            "id": "tea",
+            "name": "Pot of tea",
+            "nameAr": "إبريق شاي",
+            "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"],
+            "contains": [],
+            "modifiers": ["English breakfast", "Green tea", "Chamomile", "With milk"],
+            "kw": ["pot of tea", "tea", "شاي"]
+          },
+          {
+            "id": "sparkling",
+            "name": "Sparkling water",
+            "nameAr": "مياه فوارة",
+            "tags": ["vegan", "vegetarian", "gluten_free", "halal", "nut_free", "dairy_free"],
+            "contains": [],
+            "modifiers": [],
+            "kw": ["sparkling water", "مياه فوارة", "مياه غازية"]
+          }
         ]
       }
     ]

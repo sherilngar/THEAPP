@@ -4,13 +4,26 @@ import { X } from 'lucide-react';
 import { useGuestUi } from './context';
 
 /** Bottom sheet scoped to the guest app frame, so it also works inside the Present-mode phone. */
-export function Sheet({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
+export function Sheet({
+  open,
+  onClose,
+  title,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+}) {
   const { t } = useGuestUi();
   const panel = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!open) return;
     const prev = document.activeElement as HTMLElement | null;
-    const id = window.setTimeout(() => panel.current?.querySelector<HTMLElement>('button, input, select, textarea')?.focus(), 60);
+    const id = window.setTimeout(
+      () => panel.current?.querySelector<HTMLElement>('button, input, select, textarea')?.focus(),
+      60,
+    );
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', onKey);
     return () => {
@@ -46,7 +59,12 @@ export function Sheet({ open, onClose, title, children }: { open: boolean; onClo
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-line" aria-hidden />
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="display text-2xl">{title}</h2>
-              <button type="button" onClick={onClose} className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-raised" aria-label={t.close}>
+              <button
+                type="button"
+                onClick={onClose}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-raised"
+                aria-label={t.close}
+              >
                 <X size={18} aria-hidden />
               </button>
             </div>

@@ -12,7 +12,14 @@ function useTokens() {
   const read = () => {
     const cs = getComputedStyle(document.documentElement);
     const v = (n: string) => `rgb(${cs.getPropertyValue(n).trim().split(' ').join(',')})`;
-    return { accent: v('--accent'), line: v('--line'), muted: v('--muted'), fg: v('--fg'), surface: v('--surface'), raised: v('--raised') };
+    return {
+      accent: v('--accent'),
+      line: v('--line'),
+      muted: v('--muted'),
+      fg: v('--fg'),
+      surface: v('--surface'),
+      raised: v('--raised'),
+    };
   };
   const [t, setT] = useState(read);
   useEffect(() => {
@@ -23,7 +30,15 @@ function useTokens() {
   return t;
 }
 
-function CountUp({ value, decimals = 0, suffix = '' }: { value: number; decimals?: number; suffix?: string }) {
+function CountUp({
+  value,
+  decimals = 0,
+  suffix = '',
+}: {
+  value: number;
+  decimals?: number;
+  suffix?: string;
+}) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true });
   const mv = useMotionValue(0);
@@ -48,7 +63,12 @@ const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.le
 
 function Tile({ label, children, note }: { label: string; children: ReactNode; note?: string }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="card p-5">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="card p-5"
+    >
       <p className="eyebrow mb-2">{label}</p>
       <p className="display text-4xl">{children}</p>
       {note && <p className="mt-1 text-xs text-muted">{note}</p>}
@@ -61,23 +81,50 @@ interface Row {
   value: number;
 }
 
-function ChartCard({ title, subtitle, rows, unit, decimals = 0, height = 280, vertical = true }: { title: string; subtitle?: string; rows: Row[]; unit: string; decimals?: number; height?: number; vertical?: boolean }) {
+function ChartCard({
+  title,
+  subtitle,
+  rows,
+  unit,
+  decimals = 0,
+  height = 280,
+  vertical = true,
+}: {
+  title: string;
+  subtitle?: string;
+  rows: Row[];
+  unit: string;
+  decimals?: number;
+  height?: number;
+  vertical?: boolean;
+}) {
   const tk = useTokens();
   const [table, setTable] = useState(false);
   const fmt = (v: number) => `${v.toFixed(decimals)}${unit ? ` ${unit}` : ''}`;
   return (
-    <motion.section initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }} className="card p-5">
+    <motion.section
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      className="card p-5"
+    >
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h2 className="font-medium">{title}</h2>
           {subtitle && <p className="text-xs text-muted">{subtitle}</p>}
         </div>
-        <button className="rounded-full px-3 py-1.5 text-xs text-muted hover:bg-raised" onClick={() => setTable((v) => !v)} aria-pressed={table}>
+        <button
+          className="rounded-full px-3 py-1.5 text-xs text-muted hover:bg-raised"
+          onClick={() => setTable((v) => !v)}
+          aria-pressed={table}
+        >
           {table ? 'Chart' : 'Table'}
         </button>
       </div>
       {rows.length === 0 ? (
-        <p className="py-10 text-center text-sm text-muted">No data yet. Run the guided demo to generate activity.</p>
+        <p className="py-10 text-center text-sm text-muted">
+          No data yet. Run the guided demo to generate activity.
+        </p>
       ) : table ? (
         <table className="w-full text-sm">
           <thead>
@@ -96,23 +143,94 @@ function ChartCard({ title, subtitle, rows, unit, decimals = 0, height = 280, ve
           </tbody>
         </table>
       ) : (
-        <div style={{ height: vertical ? Math.max(height, rows.length * 30 + 20) : height }} role="img" aria-label={`${title}: ${rows.map((r) => `${r.name} ${fmt(r.value)}`).join(', ')}`}>
+        <div
+          style={{ height: vertical ? Math.max(height, rows.length * 30 + 20) : height }}
+          role="img"
+          aria-label={`${title}: ${rows.map((r) => `${r.name} ${fmt(r.value)}`).join(', ')}`}
+        >
           <ResponsiveContainer width="100%" height="100%">
             {vertical ? (
-              <BarChart data={rows} layout="vertical" margin={{ top: 0, right: 48, bottom: 0, left: 0 }} barCategoryGap={6}>
+              <BarChart
+                data={rows}
+                layout="vertical"
+                margin={{ top: 0, right: 48, bottom: 0, left: 0 }}
+                barCategoryGap={6}
+              >
                 <CartesianGrid horizontal={false} stroke={tk.line} strokeOpacity={0.6} />
-                <XAxis type="number" tick={{ fill: tk.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis type="category" dataKey="name" width={150} tick={{ fill: tk.fg, fontSize: 12 }} axisLine={false} tickLine={false} />
-                <Tooltip cursor={{ fill: tk.raised, opacity: 0.6 }} contentStyle={{ background: tk.surface, border: `1px solid ${tk.line}`, borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [fmt(v), title]} />
-                <Bar dataKey="value" fill={tk.accent} radius={[0, 4, 4, 0]} maxBarSize={18} animationDuration={900} label={{ position: 'right', fill: tk.muted, fontSize: 11, formatter: (v: number) => v.toFixed(decimals) }} />
+                <XAxis
+                  type="number"
+                  tick={{ fill: tk.muted, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  width={150}
+                  tick={{ fill: tk.fg, fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: tk.raised, opacity: 0.6 }}
+                  contentStyle={{
+                    background: tk.surface,
+                    border: `1px solid ${tk.line}`,
+                    borderRadius: 12,
+                    fontSize: 12,
+                  }}
+                  formatter={(v: number) => [fmt(v), title]}
+                />
+                <Bar
+                  dataKey="value"
+                  fill={tk.accent}
+                  radius={[0, 4, 4, 0]}
+                  maxBarSize={18}
+                  animationDuration={900}
+                  label={{
+                    position: 'right',
+                    fill: tk.muted,
+                    fontSize: 11,
+                    formatter: (v: number) => v.toFixed(decimals),
+                  }}
+                />
               </BarChart>
             ) : (
-              <BarChart data={rows} margin={{ top: 16, right: 8, bottom: 0, left: -16 }} barCategoryGap="28%">
+              <BarChart
+                data={rows}
+                margin={{ top: 16, right: 8, bottom: 0, left: -16 }}
+                barCategoryGap="28%"
+              >
                 <CartesianGrid vertical={false} stroke={tk.line} strokeOpacity={0.6} />
-                <XAxis dataKey="name" tick={{ fill: tk.muted, fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: tk.muted, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip cursor={{ fill: tk.raised, opacity: 0.6 }} contentStyle={{ background: tk.surface, border: `1px solid ${tk.line}`, borderRadius: 12, fontSize: 12 }} formatter={(v: number) => [fmt(v), title]} />
-                <Bar dataKey="value" fill={tk.accent} radius={[4, 4, 0, 0]} maxBarSize={36} animationDuration={900} />
+                <XAxis
+                  dataKey="name"
+                  tick={{ fill: tk.muted, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis
+                  tick={{ fill: tk.muted, fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  allowDecimals={false}
+                />
+                <Tooltip
+                  cursor={{ fill: tk.raised, opacity: 0.6 }}
+                  contentStyle={{
+                    background: tk.surface,
+                    border: `1px solid ${tk.line}`,
+                    borderRadius: 12,
+                    fontSize: 12,
+                  }}
+                  formatter={(v: number) => [fmt(v), title]}
+                />
+                <Bar
+                  dataKey="value"
+                  fill={tk.accent}
+                  radius={[4, 4, 0, 0]}
+                  maxBarSize={36}
+                  animationDuration={900}
+                />
               </BarChart>
             )}
           </ResponsiveContainer>
@@ -136,17 +254,30 @@ export default function Insights() {
     const done = set.filter((t) => t.status === 'done');
     const accepted = set.filter((t) => t.acceptedAt);
     const perDept = DEPARTMENTS.map((d) => {
-      const a = accepted.filter((t) => t.department === d.id).map((t) => mins(t.acceptedAt! - t.createdAt));
-      const c = done.filter((t) => t.department === d.id && t.doneAt).map((t) => mins(t.doneAt! - t.createdAt));
+      const a = accepted
+        .filter((t) => t.department === d.id)
+        .map((t) => mins(t.acceptedAt! - t.createdAt));
+      const c = done
+        .filter((t) => t.department === d.id && t.doneAt)
+        .map((t) => mins(t.doneAt! - t.createdAt));
       return { d, accept: avg(a), complete: avg(c), n: a.length, standard: standards[d.id].normal };
     }).filter((x) => x.n > 0);
     const counts = new Map<string, number>();
     set.forEach((t) => counts.set(t.item, (counts.get(t.item) ?? 0) + 1));
-    const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10).map(([name, value]) => ({ name, value }));
+    const top = [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10)
+      .map(([name, value]) => ({ name, value }));
     const ratings = set.filter((t) => t.rating).map((t) => t.rating!);
-    const dist = [1, 2, 3, 4, 5].map((n) => ({ name: `${n} ★`, value: ratings.filter((r) => r === n).length }));
+    const dist = [1, 2, 3, 4, 5].map((n) => ({
+      name: `${n} ★`,
+      value: ratings.filter((r) => r === n).length,
+    }));
     const escalations = set.filter((t) => t.escalationLevel > 0);
-    const escByDept = DEPARTMENTS.map((d) => ({ name: d.short, value: escalations.filter((t) => t.department === d.id).length })).filter((r) => r.value);
+    const escByDept = DEPARTMENTS.map((d) => ({
+      name: d.short,
+      value: escalations.filter((t) => t.department === d.id).length,
+    })).filter((r) => r.value);
     const dining = set.filter((t) => t.kind === 'dining');
     const days = Array.from({ length: 7 }, (_, i) => {
       const day = new Date();
@@ -154,14 +285,23 @@ export default function Insights() {
       day.setDate(day.getDate() - (6 - i));
       const start = day.getTime();
       const end = start + 86_400_000;
-      return { name: day.toLocaleDateString('en-GB', { weekday: 'short' }), value: dining.filter((t) => t.createdAt >= start && t.createdAt < end).length };
+      return {
+        name: day.toLocaleDateString('en-GB', { weekday: 'short' }),
+        value: dining.filter((t) => t.createdAt >= start && t.createdAt < end).length,
+      };
     });
     return {
       open: open.length,
       done: done.length,
       accept: avg(accepted.map((t) => mins(t.acceptedAt! - t.createdAt))),
       complete: avg(done.filter((t) => t.doneAt).map((t) => mins(t.doneAt! - t.createdAt))),
-      withinStd: accepted.length ? (accepted.filter((t) => mins(t.acceptedAt! - t.createdAt) <= standards[t.department].normal).length / accepted.length) * 100 : 0,
+      withinStd: accepted.length
+        ? (accepted.filter(
+            (t) => mins(t.acceptedAt! - t.createdAt) <= standards[t.department].normal,
+          ).length /
+            accepted.length) *
+          100
+        : 0,
       escalations: escalations.length,
       escalationsDm: escalations.filter((t) => t.escalationLevel === 2).length,
       rating: avg(ratings),
@@ -185,17 +325,28 @@ export default function Insights() {
             <p className="eyebrow mb-2">Management view</p>
             <h1 className="display text-4xl sm:text-5xl">Service insights</h1>
             <p className="mt-2 max-w-xl text-sm text-muted">
-              {range === '7d' ? 'Last 7 days, including generated sample history so the charts are readable before the live demo.' : 'Only requests created live in this demo session.'}
+              {range === '7d'
+                ? 'Last 7 days, including generated sample history so the charts are readable before the live demo.'
+                : 'Only requests created live in this demo session.'}
             </p>
           </div>
-          <div className="inline-flex rounded-full border border-line bg-surface p-1" role="group" aria-label="Data range">
+          <div
+            className="inline-flex rounded-full border border-line bg-surface p-1"
+            role="group"
+            aria-label="Data range"
+          >
             {(
               [
                 ['7d', 'Last 7 days (with sample history)'],
                 ['live', 'Live demo only'],
               ] as const
             ).map(([id, label]) => (
-              <button key={id} onClick={() => setRange(id)} aria-pressed={range === id} className={`rounded-full px-4 py-2 text-xs transition-colors ${range === id ? 'bg-fg text-bg' : 'text-muted hover:text-fg'}`}>
+              <button
+                key={id}
+                onClick={() => setRange(id)}
+                aria-pressed={range === id}
+                className={`rounded-full px-4 py-2 text-xs transition-colors ${range === id ? 'bg-fg text-bg' : 'text-muted hover:text-fg'}`}
+              >
                 {label}
               </button>
             ))}
@@ -209,7 +360,10 @@ export default function Insights() {
           <Tile label="Completed">
             <CountUp value={data.done} />
           </Tile>
-          <Tile label="Average time to accept" note={`${data.withinStd.toFixed(0)}% within standard`}>
+          <Tile
+            label="Average time to accept"
+            note={`${data.withinStd.toFixed(0)}% within standard`}
+          >
             <CountUp value={data.accept} decimals={1} suffix=" min" />
           </Tile>
           <Tile label="Average time to complete">
@@ -230,12 +384,44 @@ export default function Insights() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <ChartCard title="Average time to accept, by department" subtitle="Minutes from request to acceptance" rows={data.perDept.map((x) => ({ name: x.d.short, value: x.accept }))} unit="min" decimals={1} />
-          <ChartCard title="Average time to complete, by department" subtitle="Minutes from request to done" rows={data.perDept.filter((x) => x.complete).map((x) => ({ name: x.d.short, value: x.complete }))} unit="min" decimals={1} />
+          <ChartCard
+            title="Average time to accept, by department"
+            subtitle="Minutes from request to acceptance"
+            rows={data.perDept.map((x) => ({ name: x.d.short, value: x.accept }))}
+            unit="min"
+            decimals={1}
+          />
+          <ChartCard
+            title="Average time to complete, by department"
+            subtitle="Minutes from request to done"
+            rows={data.perDept
+              .filter((x) => x.complete)
+              .map((x) => ({ name: x.d.short, value: x.complete }))}
+            unit="min"
+            decimals={1}
+          />
           <ChartCard title="Top 10 requests" rows={data.top} unit="" />
-          <ChartCard title="Escalations by department" subtitle="Requests not accepted within the response standard" rows={data.escByDept} unit="" />
-          <ChartCard title="Guest ratings" subtitle="Number of ratings at each score" rows={data.dist} unit="" vertical={false} height={240} />
-          <ChartCard title="In-room dining orders per day" rows={data.days} unit="" vertical={false} height={240} />
+          <ChartCard
+            title="Escalations by department"
+            subtitle="Requests not accepted within the response standard"
+            rows={data.escByDept}
+            unit=""
+          />
+          <ChartCard
+            title="Guest ratings"
+            subtitle="Number of ratings at each score"
+            rows={data.dist}
+            unit=""
+            vertical={false}
+            height={240}
+          />
+          <ChartCard
+            title="In-room dining orders per day"
+            rows={data.days}
+            unit=""
+            vertical={false}
+            height={240}
+          />
         </div>
       </main>
     </>

@@ -2,7 +2,8 @@ import type { Lang } from '../domain/types';
 
 const ARABIC_CHAR = /[؀-ۿ]/;
 const ARABIC_CHARS = /[؀-ۿ]/g;
-const OTHER_SCRIPT = /[Ѐ-ӿऀ-ॿ぀-ヿ一-鿿가-힯฀-๿]/;
+const OTHER_SCRIPT =
+  /[\p{Script=Cyrillic}\p{Script=Devanagari}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}\p{Script=Thai}\p{Script=Greek}\p{Script=Hebrew}]/u;
 const LETTER = /[\p{L}\p{N}]/u;
 
 export function detectLang(text: string): Lang {
@@ -122,7 +123,8 @@ export function containsAny(text: string, words: string[]): boolean {
 /** Splits a message into phrases so quantities and times stay attached to the right request. */
 export function splitSegments(text: string): Array<{ text: string; offset: number }> {
   const out: Array<{ text: string; offset: number }> = [];
-  const re = /[,.;!?،؛\n]+|\s+(?:and also|and then|and|also|plus|then|but|as well as)\s+|\s+و(?=\s)|\s+(?=و[؀-ۿ]{3,})/g;
+  const re =
+    /[,.;!?،؛\n]+|\s+(?:and also|and then|and|also|plus|then|but|as well as)\s+|\s+و(?=\s)|\s+(?=و[؀-ۿ]{3,})/g;
   let last = 0;
   let m: RegExpExecArray | null;
   while ((m = re.exec(text))) {
@@ -134,10 +136,48 @@ export function splitSegments(text: string): Array<{ text: string; offset: numbe
 }
 
 const EN_NUMBERS: Record<string, number> = {
-  a: 1, an: 1, one: 1, single: 1, two: 2, couple: 2, pair: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10, eleven: 11, twelve: 12,
+  a: 1,
+  an: 1,
+  one: 1,
+  single: 1,
+  two: 2,
+  couple: 2,
+  pair: 2,
+  three: 3,
+  four: 4,
+  five: 5,
+  six: 6,
+  seven: 7,
+  eight: 8,
+  nine: 9,
+  ten: 10,
+  eleven: 11,
+  twelve: 12,
 };
 const AR_NUMBERS: Record<string, number> = {
-  واحد: 1, واحده: 1, اثنين: 2, اثنان: 2, اثنتين: 2, ثنتين: 2, زوج: 2, ثلاث: 3, ثلاثه: 3, اربع: 4, اربعه: 4, خمس: 5, خمسه: 5, ست: 6, سته: 6, سبع: 7, سبعه: 7, ثمان: 8, ثمانيه: 8, تسع: 9, تسعه: 9, عشر: 10, عشره: 10,
+  واحد: 1,
+  واحده: 1,
+  اثنين: 2,
+  اثنان: 2,
+  اثنتين: 2,
+  ثنتين: 2,
+  زوج: 2,
+  ثلاث: 3,
+  ثلاثه: 3,
+  اربع: 4,
+  اربعه: 4,
+  خمس: 5,
+  خمسه: 5,
+  ست: 6,
+  سته: 6,
+  سبع: 7,
+  سبعه: 7,
+  ثمان: 8,
+  ثمانيه: 8,
+  تسع: 9,
+  تسعه: 9,
+  عشر: 10,
+  عشره: 10,
 };
 
 export function wordToNumber(word: string): number | undefined {
@@ -150,7 +190,12 @@ export function wordToNumber(word: string): number | undefined {
 export function quantityNear(segment: string, start: number, end: number): number | undefined {
   const before = segment.slice(0, start).trim().split(/\s+/).slice(-3).reverse();
   for (const w of before) {
-    if (/^(extra|more|additional|fresh|clean|new|of|bottles?|please|me|us|send|bring|get|need|want|some|اضافيه|اضافي|زياده)$/.test(w)) continue;
+    if (
+      /^(extra|more|additional|fresh|clean|new|of|bottles?|please|me|us|send|bring|get|need|want|some|اضافيه|اضافي|زياده)$/.test(
+        w,
+      )
+    )
+      continue;
     const n = wordToNumber(w);
     if (n !== undefined) return n;
     break;
@@ -178,7 +223,8 @@ export function parseTime(raw: string): ParsedTime {
   const t = normalize(raw);
   const out: ParsedTime = {};
   if (/\b(tomorrow|tmrw)\b|بكره|بكرة|غدا|الغد/.test(t)) out.date = 'tomorrow';
-  else if (/\b(today|tonight|this evening|this afternoon|this morning)\b|اليوم|الليله/.test(t)) out.date = 'today';
+  else if (/\b(today|tonight|this evening|this afternoon|this morning)\b|اليوم|الليله/.test(t))
+    out.date = 'today';
 
   if (/\b(now|right now|asap|immediately|right away)\b|الان|حالا|فورا/.test(t)) {
     out.time = 'now';
@@ -186,7 +232,8 @@ export function parseTime(raw: string): ParsedTime {
   }
   if (/\bnoon|midday\b|الظهر/.test(t)) out.time = '12:00';
   if (/\bmidnight\b|منتصف الليل/.test(t)) out.time = '00:00';
-  const evening = /\b(tonight|evening|night|pm|p\.m\.|dinner)\b|مساء|المساء|الليله|بالليل|عشاء/.test(t);
+  const evening =
+    /\b(tonight|evening|night|pm|p\.m\.|dinner)\b|مساء|المساء|الليله|بالليل|عشاء/.test(t);
   const morning = /\b(morning|am|a\.m\.|breakfast)\b|صباحا|الصبح|الصباح/.test(t);
 
   const ampm = t.match(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm|a\.m\.|p\.m\.)/);
@@ -211,7 +258,9 @@ export function parseTime(raw: string): ParsedTime {
     out.time = `${pad(h % 24)}:${pad(m)}`;
     return out;
   }
-  const inMins = t.match(/\bin\s+(\d{1,3})\s*(minutes|mins|min|hours|hour|hrs|hr)\b|بعد\s*(\d{1,3})\s*(دقيقه|دقائق|ساعه|ساعات)/);
+  const inMins = t.match(
+    /\bin\s+(\d{1,3})\s*(minutes|mins|min|hours|hour|hrs|hr)\b|بعد\s*(\d{1,3})\s*(دقيقه|دقائق|ساعه|ساعات)/,
+  );
   if (inMins) {
     const n = Number(inMins[1] ?? inMins[3]);
     const unit = inMins[2] ?? inMins[4] ?? '';
@@ -228,8 +277,12 @@ export function parseTime(raw: string): ParsedTime {
 export function parsePartySize(raw: string): number | undefined {
   const t = normalize(raw);
   const m =
-    t.match(/\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|twelve)\s*(people|persons|person|guests|pax|adults|of us|ppl)\b/) ??
-    t.match(/\btable for\s+(\d{1,2}|two|three|four|five|six|seven|eight|nine|ten)\b(?!\s*(pm|am|:|tonight|o'clock))/) ??
+    t.match(
+      /\b(\d{1,2}|one|two|three|four|five|six|seven|eight|nine|ten|twelve)\s*(people|persons|person|guests|pax|adults|of us|ppl)\b/,
+    ) ??
+    t.match(
+      /\btable for\s+(\d{1,2}|two|three|four|five|six|seven|eight|nine|ten)\b(?!\s*(pm|am|:|tonight|o'clock))/,
+    ) ??
     t.match(/(\d{1,2}|اثنين|ثلاثه|اربعه|خمسه|سته)\s*(اشخاص|شخص|افراد|نفر)/);
   if (m) return wordToNumber(m[1] ?? '');
   if (/\bjust (the )?two of us|\bfor two\b|\bfor us two\b|شخصين|لشخصين/.test(t)) return 2;
@@ -239,7 +292,9 @@ export function parsePartySize(raw: string): number | undefined {
 
 export function isAffirmative(raw: string): boolean {
   const t = normalize(raw).replace(/[!.]/g, '');
-  return /^(yes|yes please|yeah|yep|yup|sure|ok|okay|confirm|confirmed|go ahead|please do|place it|perfect|correct|that's right|sounds good|نعم|ايوه|ايوا|اي|اكيد|تمام|اوكي|موافق|اكد|نعم من فضلك|ok please)\b/.test(t);
+  return /^(yes|yes please|yeah|yep|yup|sure|ok|okay|confirm|confirmed|go ahead|please do|place it|perfect|correct|that's right|sounds good|نعم|ايوه|ايوا|اي|اكيد|تمام|اوكي|موافق|اكد|نعم من فضلك|ok please)\b/.test(
+    t,
+  );
 }
 
 export function isNegative(raw: string): boolean {
@@ -251,17 +306,23 @@ export function isQuestion(raw: string): boolean {
   const t = normalize(raw);
   return (
     /\?|؟/.test(raw) ||
-    /^(what|when|where|which|who|how|is there|are there|do you|does|is the|are the|can i|may i|could you tell)\b/.test(t) ||
+    /^(what|when|where|which|who|how|is there|are there|do you|does|is the|are the|can i|may i|could you tell)\b/.test(
+      t,
+    ) ||
     /^(متي|اين|وين|كم|هل|ما هي|ما هو|شو|ايش|كيف|فين)\b/.test(t)
   );
 }
 
 export function hasRequestMarker(raw: string): boolean {
   const t = normalize(raw);
-  return /\b(can i (get|have|order|book)|could i (get|have)|can you|could you|can we|please|i need|we need|i'd like|i would like|we'd like|send|bring|book|order|reserve|arrange|i want|we want|get me|need)\b|ممكن|ابغي|ابي|اريد|لو سمحت|من فضلك|ارسل|احجز|اطلب|نبغي|نحتاج|احتاج/.test(t);
+  return /\b(can i (get|have|order|book)|could i (get|have)|can you|could you|can we|please|i need|we need|i'd like|i would like|we'd like|send|bring|book|order|reserve|arrange|i want|we want|get me|need)\b|ممكن|ابغي|ابي|اريد|لو سمحت|من فضلك|ارسل|احجز|اطلب|نبغي|نحتاج|احتاج/.test(
+    t,
+  );
 }
 
 export function hasProblemMarker(raw: string): boolean {
   const t = normalize(raw);
-  return /\b(not working|isn't working|doesn't work|does not work|won't|broken|stopped|problem|issue|can't connect|cannot connect|slow|leaking|too (hot|cold|loud)|keeps|stuck|faulty)\b|لا يعمل|ما يشتغل|مايشتغل|خربان|عطلان|معطل|عطل|بطيء|مشكله/.test(t);
+  return /\b(not working|isn't working|doesn't work|does not work|won't|broken|stopped|problem|issue|can't connect|cannot connect|slow|leaking|too (hot|cold|loud)|keeps|stuck|faulty)\b|لا يعمل|ما يشتغل|مايشتغل|خربان|عطلان|معطل|عطل|بطيء|مشكله/.test(
+    t,
+  );
 }

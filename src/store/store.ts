@@ -1,5 +1,14 @@
 import { useRef, useSyncExternalStore } from 'react';
-import { NEW_TICKETS, bookingConfirmation, bookingDraftToTicket, orderDraft, orderReadBack, respond, type EngineResult, type Reply } from '../ai/engine';
+import {
+  NEW_TICKETS,
+  bookingConfirmation,
+  bookingDraftToTicket,
+  orderDraft,
+  orderReadBack,
+  respond,
+  type EngineResult,
+  type Reply,
+} from '../ai/engine';
 import { maskPii } from '../domain/pii';
 import { ITEM_BY_KEY } from '../domain/catalogue';
 import { DEFAULT_STANDARDS, DEPT_BY_ID, deptName } from '../domain/departments';
@@ -57,7 +66,10 @@ function initialState(): State {
     messages: [],
     tickets: [...sampleHistory(now), ...liveSampleTickets(now)],
     ratings: [],
-    settings: { standards: structuredClone(DEFAULT_STANDARDS), knowledge: structuredClone(DEFAULT_KNOWLEDGE) },
+    settings: {
+      standards: structuredClone(DEFAULT_STANDARDS),
+      knowledge: structuredClone(DEFAULT_KNOWLEDGE),
+    },
     clockOffset: 0,
     seq: 1000,
     typing: false,
@@ -161,8 +173,16 @@ function msgId() {
   return `m-${Date.now().toString(36)}-${msgCounter}-${Math.random().toString(36).slice(2, 6)}`;
 }
 
-function pushMessage(s: State, m: Omit<Message, 'id' | 'conversationId' | 'at'> & { at?: number }): Message {
-  const msg: Message = { id: msgId(), conversationId: s.conversation.id, at: m.at ?? Date.now() + s.clockOffset, ...m };
+function pushMessage(
+  s: State,
+  m: Omit<Message, 'id' | 'conversationId' | 'at'> & { at?: number },
+): Message {
+  const msg: Message = {
+    id: msgId(),
+    conversationId: s.conversation.id,
+    at: m.at ?? Date.now() + s.clockOffset,
+    ...m,
+  };
   s.messages.push(msg);
   return msg;
 }
@@ -190,7 +210,12 @@ export function validateDraft(d: TicketDraft): { ok: true } | { ok: false; error
   return { ok: true };
 }
 
-function createTickets(s: State, drafts: TicketDraft[], original: string | undefined, lang: Lang): Ticket[] {
+function createTickets(
+  s: State,
+  drafts: TicketDraft[],
+  original: string | undefined,
+  lang: Lang,
+): Ticket[] {
   const created: Ticket[] = [];
   for (const d of drafts) {
     const v = validateDraft(d);
@@ -261,23 +286,49 @@ function applyEngine(s: State, r: EngineResult, original: string) {
 
   let pendingCardMsg: string | undefined;
   r.replies.forEach((rep: Reply) => {
-    const m = pushMessage(s, { sender: 'ai', text: rep.text, lang: r.lang, cards: fill(rep.cards), chips: rep.chips });
-    if (rep.cards?.some((c) => (c.type === 'order_confirm' || c.type === 'booking') && c.state === 'pending')) pendingCardMsg = m.id;
+    const m = pushMessage(s, {
+      sender: 'ai',
+      text: rep.text,
+      lang: r.lang,
+      cards: fill(rep.cards),
+      chips: rep.chips,
+    });
+    if (
+      rep.cards?.some(
+        (c) => (c.type === 'order_confirm' || c.type === 'booking') && c.state === 'pending',
+      )
+    )
+      pendingCardMsg = m.id;
   });
-  if (!usedIds && ids.length) pushMessage(s, { sender: 'ai', text: '', lang: r.lang, cards: [{ type: 'tickets', ticketIds: ids }] });
+  if (!usedIds && ids.length)
+    pushMessage(s, {
+      sender: 'ai',
+      text: '',
+      lang: r.lang,
+      cards: [{ type: 'tickets', ticketIds: ids }],
+    });
 
   if (r.completeCardMessageId) completeCard(s, r.completeCardMessageId);
   if (r.pending === null) delete s.conversation.pending;
   else if (r.pending) {
     const p = { ...r.pending };
-    if ((p.type === 'order_confirm' || p.type === 'booking') && !p.messageId) p.messageId = pendingCardMsg;
+    if ((p.type === 'order_confirm' || p.type === 'booking') && !p.messageId)
+      p.messageId = pendingCardMsg;
     s.conversation.pending = p;
   }
   if (r.handover && s.conversation.mode === 'ai') {
-    s.conversation.handoverRequested = { reason: r.handover.reason, at: Date.now() + s.clockOffset, urgency: r.handover.urgency };
+    s.conversation.handoverRequested = {
+      reason: r.handover.reason,
+      at: Date.now() + s.clockOffset,
+      urgency: r.handover.urgency,
+    };
     pushMessage(s, {
       sender: 'system',
-      text: tr(s.conversation.lang, `${s.guest.ambassador}, your Experience Ambassador, has been notified and will join this chat.`, `تم إبلاغ ${s.guest.ambassador} من فريق سفراء التجربة وسينضم إلى هذه المحادثة.`),
+      text: tr(
+        s.conversation.lang,
+        `${s.guest.ambassador}, your Experience Ambassador, has been notified and will join this chat.`,
+        `تم إبلاغ ${s.guest.ambassador} من فريق سفراء التجربة وسينضم إلى هذه المحادثة.`,
+      ),
       lang: s.conversation.lang,
       cards: [{ type: 'handover', staffName: s.guest.ambassador }],
     });
@@ -312,8 +363,22 @@ export function sendGuestMessage(raw: string, opts: { thinkMs?: number } = {}): 
     const r = respond(text, engineCtx());
     if (r.emergency || r.pii.length) {
       update((s) => {
-        const created = applyEngine(s, { ...r, replies: r.replies.filter((x) => x.cards?.some((c) => c.type === 'emergency' || c.type === 'privacy')) }, masked);
-        if (created.length) queueMicrotask(() => busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) })));
+        const created = applyEngine(
+          s,
+          {
+            ...r,
+            replies: r.replies.filter((x) =>
+              x.cards?.some((c) => c.type === 'emergency' || c.type === 'privacy'),
+            ),
+          },
+          masked,
+        );
+        if (created.length)
+          queueMicrotask(() =>
+            busListeners.forEach((l) =>
+              l({ type: 'tickets-created', ids: created.map((t) => t.id) }),
+            ),
+          );
       });
     }
     return Promise.resolve();
@@ -335,14 +400,37 @@ export function sendGuestMessage(raw: string, opts: { thinkMs?: number } = {}): 
           s.typing = false;
           pushMessage(s, {
             sender: 'ai',
-            text: tr(s.conversation.lang, "I'm sorry, I couldn't process that just now. I've asked your ambassador to help you personally.", 'عذراً، لم أتمكن من معالجة ذلك الآن. طلبت من السفير مساعدتك شخصياً.'),
+            text: tr(
+              s.conversation.lang,
+              "I'm sorry, I couldn't process that just now. I've asked your ambassador to help you personally.",
+              'عذراً، لم أتمكن من معالجة ذلك الآن. طلبت من السفير مساعدتك شخصياً.',
+            ),
             lang: s.conversation.lang,
           });
-          s.conversation.handoverRequested = { reason: 'Concierge error fallback', at: Date.now() + s.clockOffset, urgency: 'normal' };
-          createTickets(s, [{ department: 'frontoffice', category: 'Guest Relations', item: 'Concierge could not respond', details: 'Automatic fallback: please contact the guest.', priority: 'high', kind: 'handover' }], masked, lang);
+          s.conversation.handoverRequested = {
+            reason: 'Concierge error fallback',
+            at: Date.now() + s.clockOffset,
+            urgency: 'normal',
+          };
+          createTickets(
+            s,
+            [
+              {
+                department: 'frontoffice',
+                category: 'Guest Relations',
+                item: 'Concierge could not respond',
+                details: 'Automatic fallback: please contact the guest.',
+                priority: 'high',
+                kind: 'handover',
+              },
+            ],
+            masked,
+            lang,
+          );
         });
       }
-      if (created.length) busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+      if (created.length)
+        busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
       resolve();
     }, delay);
   });
@@ -387,18 +475,27 @@ export function confirmOrder(messageId: string) {
     const card = m?.cards?.find((c) => c.type === 'order_confirm');
     if (!card || card.type !== 'order_confirm' || card.state !== 'pending') return;
     const lang = s.conversation.lang;
-    pushMessage(s, { sender: 'guest', text: tr(lang, 'Yes, place my order', 'نعم، أكد الطلب'), lang });
+    pushMessage(s, {
+      sender: 'guest',
+      text: tr(lang, 'Yes, place my order', 'نعم، أكد الطلب'),
+      lang,
+    });
     created = createTickets(s, [orderDraft(card.order)], undefined, lang);
     card.state = 'placed';
     delete s.conversation.pending;
     pushMessage(s, {
       sender: 'ai',
-      text: tr(lang, `Your order is placed, ${s.guest.firstName}. I'll let you know when it's on the way. It will be charged to room ${s.guest.room} (${s.guest.lastName}).`, `تم تأكيد طلبك يا ${s.guest.firstName}، وسأبلغك عندما يكون في الطريق. سيُضاف إلى حساب الغرفة ${s.guest.room}.`),
+      text: tr(
+        lang,
+        `Your order is placed, ${s.guest.firstName}. I'll let you know when it's on the way. It will be charged to room ${s.guest.room} (${s.guest.lastName}).`,
+        `تم تأكيد طلبك يا ${s.guest.firstName}، وسأبلغك عندما يكون في الطريق. سيُضاف إلى حساب الغرفة ${s.guest.room}.`,
+      ),
       lang,
       cards: [{ type: 'tickets', ticketIds: created.map((t) => t.id) }],
     });
   });
-  if (created.length) busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+  if (created.length)
+    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
 }
 
 /** Booking card submit (restaurant, spa or transport). */
@@ -417,40 +514,73 @@ export function submitBooking(messageId: string, booking: BookingDraft) {
       }
     });
     if (s.conversation.pending?.type === 'booking') delete s.conversation.pending;
-    pushMessage(s, { sender: 'ai', text: bookingConfirmation(booking, s.settings.knowledge, lang), lang, cards: [{ type: 'tickets', ticketIds: created.map((t) => t.id) }] });
+    pushMessage(s, {
+      sender: 'ai',
+      text: bookingConfirmation(booking, s.settings.knowledge, lang),
+      lang,
+      cards: [{ type: 'tickets', ticketIds: created.map((t) => t.id) }],
+    });
   });
-  if (created.length) busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+  if (created.length)
+    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
   return created.length > 0;
 }
 
 /** Services grid: a direct request without typing. */
-export function requestFromGrid(itemKey: string, opts: { quantity?: number; time?: string; notes?: string }) {
+export function requestFromGrid(
+  itemKey: string,
+  opts: { quantity?: number; time?: string; notes?: string },
+) {
   const item = ITEM_BY_KEY[itemKey];
   if (!item) return;
   let created: Ticket[] = [];
   update((s) => {
     const lang = s.conversation.lang;
     const label = lang === 'ar' ? item.ar : item.en;
-    pushMessage(s, { sender: 'guest', text: `${opts.quantity && opts.quantity > 1 ? `${opts.quantity} × ` : ''}${label}${opts.time ? ` · ${opts.time}` : ''}`, lang });
+    pushMessage(s, {
+      sender: 'guest',
+      text: `${opts.quantity && opts.quantity > 1 ? `${opts.quantity} × ` : ''}${label}${opts.time ? ` · ${opts.time}` : ''}`,
+      lang,
+    });
     created = createTickets(
       s,
-      [{ department: item.dept, alsoNotify: item.also, category: item.en, item: item.en, itemKey: item.key, quantity: opts.quantity, details: opts.notes ? maskPii(opts.notes).text : undefined, preferredTime: opts.time, priority: item.prio ?? 'normal', kind: item.action === 'handover' ? 'handover' : 'service' }],
+      [
+        {
+          department: item.dept,
+          alsoNotify: item.also,
+          category: item.en,
+          item: item.en,
+          itemKey: item.key,
+          quantity: opts.quantity,
+          details: opts.notes ? maskPii(opts.notes).text : undefined,
+          preferredTime: opts.time,
+          priority: item.prio ?? 'normal',
+          kind: item.action === 'handover' ? 'handover' : 'service',
+        },
+      ],
       undefined,
       lang,
     );
     pushMessage(s, {
       sender: 'ai',
-      text: tr(lang, `Of course, ${s.guest.firstName}. I've sent this to our ${deptName(item.dept)} team.`, `بالتأكيد يا ${s.guest.firstName}. أرسلت طلبك إلى فريق ${deptName(item.dept, 'ar')}.`),
+      text: tr(
+        lang,
+        `Of course, ${s.guest.firstName}. I've sent this to our ${deptName(item.dept)} team.`,
+        `بالتأكيد يا ${s.guest.firstName}. أرسلت طلبك إلى فريق ${deptName(item.dept, 'ar')}.`,
+      ),
       lang,
       cards: [{ type: 'tickets', ticketIds: created.map((t) => t.id) }],
     });
   });
-  if (created.length) busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
+  if (created.length)
+    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((t) => t.id) }));
 }
 
 export function requestAmbassador() {
   const lang = state.conversation.lang;
-  return sendGuestMessage(tr(lang, "I'd like to speak to my ambassador, please.", 'أود التحدث إلى السفير من فضلك.'));
+  return sendGuestMessage(
+    tr(lang, "I'd like to speak to my ambassador, please.", 'أود التحدث إلى السفير من فضلك.'),
+  );
 }
 
 // ---------------------------------------------------------------- staff
@@ -461,13 +591,34 @@ function statusMessage(s: State, t: Ticket, status: TicketStatus, by: string) {
   const name = guestItemName(t, lang);
   const dept = deptName(t.department, lang);
   if (status === 'accepted')
-    pushMessage(s, { sender: 'system', text: tr(lang, `${dept} has accepted your request: ${name}.`, `قبل فريق ${dept} طلبك: ${name}.`), lang, cards: [{ type: 'tickets', ticketIds: [t.id] }] });
+    pushMessage(s, {
+      sender: 'system',
+      text: tr(
+        lang,
+        `${dept} has accepted your request: ${name}.`,
+        `قبل فريق ${dept} طلبك: ${name}.`,
+      ),
+      lang,
+      cards: [{ type: 'tickets', ticketIds: [t.id] }],
+    });
   if (status === 'on_the_way')
-    pushMessage(s, { sender: 'system', text: tr(lang, `${by} is on the way with your ${name.toLowerCase()}.`, `${by} في الطريق إليك بطلبك: ${name}.`), lang });
+    pushMessage(s, {
+      sender: 'system',
+      text: tr(
+        lang,
+        `${by} is on the way with your ${name.toLowerCase()}.`,
+        `${by} في الطريق إليك بطلبك: ${name}.`,
+      ),
+      lang,
+    });
   if (status === 'done')
     pushMessage(s, {
       sender: 'ai',
-      text: tr(lang, `Your request “${name}” is complete, ${s.guest.firstName}. How did we do?`, `اكتمل طلبك «${name}» يا ${s.guest.firstName}. كيف كانت الخدمة؟`),
+      text: tr(
+        lang,
+        `Your request “${name}” is complete, ${s.guest.firstName}. How did we do?`,
+        `اكتمل طلبك «${name}» يا ${s.guest.firstName}. كيف كانت الخدمة؟`,
+      ),
       lang,
       cards: [{ type: 'rating', ticketId: t.id }],
     });
@@ -509,7 +660,11 @@ export function reassignTicket(id: string, dept: DepartmentId, by: string) {
     const t = s.tickets.find((x) => x.id === id);
     if (!t) return;
     const at = Date.now() + s.clockOffset;
-    t.notes.push({ at, by, text: `Reassigned from ${deptName(t.department)} to ${deptName(dept)}` });
+    t.notes.push({
+      at,
+      by,
+      text: `Reassigned from ${deptName(t.department)} to ${deptName(dept)}`,
+    });
     t.department = dept;
     t.createdAt = at; // the new team gets a fresh response clock
     t.escalationLevel = 0;
@@ -523,7 +678,9 @@ export function addNote(id: string, by: string, text: string) {
   const clean = maskPii(text.trim().slice(0, 500)).text;
   if (!clean) return;
   update((s) => {
-    s.tickets.find((x) => x.id === id)?.notes.push({ at: Date.now() + s.clockOffset, by, text: clean });
+    s.tickets
+      .find((x) => x.id === id)
+      ?.notes.push({ at: Date.now() + s.clockOffset, by, text: clean });
   });
 }
 
@@ -536,7 +693,11 @@ export function staffReply(text: string, staffName: string, dept: DepartmentId) 
     if (s.conversation.mode !== 'human' || s.conversation.humanName !== staffName) {
       pushMessage(s, {
         sender: 'system',
-        text: tr(lang, `${staffName} (${deptName(dept)}) has joined the chat. You are now talking to a person.`, `انضم ${staffName} (${deptName(dept, 'ar')}) إلى المحادثة. أنت الآن تتحدث مع موظف.`),
+        text: tr(
+          lang,
+          `${staffName} (${deptName(dept)}) has joined the chat. You are now talking to a person.`,
+          `انضم ${staffName} (${deptName(dept, 'ar')}) إلى المحادثة. أنت الآن تتحدث مع موظف.`,
+        ),
         lang,
       });
     }
@@ -544,7 +705,12 @@ export function staffReply(text: string, staffName: string, dept: DepartmentId) 
     s.conversation.humanName = staffName;
     delete s.conversation.handoverRequested;
     delete s.conversation.pending;
-    pushMessage(s, { sender: 'staff', staffName: `${staffName} · ${DEPT_BY_ID[dept].short}`, text: clean, lang });
+    pushMessage(s, {
+      sender: 'staff',
+      staffName: `${staffName} · ${DEPT_BY_ID[dept].short}`,
+      text: clean,
+      lang,
+    });
   });
 }
 
@@ -553,7 +719,15 @@ export function handBackToAi() {
     const lang = s.conversation.lang;
     s.conversation.mode = 'ai';
     delete s.conversation.humanName;
-    pushMessage(s, { sender: 'system', text: tr(lang, 'The AI concierge is replying again. Your ambassador is always one tap away.', 'عاد مساعد الكونسيرج الذكي للرد. السفير متاح دائماً بضغطة واحدة.'), lang });
+    pushMessage(s, {
+      sender: 'system',
+      text: tr(
+        lang,
+        'The AI concierge is replying again. Your ambassador is always one tap away.',
+        'عاد مساعد الكونسيرج الذكي للرد. السفير متاح دائماً بضغطة واحدة.',
+      ),
+      lang,
+    });
   });
 }
 
@@ -564,27 +738,55 @@ export function rateTicket(ticketId: string, value: number) {
     if (!t || t.rating) return;
     t.rating = value;
     s.ratings.push({ ticketId, value, at: Date.now() + s.clockOffset });
-    s.messages.forEach((m) => m.cards?.forEach((c) => c.type === 'rating' && c.ticketId === ticketId && (c.value = value)));
+    s.messages.forEach((m) =>
+      m.cards?.forEach((c) => c.type === 'rating' && c.ticketId === ticketId && (c.value = value)),
+    );
     const lang = s.conversation.lang;
     if (value <= 2) {
       created = createTickets(
         s,
-        [{ department: 'frontoffice', category: 'Service Recovery', item: 'Service recovery', details: `Guest rated “${t.item}” (${t.id}, ${deptName(t.department)}) ${value}/5. Contact the guest personally.`, priority: 'high', kind: 'recovery' }],
+        [
+          {
+            department: 'frontoffice',
+            category: 'Service Recovery',
+            item: 'Service recovery',
+            details: `Guest rated “${t.item}” (${t.id}, ${deptName(t.department)}) ${value}/5. Contact the guest personally.`,
+            priority: 'high',
+            kind: 'recovery',
+          },
+        ],
         undefined,
         lang,
       );
       pushMessage(s, {
         sender: 'ai',
-        text: tr(lang, `I'm very sorry we fell short, ${s.guest.firstName}. Your ambassador, ${s.guest.ambassador}, will contact you personally to put this right.`, `نأسف جداً لأننا لم نكن عند حسن ظنك يا ${s.guest.firstName}. سيتواصل معك ${s.guest.ambassador} من فريق سفراء التجربة شخصياً لمعالجة الأمر.`),
+        text: tr(
+          lang,
+          `I'm very sorry we fell short, ${s.guest.firstName}. Your ambassador, ${s.guest.ambassador}, will contact you personally to put this right.`,
+          `نأسف جداً لأننا لم نكن عند حسن ظنك يا ${s.guest.firstName}. سيتواصل معك ${s.guest.ambassador} من فريق سفراء التجربة شخصياً لمعالجة الأمر.`,
+        ),
         lang,
         cards: [{ type: 'tickets', ticketIds: created.map((x) => x.id) }],
       });
-      s.conversation.handoverRequested = { reason: `Low rating (${value}/5)`, at: Date.now() + s.clockOffset, urgency: 'high' };
+      s.conversation.handoverRequested = {
+        reason: `Low rating (${value}/5)`,
+        at: Date.now() + s.clockOffset,
+        urgency: 'high',
+      };
     } else {
-      pushMessage(s, { sender: 'ai', text: tr(lang, `Thank you, ${s.guest.firstName}. We're delighted to hear it.`, `شكراً لك يا ${s.guest.firstName}. يسعدنا ذلك.`), lang });
+      pushMessage(s, {
+        sender: 'ai',
+        text: tr(
+          lang,
+          `Thank you, ${s.guest.firstName}. We're delighted to hear it.`,
+          `شكراً لك يا ${s.guest.firstName}. يسعدنا ذلك.`,
+        ),
+        lang,
+      });
     }
   });
-  if (created.length) busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((x) => x.id) }));
+  if (created.length)
+    busListeners.forEach((l) => l({ type: 'tickets-created', ids: created.map((x) => x.id) }));
 }
 
 // ------------------------------------------------------------- escalation
@@ -592,7 +794,9 @@ export function rateTicket(ticketId: string, value: number) {
 /** Raises escalation levels as time passes. Idempotent, so every open tab can run it. */
 export function tickEscalations() {
   const t = now();
-  const changes = state.tickets.filter((x) => !x.sample && computeEscalation(x, state.settings.standards, t) > x.escalationLevel);
+  const changes = state.tickets.filter(
+    (x) => !x.sample && computeEscalation(x, state.settings.standards, t) > x.escalationLevel,
+  );
   if (!changes.length) return;
   update((s) => {
     for (const c of changes) {
@@ -601,7 +805,11 @@ export function tickEscalations() {
       const level = computeEscalation(tk, s.settings.standards, t);
       if (level <= tk.escalationLevel) continue;
       tk.escalationLevel = level;
-      tk.notes.push({ at: t, by: 'System', text: `${escalationLabel(level)} (${level === 1 ? DEPT_BY_ID[tk.department].supervisor : 'Duty Manager'})` });
+      tk.notes.push({
+        at: t,
+        by: 'System',
+        text: `${escalationLabel(level)} (${level === 1 ? DEPT_BY_ID[tk.department].supervisor : 'Duty Manager'})`,
+      });
     }
   });
 }
@@ -640,17 +848,27 @@ export function startBooking(kind: BookingDraft['kind'], label: string, context?
     pushMessage(s, { sender: 'guest', text: label, lang });
     const booking: BookingDraft = { kind };
     if (kind === 'transport') {
-      booking.outlet = context === 'airport' ? 'airport_departure' : context ?? 'taxi';
+      booking.outlet = context === 'airport' ? 'airport_departure' : (context ?? 'taxi');
       if (context === 'airport') booking.destination = 'Airport';
     }
     if (kind === 'spa' && context === 'couples') booking.outlet = 'couples';
     if (context === 'beach or terrace table') booking.notes = 'Beach or terrace table';
     const m = pushMessage(s, {
       sender: 'ai',
-      text: tr(lang, 'Of course. Choose the details below and I will send the request to our team.', 'بالتأكيد. اختر التفاصيل أدناه وسأرسل الطلب إلى فريقنا.'),
+      text: tr(
+        lang,
+        'Of course. Choose the details below and I will send the request to our team.',
+        'بالتأكيد. اختر التفاصيل أدناه وسأرسل الطلب إلى فريقنا.',
+      ),
       lang,
       cards: [{ type: 'booking', booking, state: 'pending' }],
     });
-    s.conversation.pending = { type: 'booking', booking, asking: kind === 'spa' ? 'outlet' : 'time', messageId: m.id, lang };
+    s.conversation.pending = {
+      type: 'booking',
+      booking,
+      asking: kind === 'spa' ? 'outlet' : 'time',
+      messageId: m.id,
+      lang,
+    };
   });
 }

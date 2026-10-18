@@ -2,7 +2,13 @@ import { FlaskConical } from 'lucide-react';
 import { useStore } from '../../store/store';
 import { hasSampleContent } from '../../data/knowledge';
 
-export function SampleBadge({ label = 'Sample content', title }: { label?: string; title?: string }) {
+export function SampleBadge({
+  label = 'Sample content',
+  title,
+}: {
+  label?: string;
+  title?: string;
+}) {
   const show = useStore((s) => hasSampleContent(s.settings.knowledge));
   if (!show) return null;
   return (

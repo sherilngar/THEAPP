@@ -15,7 +15,21 @@ const PRIORITY: Record<Ticket['priority'], string> = {
   urgent: 'border-st-escalated/60 bg-st-escalated/10 text-st-escalated',
 };
 
-export function TicketCard({ ticket: t, now, session, fresh, compact = false, onOpen }: { ticket: Ticket; now: number; session: StaffSession; fresh: boolean; compact?: boolean; onOpen: () => void }) {
+export function TicketCard({
+  ticket: t,
+  now,
+  session,
+  fresh,
+  compact = false,
+  onOpen,
+}: {
+  ticket: Ticket;
+  now: number;
+  session: StaffSession;
+  fresh: boolean;
+  compact?: boolean;
+  onOpen: () => void;
+}) {
   const standards = useStore((s) => s.settings.standards);
   const [noteOpen, setNoteOpen] = useState(false);
   const [note, setNote] = useState('');
@@ -40,10 +54,27 @@ export function TicketCard({ ticket: t, now, session, fresh, compact = false, on
       data-escalation={t.escalationLevel}
       className={`relative rounded-2xl border bg-surface p-3 shadow-soft ${escalated ? (t.escalationLevel === 2 ? 'border-st-escalated border-2' : 'border-st-escalated/60') : 'border-line/70'}`}
     >
-      {fresh && <motion.span aria-hidden className="pointer-events-none absolute -inset-px rounded-2xl ring-2 ring-accent" initial={{ opacity: 1 }} animate={{ opacity: [1, 0.2, 1, 0.2, 0] }} transition={{ duration: 4 }} />}
-      <button type="button" onClick={onOpen} className="flex w-full items-start gap-3 text-start" aria-label={`Open ${t.id}: ${t.item}, room ${t.room}`}>
+      {fresh && (
+        <motion.span
+          aria-hidden
+          className="pointer-events-none absolute -inset-px rounded-2xl ring-2 ring-accent"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: [1, 0.2, 1, 0.2, 0] }}
+          transition={{ duration: 4 }}
+        />
+      )}
+      <button
+        type="button"
+        onClick={onOpen}
+        className="flex w-full items-start gap-3 text-start"
+        aria-label={`Open ${t.id}: ${t.item}, room ${t.room}`}
+      >
         {!closed ? (
-          <TimerRing progress={progress} label={`${mmss(elapsed)} of ${std} min standard`} size={compact ? 38 : 44} />
+          <TimerRing
+            progress={progress}
+            label={`${mmss(elapsed)} of ${std} min standard`}
+            size={compact ? 38 : 44}
+          />
         ) : (
           <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-st-done/10 text-st-done">
             <Check size={16} aria-hidden />
@@ -53,13 +84,21 @@ export function TicketCard({ ticket: t, now, session, fresh, compact = false, on
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-xs font-semibold tabular-nums">Rm {t.room}</span>
             <span className="truncate text-xs text-muted">{t.guestName}</span>
-            {t.priority !== 'normal' && <span className={`rounded-full border px-1.5 text-[10px] font-medium uppercase tracking-wide ${PRIORITY[t.priority]}`}>{t.priority}</span>}
+            {t.priority !== 'normal' && (
+              <span
+                className={`rounded-full border px-1.5 text-[10px] font-medium uppercase tracking-wide ${PRIORITY[t.priority]}`}
+              >
+                {t.priority}
+              </span>
+            )}
           </div>
           <p className="mt-0.5 text-sm font-medium leading-snug">
             {t.quantity && t.kind === 'service' ? `${t.quantity} × ` : ''}
             {t.item}
           </p>
-          {t.details && !compact && <p className="mt-0.5 line-clamp-2 text-xs text-muted">{t.details}</p>}
+          {t.details && !compact && (
+            <p className="mt-0.5 line-clamp-2 text-xs text-muted">{t.details}</p>
+          )}
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-muted">
             <StatusPill status={t.status} escalation={t.escalationLevel} />
             <span>{ago(now - t.createdAt)}</span>
@@ -74,7 +113,9 @@ export function TicketCard({ ticket: t, now, session, fresh, compact = false, on
           </div>
           {escalated && (
             <p className="mt-1.5 text-[11px] font-medium text-st-escalated">
-              {t.escalationLevel === 2 ? 'Not accepted within 200% of standard → Duty Manager' : `Not accepted within standard → ${DEPT_BY_ID[t.department].supervisor}`}
+              {t.escalationLevel === 2
+                ? 'Not accepted within 200% of standard → Duty Manager'
+                : `Not accepted within standard → ${DEPT_BY_ID[t.department].supervisor}`}
             </p>
           )}
         </div>
@@ -83,24 +124,44 @@ export function TicketCard({ ticket: t, now, session, fresh, compact = false, on
       {!closed && (
         <div className="mt-3 flex flex-wrap gap-1.5">
           {t.status === 'new' && (
-            <button className="btn-primary min-h-[36px] px-3 text-xs" onClick={() => setTicketStatus(t.id, 'accepted', by)} data-action="accept">
+            <button
+              className="btn-primary min-h-[36px] px-3 text-xs"
+              onClick={() => setTicketStatus(t.id, 'accepted', by)}
+              data-action="accept"
+            >
               <Check size={14} aria-hidden /> Accept
             </button>
           )}
           {(t.status === 'new' || t.status === 'accepted') && (
-            <button className="btn-ghost min-h-[36px] px-3 text-xs" onClick={() => setTicketStatus(t.id, 'on_the_way', by)} data-action="on-the-way">
+            <button
+              className="btn-ghost min-h-[36px] px-3 text-xs"
+              onClick={() => setTicketStatus(t.id, 'on_the_way', by)}
+              data-action="on-the-way"
+            >
               <Footprints size={14} aria-hidden /> On the way
             </button>
           )}
-          <button className="btn-ghost min-h-[36px] px-3 text-xs" onClick={() => setTicketStatus(t.id, 'done', by)} data-action="done">
+          <button
+            className="btn-ghost min-h-[36px] px-3 text-xs"
+            onClick={() => setTicketStatus(t.id, 'done', by)}
+            data-action="done"
+          >
             <Sparkles size={14} aria-hidden /> Done
           </button>
           {!compact && (
             <>
-              <button className="btn-ghost min-h-[36px] px-3 text-xs" onClick={() => setReassign((v) => !v)} aria-expanded={reassign}>
+              <button
+                className="btn-ghost min-h-[36px] px-3 text-xs"
+                onClick={() => setReassign((v) => !v)}
+                aria-expanded={reassign}
+              >
                 <Repeat2 size={14} aria-hidden /> Reassign
               </button>
-              <button className="btn-ghost min-h-[36px] px-3 text-xs" onClick={() => setNoteOpen((v) => !v)} aria-expanded={noteOpen}>
+              <button
+                className="btn-ghost min-h-[36px] px-3 text-xs"
+                onClick={() => setNoteOpen((v) => !v)}
+                aria-expanded={noteOpen}
+              >
                 <MessageSquarePlus size={14} aria-hidden /> Note
               </button>
             </>
@@ -144,7 +205,15 @@ export function TicketCard({ ticket: t, now, session, fresh, compact = false, on
           <label htmlFor={`note-${t.id}`} className="sr-only">
             Note
           </label>
-          <input id={`note-${t.id}`} className="field py-2 text-sm" value={note} onChange={(e) => setNote(e.target.value)} placeholder="Internal note" maxLength={300} autoFocus />
+          <input
+            id={`note-${t.id}`}
+            className="field py-2 text-sm"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Internal note"
+            maxLength={300}
+            autoFocus
+          />
           <button className="btn-primary min-h-[40px] px-3 text-xs" disabled={!note.trim()}>
             Add
           </button>

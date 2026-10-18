@@ -26,7 +26,13 @@ const OTHER_GUESTS = [
   { id: 'g-0305', name: 'Mr Tanaka', room: '0305' },
 ];
 
-const HISTORY: Array<{ dept: DepartmentId; item: string; category: string; prio?: Priority; kind?: Ticket['kind'] }> = [
+const HISTORY: Array<{
+  dept: DepartmentId;
+  item: string;
+  category: string;
+  prio?: Priority;
+  kind?: Ticket['kind'];
+}> = [
   { dept: 'housekeeping', item: 'Extra towels', category: 'Housekeeping' },
   { dept: 'housekeeping', item: 'Extra towels', category: 'Housekeeping' },
   { dept: 'housekeeping', item: 'Pillows (pillow menu)', category: 'Housekeeping' },
@@ -43,10 +49,25 @@ const HISTORY: Array<{ dept: DepartmentId; item: string; category: string; prio?
   { dept: 'engineering', item: 'Air conditioning', category: 'Engineering' },
   { dept: 'engineering', item: 'TV or remote', category: 'Engineering' },
   { dept: 'engineering', item: 'Wi-Fi in room', category: 'Engineering' },
-  { dept: 'restaurants', item: 'Table reservation', category: 'Restaurants & Bars', kind: 'reservation' },
-  { dept: 'restaurants', item: 'Table reservation', category: 'Restaurants & Bars', kind: 'reservation' },
+  {
+    dept: 'restaurants',
+    item: 'Table reservation',
+    category: 'Restaurants & Bars',
+    kind: 'reservation',
+  },
+  {
+    dept: 'restaurants',
+    item: 'Table reservation',
+    category: 'Restaurants & Bars',
+    kind: 'reservation',
+  },
   { dept: 'spa', item: 'Spa booking', category: 'Spa & Wellness', kind: 'spa' },
-  { dept: 'concierge', item: 'Airport transfer (departure)', category: 'Concierge & Transport', kind: 'transport' },
+  {
+    dept: 'concierge',
+    item: 'Airport transfer (departure)',
+    category: 'Concierge & Transport',
+    kind: 'transport',
+  },
   { dept: 'concierge', item: 'Taxi', category: 'Concierge & Transport', kind: 'transport' },
   { dept: 'frontoffice', item: 'Late check-out', category: 'Front Office & Ambassador' },
   { dept: 'laundry', item: 'Laundry pickup', category: 'Laundry' },
@@ -78,7 +99,10 @@ export function sampleHistory(now: number): Ticket[] {
     const acceptAfter = Math.floor(std * (0.25 + rand() * (rand() < 0.12 ? 2.4 : 0.9)));
     const doneAfter = acceptAfter + Math.floor(std * (1 + rand() * 4));
     const escalation = acceptAfter >= std * 2 ? 2 : acceptAfter >= std ? 1 : 0;
-    const rating = rand() < 0.7 ? Math.min(5, Math.max(1, Math.round(5.2 - rand() * 1.6 - escalation * 1.1))) : undefined;
+    const rating =
+      rand() < 0.7
+        ? Math.min(5, Math.max(1, Math.round(5.2 - rand() * 1.6 - escalation * 1.1)))
+        : undefined;
     out.push({
       id: `S-${String(1000 + i)}`,
       department: h.dept,
@@ -106,10 +130,61 @@ export function sampleHistory(now: number): Ticket[] {
 
 /** A few live tickets from other rooms so the board looks like a real shift. */
 export function liveSampleTickets(now: number): Ticket[] {
-  const base = { notes: [], escalationLevel: 0 as const, language: 'en' as const, kind: 'service' as const };
+  const base = {
+    notes: [],
+    escalationLevel: 0 as const,
+    language: 'en' as const,
+    kind: 'service' as const,
+  };
   return [
-    { ...base, id: 'T-0991', department: 'housekeeping', category: 'Housekeeping', item: 'Baby cot', room: '0412', guestId: 'g-0412', guestName: 'Mr Rahman', priority: 'normal', status: 'on_the_way', createdAt: now - 6 * 60_000, acceptedAt: now - 5 * 60_000, onTheWayAt: now - 3 * 60_000, assignee: 'Maria' },
-    { ...base, id: 'T-0992', department: 'engineering', category: 'Engineering', item: 'TV or remote', details: 'Remote not responding', room: '0918', guestId: 'g-0918', guestName: 'Mrs Okafor', priority: 'normal', status: 'accepted', createdAt: now - 4 * 60_000, acceptedAt: now - 2 * 60_000, assignee: 'Rajesh' },
-    { ...base, id: 'T-0993', department: 'concierge', category: 'Concierge & Transport', item: 'Taxi', details: 'Hotel main entrance → Al Hamra · today 18:30 · 2 passengers', room: '1503', guestId: 'g-1503', guestName: 'Mr & Mrs Laurent', priority: 'normal', status: 'accepted', createdAt: now - 9 * 60_000, acceptedAt: now - 8 * 60_000, assignee: 'Youssef', kind: 'transport' },
+    {
+      ...base,
+      id: 'T-0991',
+      department: 'housekeeping',
+      category: 'Housekeeping',
+      item: 'Baby cot',
+      room: '0412',
+      guestId: 'g-0412',
+      guestName: 'Mr Rahman',
+      priority: 'normal',
+      status: 'on_the_way',
+      createdAt: now - 6 * 60_000,
+      acceptedAt: now - 5 * 60_000,
+      onTheWayAt: now - 3 * 60_000,
+      assignee: 'Maria',
+    },
+    {
+      ...base,
+      id: 'T-0992',
+      department: 'engineering',
+      category: 'Engineering',
+      item: 'TV or remote',
+      details: 'Remote not responding',
+      room: '0918',
+      guestId: 'g-0918',
+      guestName: 'Mrs Okafor',
+      priority: 'normal',
+      status: 'accepted',
+      createdAt: now - 4 * 60_000,
+      acceptedAt: now - 2 * 60_000,
+      assignee: 'Rajesh',
+    },
+    {
+      ...base,
+      id: 'T-0993',
+      department: 'concierge',
+      category: 'Concierge & Transport',
+      item: 'Taxi',
+      details: 'Hotel main entrance → Al Hamra · today 18:30 · 2 passengers',
+      room: '1503',
+      guestId: 'g-1503',
+      guestName: 'Mr & Mrs Laurent',
+      priority: 'normal',
+      status: 'accepted',
+      createdAt: now - 9 * 60_000,
+      acceptedAt: now - 8 * 60_000,
+      assignee: 'Youssef',
+      kind: 'transport',
+    },
   ];
 }

@@ -13,7 +13,24 @@ const both = (en: string, ar: string, lang: L) => (lang === 'ar' ? ar : en);
 export const KB_TOPICS: KbTopic[] = [
   {
     id: 'checkin',
-    kw: ['check-in time', 'check in time', 'checkin time', 'check-out time', 'check out time', 'checkout time', 'check-in', 'check-out', 'check in', 'check out', 'checkout', 'وقت الدخول', 'وقت المغادره', 'تسجيل الدخول', 'تسجيل الخروج', 'المغادره'],
+    kw: [
+      'check-in time',
+      'check in time',
+      'checkin time',
+      'check-out time',
+      'check out time',
+      'checkout time',
+      'check-in',
+      'check-out',
+      'check in',
+      'check out',
+      'checkout',
+      'وقت الدخول',
+      'وقت المغادره',
+      'تسجيل الدخول',
+      'تسجيل الخروج',
+      'المغادره',
+    ],
     answer: (k, lang) => ({
       sample: !!k.policies.sample,
       text: both(
@@ -44,12 +61,27 @@ export const KB_TOPICS: KbTopic[] = [
     kw: ['dress code', 'what to wear', 'dress', 'قواعد اللباس', 'اللبس', 'الملابس المناسبه'],
     answer: (k, lang) => ({
       sample: !!k.policies.sample,
-      text: both(k.policies.dressCode, 'اللباس الأنيق غير الرسمي في المطاعم مساءً، وملابس السباحة عند المسبح والشاطئ فقط.', lang),
+      text: both(
+        k.policies.dressCode,
+        'اللباس الأنيق غير الرسمي في المطاعم مساءً، وملابس السباحة عند المسبح والشاطئ فقط.',
+        lang,
+      ),
     }),
   },
   {
     id: 'wifi',
-    kw: ['wifi password', 'wi-fi password', 'wifi', 'wi-fi', 'internet', 'network', 'الواي فاي', 'واي فاي', 'الانترنت', 'كلمه السر'],
+    kw: [
+      'wifi password',
+      'wi-fi password',
+      'wifi',
+      'wi-fi',
+      'internet',
+      'network',
+      'الواي فاي',
+      'واي فاي',
+      'الانترنت',
+      'كلمه السر',
+    ],
     answer: (k, lang) => ({
       sample: !!k.wifi.sample,
       text: both(
@@ -61,13 +93,27 @@ export const KB_TOPICS: KbTopic[] = [
   },
   {
     id: 'outlets',
-    kw: ['restaurants', 'restaurant', 'opening hours', 'where can i eat', 'places to eat', 'dinner', 'lunch', 'المطاعم', 'مطعم', 'ساعات العمل', 'وين اكل'],
+    kw: [
+      'restaurants',
+      'restaurant',
+      'opening hours',
+      'where can i eat',
+      'places to eat',
+      'dinner',
+      'lunch',
+      'المطاعم',
+      'مطعم',
+      'ساعات العمل',
+      'وين اكل',
+    ],
     answer: (k, lang) => ({
       sample: k.outlets.some((o) => o.sample),
       text:
         both('Here are our restaurants and bars:\n', 'هذه مطاعمنا ومقاهينا:\n', lang) +
         k.outlets
-          .map((o) => (lang === 'ar' ? `• ${o.nameAr}: ${o.hours}` : `• ${o.name} (${o.type}): ${o.hours}`))
+          .map((o) =>
+            lang === 'ar' ? `• ${o.nameAr}: ${o.hours}` : `• ${o.name} (${o.type}): ${o.hours}`,
+          )
           .join('\n'),
     }),
   },
@@ -84,7 +130,11 @@ export const KB_TOPICS: KbTopic[] = [
               `يُقدَّم الفطور في ${o.nameAr}، ${o.hours.split('·')[0]?.trim()}. ويمكنك أيضاً طلب الفطور إلى غرفتك في أي وقت.`,
               lang,
             )
-          : both('Let me check breakfast times with your ambassador.', 'سأتحقق من مواعيد الفطور مع السفير.', lang),
+          : both(
+              'Let me check breakfast times with your ambassador.',
+              'سأتحقق من مواعيد الفطور مع السفير.',
+              lang,
+            ),
       };
     },
   },
@@ -117,12 +167,26 @@ export const KB_TOPICS: KbTopic[] = [
     kw: ['sauna', 'steam', 'الساونا', 'ساونا', 'البخار'],
     answer: (k, lang) => ({
       sample: !!k.sauna.sample,
-      text: both(`Sauna and steam room: ${k.sauna.hours}.`, `الساونا وغرفة البخار: ${k.sauna.hours}.`, lang),
+      text: both(
+        `Sauna and steam room: ${k.sauna.hours}.`,
+        `الساونا وغرفة البخار: ${k.sauna.hours}.`,
+        lang,
+      ),
     }),
   },
   {
     id: 'pool',
-    kw: ['pool hours', 'beach hours', 'pool', 'beach', 'swim', 'المسبح', 'الشاطئ', 'البحر', 'سباحه'],
+    kw: [
+      'pool hours',
+      'beach hours',
+      'pool',
+      'beach',
+      'swim',
+      'المسبح',
+      'الشاطئ',
+      'البحر',
+      'سباحه',
+    ],
     answer: (k, lang) => ({
       sample: !!k.pool.sample,
       text: both(
@@ -134,7 +198,16 @@ export const KB_TOPICS: KbTopic[] = [
   },
   {
     id: 'kids',
-    kw: ["kids' club", 'kids club', 'children', 'kids', 'babysitting', 'نادي الاطفال', 'الاطفال', 'اطفال'],
+    kw: [
+      "kids' club",
+      'kids club',
+      'children',
+      'kids',
+      'babysitting',
+      'نادي الاطفال',
+      'الاطفال',
+      'اطفال',
+    ],
     answer: (k, lang) => ({
       sample: !!k.kidsClub.sample,
       text: both(
@@ -149,7 +222,11 @@ export const KB_TOPICS: KbTopic[] = [
     kw: ['activities', 'activity', "what's on", 'things to do', 'الانشطه', 'نشاطات'],
     answer: (k, lang) => ({
       sample: !!k.activities.sample,
-      text: both(k.activities.schedule, 'نضع برنامج الأنشطة اليومي في غرفتك كل مساء: كرة الطائرة الشاطئية، أنشطة الأطفال، ويوغا الغروب.', lang),
+      text: both(
+        k.activities.schedule,
+        'نضع برنامج الأنشطة اليومي في غرفتك كل مساء: كرة الطائرة الشاطئية، أنشطة الأطفال، ويوغا الغروب.',
+        lang,
+      ),
     }),
   },
   {
@@ -166,7 +243,13 @@ export const KB_TOPICS: KbTopic[] = [
   },
   {
     id: 'ird',
-    kw: ['room service hours', 'in-room dining hours', 'room service', 'in-room dining', 'خدمه الغرف'],
+    kw: [
+      'room service hours',
+      'in-room dining hours',
+      'room service',
+      'in-room dining',
+      'خدمه الغرف',
+    ],
     answer: (k, lang) => ({
       sample: !!k.ird.sample,
       text: both(
@@ -178,7 +261,15 @@ export const KB_TOPICS: KbTopic[] = [
   },
   {
     id: 'location',
-    kw: ['where is the hotel', 'address', 'location', 'how many rooms', 'العنوان', 'موقع الفندق', 'كم غرفه'],
+    kw: [
+      'where is the hotel',
+      'address',
+      'location',
+      'how many rooms',
+      'العنوان',
+      'موقع الفندق',
+      'كم غرفه',
+    ],
     answer: (k, lang) => ({
       sample: false,
       text: both(
@@ -190,10 +281,21 @@ export const KB_TOPICS: KbTopic[] = [
   },
   {
     id: 'contact',
-    kw: ['phone number', 'contact', 'call the front desk', 'reception number', 'رقم الاستقبال', 'اتصل'],
+    kw: [
+      'phone number',
+      'contact',
+      'call the front desk',
+      'reception number',
+      'رقم الاستقبال',
+      'اتصل',
+    ],
     answer: (k, lang) => ({
       sample: !!k.contacts.sample,
-      text: both(k.contacts.ambassador, 'اطلب الرقم 0 من هاتف غرفتك، أو استخدم هذه المحادثة.', lang),
+      text: both(
+        k.contacts.ambassador,
+        'اطلب الرقم 0 من هاتف غرفتك، أو استخدم هذه المحادثة.',
+        lang,
+      ),
     }),
   },
 ];

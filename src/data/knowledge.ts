@@ -62,7 +62,12 @@ export const KnowledgeSchema = z.object({
     hours: z.string(),
     note: z.string(),
     categories: z.array(
-      z.object({ id: z.string(), name: z.string(), nameAr: z.string(), items: z.array(MenuItemSchema) }),
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        nameAr: z.string(),
+        items: z.array(MenuItemSchema),
+      }),
     ),
   }),
   contacts: z.object({ sample, ambassador: z.string(), emergency: z.string(), doctor: z.string() }),

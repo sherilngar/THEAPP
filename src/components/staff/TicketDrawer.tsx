@@ -7,9 +7,18 @@ import type { StaffSession, Ticket } from '../../domain/types';
 import { handBackToAi, staffReply, useStore } from '../../store/store';
 import { StatusPill } from '../ui/Status';
 
-const fmt = (t?: number) => (t ? new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—');
+const fmt = (t?: number) =>
+  t ? new Date(t).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '—';
 
-export function TicketDrawer({ ticketId, session, onClose }: { ticketId: string | null; session: StaffSession; onClose: () => void }) {
+export function TicketDrawer({
+  ticketId,
+  session,
+  onClose,
+}: {
+  ticketId: string | null;
+  session: StaffSession;
+  onClose: () => void;
+}) {
   const ticket = useStore((s) => s.tickets.find((t) => t.id === ticketId));
   const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
@@ -24,7 +33,14 @@ export function TicketDrawer({ ticketId, session, onClose }: { ticketId: string 
     <AnimatePresence>
       {ticket && (
         <>
-          <motion.div className="fixed inset-0 z-40 bg-ink/30" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={onClose} aria-hidden />
+          <motion.div
+            className="fixed inset-0 z-40 bg-ink/30"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            aria-hidden
+          />
           <motion.aside
             role="dialog"
             aria-modal="true"
@@ -52,7 +68,12 @@ export function TicketDrawer({ ticketId, session, onClose }: { ticketId: string 
                   <span className="capitalize">· {ticket.priority} priority</span>
                 </div>
               </div>
-              <button ref={closeRef} onClick={onClose} className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-raised" aria-label="Close">
+              <button
+                ref={closeRef}
+                onClick={onClose}
+                className="inline-flex h-11 w-11 items-center justify-center rounded-full hover:bg-raised"
+                aria-label="Close"
+              >
                 <X size={18} aria-hidden />
               </button>
             </header>
@@ -76,7 +97,10 @@ function Details({ ticket: t }: { ticket: Ticket }) {
     ['Also sent to', t.alsoNotify ? DEPT_BY_ID[t.alsoNotify].en : undefined],
     ['Assignee', t.assignee],
     ['Escalation', t.escalationLevel ? escalationLabel(t.escalationLevel) : 'None'],
-    ['Guest language', t.language === 'ar' ? 'Arabic' : t.language === 'other' ? 'Other' : 'English'],
+    [
+      'Guest language',
+      t.language === 'ar' ? 'Arabic' : t.language === 'other' ? 'Other' : 'English',
+    ],
     ['Rating', t.rating ? `${t.rating} / 5` : undefined],
   ];
   return (
@@ -106,11 +130,15 @@ function Details({ ticket: t }: { ticket: Ticket }) {
 function Timeline({ ticket: t }: { ticket: Ticket }) {
   const events = [
     { at: t.createdAt, text: 'Created' },
-    ...(t.acceptedAt ? [{ at: t.acceptedAt, text: `Accepted${t.assignee ? ` by ${t.assignee}` : ''}` }] : []),
+    ...(t.acceptedAt
+      ? [{ at: t.acceptedAt, text: `Accepted${t.assignee ? ` by ${t.assignee}` : ''}` }]
+      : []),
     ...(t.onTheWayAt ? [{ at: t.onTheWayAt, text: 'On the way' }] : []),
     ...(t.doneAt ? [{ at: t.doneAt, text: 'Done' }] : []),
     ...(t.cancelledAt ? [{ at: t.cancelledAt, text: 'Cancelled' }] : []),
-    ...t.notes.filter((n) => !n.text.startsWith('Status →')).map((n) => ({ at: n.at, text: `${n.by}: ${n.text}` })),
+    ...t.notes
+      .filter((n) => !n.text.startsWith('Status →'))
+      .map((n) => ({ at: n.at, text: `${n.by}: ${n.text}` })),
   ].sort((a, b) => a.at - b.at);
   return (
     <section>
@@ -118,7 +146,10 @@ function Timeline({ ticket: t }: { ticket: Ticket }) {
       <ol className="relative space-y-3 border-s border-line ps-4">
         {events.map((e, i) => (
           <li key={i} className="relative text-sm">
-            <span className="absolute top-1.5 h-2 w-2 rounded-full bg-accent ltr:-left-[21px] rtl:-right-[21px]" aria-hidden />
+            <span
+              className="absolute top-1.5 h-2 w-2 rounded-full bg-accent ltr:-left-[21px] rtl:-right-[21px]"
+              aria-hidden
+            />
             <span className="me-2 tabular-nums text-muted">{fmt(e.at)}</span>
             {e.text}
           </li>
@@ -135,25 +166,50 @@ function Conversation({ ticket, session }: { ticket: Ticket; session: StaffSessi
   const [text, setText] = useState('');
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => end.current?.scrollIntoView({ block: 'nearest' }), [messages.length]);
-  if (!isGuest) return <p className="text-sm text-muted">Conversation history is available for live demo guests only.</p>;
+  if (!isGuest)
+    return (
+      <p className="text-sm text-muted">
+        Conversation history is available for live demo guests only.
+      </p>
+    );
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
         <h3 className="eyebrow">Guest conversation</h3>
-        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${conv.mode === 'human' ? 'bg-accent text-accent-fg' : 'bg-raised text-muted'}`}>
+        <span
+          className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${conv.mode === 'human' ? 'bg-accent text-accent-fg' : 'bg-raised text-muted'}`}
+        >
           {conv.mode === 'human' ? `${conv.humanName} is replying` : 'AI is replying'}
         </span>
       </div>
       <div className="max-h-80 space-y-2 overflow-y-auto rounded-xl border border-line/70 bg-bg p-3">
-        {messages.length === 0 && <p className="text-center text-xs text-muted">No messages yet.</p>}
+        {messages.length === 0 && (
+          <p className="text-center text-xs text-muted">No messages yet.</p>
+        )}
         {messages
           .filter((m) => m.text)
           .map((m) => (
-            <div key={m.id} className={`flex ${m.sender === 'guest' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[85%] rounded-xl px-3 py-2 text-xs ${m.sender === 'guest' ? 'bg-fg text-bg' : m.sender === 'staff' ? 'border border-accent/40 bg-accent/10' : m.sender === 'system' ? 'bg-raised text-muted' : 'bg-surface'}`} dir="auto">
+            <div
+              key={m.id}
+              className={`flex ${m.sender === 'guest' ? 'justify-end' : 'justify-start'}`}
+            >
+              <div
+                className={`max-w-[85%] rounded-xl px-3 py-2 text-xs ${m.sender === 'guest' ? 'bg-fg text-bg' : m.sender === 'staff' ? 'border border-accent/40 bg-accent/10' : m.sender === 'system' ? 'bg-raised text-muted' : 'bg-surface'}`}
+                dir="auto"
+              >
                 <span className="mb-0.5 flex items-center gap-1 text-[10px] opacity-70">
-                  {m.sender === 'ai' ? <Bot size={10} aria-hidden /> : m.sender === 'staff' ? <UserRound size={10} aria-hidden /> : null}
-                  {m.sender === 'staff' ? m.staffName : m.sender === 'ai' ? 'AI concierge' : m.sender === 'guest' ? 'Guest' : 'System'}
+                  {m.sender === 'ai' ? (
+                    <Bot size={10} aria-hidden />
+                  ) : m.sender === 'staff' ? (
+                    <UserRound size={10} aria-hidden />
+                  ) : null}
+                  {m.sender === 'staff'
+                    ? m.staffName
+                    : m.sender === 'ai'
+                      ? 'AI concierge'
+                      : m.sender === 'guest'
+                        ? 'Guest'
+                        : 'System'}
                 </span>
                 <span className="whitespace-pre-line">{m.text}</span>
               </div>
@@ -172,12 +228,26 @@ function Conversation({ ticket, session }: { ticket: Ticket; session: StaffSessi
         <label htmlFor="staff-reply" className="sr-only">
           Reply to guest
         </label>
-        <input id="staff-reply" data-testid="staff-reply" className="field" value={text} onChange={(e) => setText(e.target.value)} placeholder={`Reply as ${session.name}…`} maxLength={1000} />
-        <button className="btn-primary min-h-[44px] px-4" disabled={!text.trim()} aria-label="Send reply">
+        <input
+          id="staff-reply"
+          data-testid="staff-reply"
+          className="field"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={`Reply as ${session.name}…`}
+          maxLength={1000}
+        />
+        <button
+          className="btn-primary min-h-[44px] px-4"
+          disabled={!text.trim()}
+          aria-label="Send reply"
+        >
           <Send size={16} aria-hidden />
         </button>
       </form>
-      <p className="mt-2 text-[11px] text-muted">Replying takes the chat over from the AI. The guest sees your name.</p>
+      <p className="mt-2 text-[11px] text-muted">
+        Replying takes the chat over from the AI. The guest sees your name.
+      </p>
       {conv.mode === 'human' && (
         <button className="btn-ghost mt-3 min-h-[40px] text-xs" onClick={handBackToAi}>
           <Bot size={14} aria-hidden /> Hand back to the AI concierge

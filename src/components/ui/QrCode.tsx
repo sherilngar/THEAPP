@@ -7,7 +7,12 @@ export function QrCode({ path = '#/guest', size = 176 }: { path?: string; size?:
   const url = `${window.location.origin}${window.location.pathname}${path}`;
   useEffect(() => {
     let alive = true;
-    QRCode.toString(url, { type: 'svg', margin: 1, errorCorrectionLevel: 'M', color: { dark: '#1C1A17', light: '#FFFFFF' } })
+    QRCode.toString(url, {
+      type: 'svg',
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#1C1A17', light: '#FFFFFF' },
+    })
       .then((s) => alive && setSvg(s))
       .catch(() => alive && setSvg(''));
     return () => {
@@ -23,7 +28,9 @@ export function QrCode({ path = '#/guest', size = 176 }: { path?: string; size?:
         aria-label={`QR code to open the guest app: ${url}`}
         dangerouslySetInnerHTML={{ __html: svg }}
       />
-      <figcaption className="max-w-[220px] break-all text-center text-[11px] text-muted">{url}</figcaption>
+      <figcaption className="max-w-[220px] break-all text-center text-[11px] text-muted">
+        {url}
+      </figcaption>
     </figure>
   );
 }

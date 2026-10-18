@@ -6,13 +6,28 @@ import type { Conversation, PendingState } from '../../src/domain/types';
 
 const now = Date.UTC(2026, 9, 18, 12);
 function ctx(pending?: PendingState): EngineContext {
-  const conversation: Conversation = { id: 'c1', guestId: 'guest-demo', mode: 'ai', pending, lang: 'en' };
-  return { guest: demoGuest(now), conversation, tickets: [], knowledge: DEFAULT_KNOWLEDGE, uiLang: 'en' };
+  const conversation: Conversation = {
+    id: 'c1',
+    guestId: 'guest-demo',
+    mode: 'ai',
+    pending,
+    lang: 'en',
+  };
+  return {
+    guest: demoGuest(now),
+    conversation,
+    tickets: [],
+    knowledge: DEFAULT_KNOWLEDGE,
+    uiLang: 'en',
+  };
 }
 
 describe('ticket routing from free text', () => {
   it('splits one message into several requests for different departments', () => {
-    const r = respond('Hi, the AC in my room is quite loud, could you send two extra towels, and book a table at the Beach Grill for 8 tonight?', ctx());
+    const r = respond(
+      'Hi, the AC in my room is quite loud, could you send two extra towels, and book a table at the Beach Grill for 8 tonight?',
+      ctx(),
+    );
     const depts = r.drafts.map((d) => d.department);
     expect(depts).toContain('engineering');
     expect(depts).toContain('housekeeping');
@@ -26,7 +41,11 @@ describe('ticket routing from free text', () => {
       expect(r.pending.booking.time).toBe('20:00');
       expect(r.pending.asking).toBe('partySize');
     }
-    expect(r.replies.some((x) => x.cards?.some((c) => c.type === 'tickets' && c.ticketIds.includes(NEW_TICKETS)))).toBe(true);
+    expect(
+      r.replies.some((x) =>
+        x.cards?.some((c) => c.type === 'tickets' && c.ticketIds.includes(NEW_TICKETS)),
+      ),
+    ).toBe(true);
   });
 
   it('completes the booking once the party size arrives', () => {
@@ -65,7 +84,10 @@ describe('ticket routing from free text', () => {
   });
 
   it('repeats a dining order back and only places it after a yes', () => {
-    const r = respond("I'd like a club sandwich with brown bread and two fresh orange juices. I'm allergic to nuts", ctx());
+    const r = respond(
+      "I'd like a club sandwich with brown bread and two fresh orange juices. I'm allergic to nuts",
+      ctx(),
+    );
     expect(r.drafts).toHaveLength(0);
     expect(r.pending?.type).toBe('order_confirm');
     if (r.pending?.type !== 'order_confirm') return;
@@ -97,7 +119,9 @@ describe('hand-offs and safety', () => {
   it('routes complaints to a person with high priority', () => {
     const r = respond('This is unacceptable, nobody came to fix the shower', ctx());
     expect(r.handover?.urgency).toBe('high');
-    expect(r.drafts.some((d) => d.kind === 'handover' && d.department === 'frontoffice')).toBe(true);
+    expect(r.drafts.some((d) => d.kind === 'handover' && d.department === 'frontoffice')).toBe(
+      true,
+    );
     expect(r.drafts.find((d) => d.itemKey === 'shower')?.priority).toBe('high');
   });
 

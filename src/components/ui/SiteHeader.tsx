@@ -15,12 +15,19 @@ const LINKS = [
 export function SiteHeader({ wide = false }: { wide?: boolean }) {
   return (
     <header className="sticky top-0 z-30 border-b border-line/60 bg-bg/85 backdrop-blur-md safe-top">
-      <div className={`mx-auto flex h-16 items-center gap-4 px-4 sm:px-6 ${wide ? 'max-w-[1600px]' : 'max-w-6xl'}`}>
+      <div
+        className={`mx-auto flex h-16 items-center gap-4 px-4 sm:px-6 ${wide ? 'max-w-[1600px]' : 'max-w-6xl'}`}
+      >
         <Link to="/" className="flex shrink-0 items-center gap-3" aria-label="Home">
           <Logo className="h-9" />
-          <span className="hidden border-s border-line ps-3 text-xs text-muted md:inline">AI Concierge</span>
+          <span className="hidden border-s border-line ps-3 text-xs text-muted md:inline">
+            AI Concierge
+          </span>
         </Link>
-        <nav aria-label="Main" className="scrollbar-none -mx-2 flex flex-1 items-center gap-1 overflow-x-auto px-2">
+        <nav
+          aria-label="Main"
+          className="scrollbar-none -mx-2 flex flex-1 items-center gap-1 overflow-x-auto px-2"
+        >
           {LINKS.map((l) => (
             <NavLink
               key={l.to}

@@ -65,7 +65,10 @@ function Login({ onSignIn }: { onSignIn: (s: StaffSession) => void }) {
     <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <p className="eyebrow mb-3">Staff board</p>
       <h1 className="display mb-2 text-4xl">Sign in to your department</h1>
-      <p className="mb-8 text-sm text-muted">Demo accounts: choose a department and use PIN 1234. Every department can switch tabs to see the whole hotel.</p>
+      <p className="mb-8 text-sm text-muted">
+        Demo accounts: choose a department and use PIN 1234. Every department can switch tabs to see
+        the whole hotel.
+      </p>
       <form onSubmit={submit} className="card p-5 sm:p-6">
         <fieldset>
           <legend className="label mb-3">Department</legend>
@@ -81,7 +84,14 @@ function Login({ onSignIn }: { onSignIn: (s: StaffSession) => void }) {
                   transition={{ delay: i * 0.02 }}
                   className={`flex min-h-[56px] cursor-pointer items-center gap-3 rounded-xl border px-3 py-2 text-sm transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-accent ${on ? 'border-accent bg-accent/10' : 'border-line hover:bg-raised'}`}
                 >
-                  <input type="radio" name="dept" value={d.id} checked={on} onChange={() => setDept(d.id)} className="sr-only" />
+                  <input
+                    type="radio"
+                    name="dept"
+                    value={d.id}
+                    checked={on}
+                    onChange={() => setDept(d.id)}
+                    className="sr-only"
+                  />
                   <Icon size={16} className="shrink-0 text-accent" aria-hidden />
                   <span>
                     <span className="block font-medium leading-tight">{d.short}</span>

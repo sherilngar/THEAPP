@@ -1,6 +1,7 @@
 import { motion } from 'motion/react';
 import { AlertTriangle, CheckCircle2, CircleDot, Loader2, XCircle } from 'lucide-react';
 import type { EscalationLevel, TicketStatus } from '../../domain/types';
+import { STATUS_LABEL_EN } from './statusLabels';
 
 const STYLE: Record<TicketStatus, { cls: string; Icon: typeof CircleDot }> = {
   new: { cls: 'text-st-new bg-st-new/10 border-st-new/30', Icon: CircleDot },
@@ -10,16 +11,16 @@ const STYLE: Record<TicketStatus, { cls: string; Icon: typeof CircleDot }> = {
   cancelled: { cls: 'text-muted bg-raised border-line', Icon: XCircle },
 };
 
-export const STATUS_LABEL_EN: Record<TicketStatus, string> = {
-  new: 'New',
-  accepted: 'Accepted',
-  on_the_way: 'On the way',
-  done: 'Done',
-  cancelled: 'Cancelled',
-};
-
 /** Colour is never the only signal: every status carries a text label and an icon. */
-export function StatusPill({ status, label, escalation = 0 }: { status: TicketStatus; label?: string; escalation?: EscalationLevel }) {
+export function StatusPill({
+  status,
+  label,
+  escalation = 0,
+}: {
+  status: TicketStatus;
+  label?: string;
+  escalation?: EscalationLevel;
+}) {
   if (escalation > 0 && status === 'new') {
     return (
       <span className="inline-flex items-center gap-1 rounded-full border border-st-escalated/40 bg-st-escalated/10 px-2 py-0.5 text-[11px] font-medium text-st-escalated">
@@ -30,7 +31,9 @@ export function StatusPill({ status, label, escalation = 0 }: { status: TicketSt
   }
   const { cls, Icon } = STYLE[status];
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${cls}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${cls}`}
+    >
       <Icon size={12} aria-hidden />
       {label ?? STATUS_LABEL_EN[status]}
     </span>
@@ -45,7 +48,10 @@ export function StatusSteps({ status, labels }: { status: TicketStatus; labels: 
   const pct = idx <= 0 ? 0 : idx / (ORDER.length - 1);
   return (
     <div className="relative mt-3" aria-label={`Progress: ${labels[Math.max(0, idx)] ?? ''}`}>
-      <div className="absolute inset-x-[12.5%] top-[7px] h-[2px] rounded-full bg-line" aria-hidden />
+      <div
+        className="absolute inset-x-[12.5%] top-[7px] h-[2px] rounded-full bg-line"
+        aria-hidden
+      />
       <motion.div
         aria-hidden
         className="absolute top-[7px] h-[2px] w-3/4 rounded-full bg-accent ltr:left-[12.5%] ltr:origin-left rtl:right-[12.5%] rtl:origin-right"
@@ -64,7 +70,9 @@ export function StatusSteps({ status, labels }: { status: TicketStatus; labels: 
                 className={`h-4 w-4 rounded-full border-2 ${reached ? 'border-accent bg-accent' : 'border-line bg-surface'}`}
                 aria-hidden
               />
-              <span className={`text-[11px] ${reached ? 'font-medium text-fg' : 'text-muted'}`}>{l}</span>
+              <span className={`text-[11px] ${reached ? 'font-medium text-fg' : 'text-muted'}`}>
+                {l}
+              </span>
             </li>
           );
         })}

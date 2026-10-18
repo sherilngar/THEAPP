@@ -8,5 +8,10 @@ export interface GuestUi {
   goTo: (tab: 'chat' | 'services' | 'requests') => void;
 }
 
-export const GuestUiContext = createContext<GuestUi>({ lang: 'en', t: strings('en'), embedded: false, goTo: () => {} });
+export const GuestUiContext = createContext<GuestUi>({
+  lang: 'en',
+  t: strings('en'),
+  embedded: false,
+  goTo: () => {},
+});
 export const useGuestUi = () => useContext(GuestUiContext);

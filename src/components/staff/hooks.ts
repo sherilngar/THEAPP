@@ -48,7 +48,10 @@ export function useNewIds(ids: string[], onNew: (fresh: string[]) => void) {
     added.forEach((id) => known.current!.add(id));
     setFresh((p) => new Set([...p, ...added]));
     onNew(added);
-    const timer = window.setTimeout(() => setFresh((p) => new Set([...p].filter((x) => !added.includes(x)))), 5000);
+    const timer = window.setTimeout(
+      () => setFresh((p) => new Set([...p].filter((x) => !added.includes(x)))),
+      5000,
+    );
     return () => window.clearTimeout(timer);
   }, [ids, onNew]);
   return fresh;
