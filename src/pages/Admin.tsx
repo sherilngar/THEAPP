@@ -181,7 +181,7 @@ function StandardsEditor() {
                 <td className="py-2 pe-3">
                   {d.en}
                   {PLACEHOLDER_STANDARDS.includes(d.id) && (
-                    <span className="ms-2 rounded-full border border-dashed border-accent/60 px-1.5 text-[10px] text-accent">
+                    <span className="ms-2 rounded-full border border-dashed border-accent/60 px-1.5 text-[11px] text-accent">
                       placeholder
                     </span>
                   )}

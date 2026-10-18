@@ -23,7 +23,7 @@ export function StatusPill({
 }) {
   if (escalation > 0 && status === 'new') {
     return (
-      <span className="inline-flex items-center gap-1 rounded-full border border-st-escalated/40 bg-st-escalated/10 px-2 py-0.5 text-[11px] font-medium text-st-escalated">
+      <span className="inline-flex items-center gap-1 rounded-full border border-st-escalated/40 bg-st-escalated/10 px-2 py-0.5 text-xs font-medium text-st-escalated">
         <AlertTriangle size={12} aria-hidden />
         {escalation === 2 ? 'Escalated · Duty Manager' : 'Escalated · Supervisor'}
       </span>
@@ -32,7 +32,7 @@ export function StatusPill({
   const { cls, Icon } = STYLE[status];
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${cls}`}
+      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${cls}`}
     >
       <Icon size={12} aria-hidden />
       {label ?? STATUS_LABEL_EN[status]}
@@ -70,7 +70,7 @@ export function StatusSteps({ status, labels }: { status: TicketStatus; labels: 
                 className={`h-4 w-4 rounded-full border-2 ${reached ? 'border-accent bg-accent' : 'border-line bg-surface'}`}
                 aria-hidden
               />
-              <span className={`text-[11px] ${reached ? 'font-medium text-fg' : 'text-muted'}`}>
+              <span className={`text-xs ${reached ? 'font-medium text-fg' : 'text-muted'}`}>
                 {l}
               </span>
             </li>

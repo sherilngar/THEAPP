@@ -28,7 +28,7 @@ export function QrCode({ path = '#/guest', size = 176 }: { path?: string; size?:
         aria-label={`QR code to open the guest app: ${url}`}
         dangerouslySetInnerHTML={{ __html: svg }}
       />
-      <figcaption className="max-w-[220px] break-all text-center text-[11px] text-muted">
+      <figcaption className="max-w-[220px] break-all text-center text-xs text-muted">
         {url}
       </figcaption>
     </figure>

@@ -56,7 +56,7 @@ export function TimerRing({
         />
       </svg>
       <span
-        className={`absolute inset-0 flex items-center justify-center text-[10px] font-medium tabular-nums ${over ? 'text-st-escalated' : 'text-fg'}`}
+        className={`absolute inset-0 flex items-center justify-center text-[11px] font-medium tabular-nums ${over ? 'text-st-escalated' : 'text-fg'}`}
         aria-hidden
       >
         {label.split(' ')[0]}

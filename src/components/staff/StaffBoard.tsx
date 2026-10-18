@@ -174,7 +174,7 @@ export function StaffBoard({
                     key={n}
                     initial={{ scale: 1.4 }}
                     animate={{ scale: 1 }}
-                    className={`relative min-w-5 rounded-full px-1.5 text-center text-[11px] tabular-nums ${active ? 'bg-bg/20' : n ? 'bg-accent/15 text-accent' : 'bg-raised'}`}
+                    className={`relative min-w-5 rounded-full px-1.5 text-center text-xs tabular-nums ${active ? 'bg-bg/20' : n ? 'bg-accent/15 text-accent' : 'bg-raised'}`}
                     aria-label={`${n} open`}
                   >
                     {n}

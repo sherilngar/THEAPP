@@ -177,7 +177,7 @@ function Conversation({ ticket, session }: { ticket: Ticket; session: StaffSessi
       <div className="mb-3 flex items-center justify-between">
         <h3 className="eyebrow">Guest conversation</h3>
         <span
-          className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${conv.mode === 'human' ? 'bg-accent text-accent-fg' : 'bg-raised text-muted'}`}
+          className={`rounded-full px-2 py-0.5 text-xs font-medium ${conv.mode === 'human' ? 'bg-accent text-accent-fg' : 'bg-raised text-muted'}`}
         >
           {conv.mode === 'human' ? `${conv.humanName} is replying` : 'AI is replying'}
         </span>
@@ -197,7 +197,7 @@ function Conversation({ ticket, session }: { ticket: Ticket; session: StaffSessi
                 className={`max-w-[85%] rounded-xl px-3 py-2 text-xs ${m.sender === 'guest' ? 'bg-fg text-bg' : m.sender === 'staff' ? 'border border-accent/40 bg-accent/10' : m.sender === 'system' ? 'bg-raised text-muted' : 'bg-surface'}`}
                 dir="auto"
               >
-                <span className="mb-0.5 flex items-center gap-1 text-[10px] opacity-70">
+                <span className="mb-0.5 flex items-center gap-1 text-[11px] opacity-70">
                   {m.sender === 'ai' ? (
                     <Bot size={10} aria-hidden />
                   ) : m.sender === 'staff' ? (
@@ -245,7 +245,7 @@ function Conversation({ ticket, session }: { ticket: Ticket; session: StaffSessi
           <Send size={16} aria-hidden />
         </button>
       </form>
-      <p className="mt-2 text-[11px] text-muted">
+      <p className="mt-2 text-xs text-muted">
         Replying takes the chat over from the AI. The guest sees your name.
       </p>
       {conv.mode === 'human' && (

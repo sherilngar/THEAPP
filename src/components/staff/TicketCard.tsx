@@ -86,7 +86,7 @@ export function TicketCard({
             <span className="truncate text-xs text-muted">{t.guestName}</span>
             {t.priority !== 'normal' && (
               <span
-                className={`rounded-full border px-1.5 text-[10px] font-medium uppercase tracking-wide ${PRIORITY[t.priority]}`}
+                className={`rounded-full border px-1.5 text-[11px] font-medium uppercase tracking-wide ${PRIORITY[t.priority]}`}
               >
                 {t.priority}
               </span>
@@ -101,7 +101,7 @@ export function TicketCard({
               {t.details}
             </p>
           )}
-          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px] text-muted">
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-xs text-muted">
             <StatusPill status={t.status} escalation={t.escalationLevel} />
             <span>{ago(now - t.createdAt)}</span>
             {t.alsoNotify && <span>· copy to {DEPT_BY_ID[t.alsoNotify].short}</span>}
@@ -114,7 +114,7 @@ export function TicketCard({
             {t.assignee && <span>· {t.assignee}</span>}
           </div>
           {escalated && (
-            <p className="mt-1.5 text-[11px] font-medium text-st-escalated">
+            <p className="mt-1.5 text-xs font-medium text-st-escalated">
               {t.escalationLevel === 2
                 ? 'Not accepted within 200% of standard → Duty Manager'
                 : `Not accepted within standard → ${DEPT_BY_ID[t.department].supervisor}`}

@@ -104,7 +104,7 @@ export function GuestApp({ embedded = false }: { embedded?: boolean }) {
               key={id}
               onClick={() => setTab(id)}
               aria-current={tab === id ? 'page' : undefined}
-              className={`relative flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-[11px] transition-colors ${tab === id ? 'text-fg' : 'text-muted'}`}
+              className={`relative flex min-h-[56px] flex-col items-center justify-center gap-0.5 text-xs transition-colors ${tab === id ? 'text-fg' : 'text-muted'}`}
             >
               <Icon size={20} aria-hidden strokeWidth={tab === id ? 2.2 : 1.8} />
               {label}
@@ -113,7 +113,7 @@ export function GuestApp({ embedded = false }: { embedded?: boolean }) {
                   key={activeCount}
                   initial={{ scale: 0.5 }}
                   animate={{ scale: 1 }}
-                  className="absolute top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[10px] font-medium text-accent-fg ltr:left-[calc(50%+6px)] rtl:right-[calc(50%+6px)]"
+                  className="absolute top-1.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-accent px-1 text-[11px] font-medium text-accent-fg ltr:left-[calc(50%+6px)] rtl:right-[calc(50%+6px)]"
                   aria-label={`${activeCount} active`}
                 >
                   {activeCount}
@@ -166,7 +166,7 @@ function GuestHeader() {
             type="button"
             onClick={() => setGuestLanguage(lang === 'ar' ? 'en' : 'ar')}
             className="inline-flex h-11 items-center gap-1 rounded-full px-3 text-sm text-muted hover:bg-raised hover:text-fg"
-            aria-label={t.languageLabel}
+            aria-label={`${t.language}: ${t.languageLabel}`}
           >
             <Languages size={16} aria-hidden /> {t.language}
           </button>
@@ -218,7 +218,7 @@ function ModeBanner({
   return (
     <div
       data-testid="mode-banner"
-      className={`flex items-center gap-2 px-4 py-0.5 text-[11px] font-medium transition-colors ${mode === 'human' ? 'bg-accent text-accent-fg' : pending ? 'bg-st-progress/15 text-st-progress' : 'bg-raised text-muted'}`}
+      className={`flex items-center gap-2 px-4 py-0.5 text-xs font-medium transition-colors ${mode === 'human' ? 'bg-accent text-accent-fg' : pending ? 'bg-st-progress/15 text-st-progress' : 'bg-raised text-muted'}`}
     >
       {mode === 'human' ? <UserRound size={13} aria-hidden /> : <Sparkles size={13} aria-hidden />}
       <span role="status" className="min-w-0 flex-1 truncate">
@@ -301,7 +301,7 @@ function EmptyChat() {
       </div>
       <p className="display mb-2 text-2xl">{t.quickHello}</p>
       <p className="text-sm text-muted">{t.servicesHint}</p>
-      <p className="mt-4 rounded-xl bg-raised/70 px-3 py-2 text-[11px] leading-relaxed text-muted">
+      <p className="mt-4 rounded-xl bg-raised/70 px-3 py-2 text-xs leading-relaxed text-muted">
         {t.privacy}
       </p>
     </div>
@@ -348,7 +348,7 @@ function Bubble({
       data-sender={m.sender}
     >
       {!mine && (
-        <span className="mb-1 flex items-center gap-1 px-1 text-[11px] text-muted">
+        <span className="mb-1 flex items-center gap-1 px-1 text-xs text-muted">
           {m.sender === 'staff' ? (
             <UserRound size={11} aria-hidden />
           ) : (
@@ -603,7 +603,7 @@ function ServicesView({ onOpenMenu }: { onOpenMenu: (c?: string, f?: string) => 
               >
                 {lang === 'ar' ? i.ar : i.en}
                 {(i.sensitive || i.action === 'handover') && (
-                  <span className="text-[11px] text-muted">
+                  <span className="text-xs text-muted">
                     {lang === 'ar' ? 'يتابعه موظف' : 'Handled by a person'}
                   </span>
                 )}

@@ -269,7 +269,7 @@ function FlyingTicket({ flight, onDone }: { flight: Flight; onDone: () => void }
     >
       <Icon size={14} className="shrink-0 text-accent" />
       <span className="truncate">{flight.label}</span>
-      <span className="ms-auto shrink-0 text-[10px] text-muted">
+      <span className="ms-auto shrink-0 text-[11px] text-muted">
         → {DEPT_BY_ID[flight.dept].short}
       </span>
     </motion.div>

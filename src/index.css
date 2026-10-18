@@ -68,7 +68,7 @@
     font-variant-numeric: lining-nums;
   }
   .eyebrow {
-    @apply text-[11px] font-medium uppercase tracking-[0.18em] text-muted;
+    @apply text-xs font-medium uppercase tracking-[0.18em] text-muted;
   }
   [dir='rtl'] .eyebrow {
     @apply tracking-normal text-xs;

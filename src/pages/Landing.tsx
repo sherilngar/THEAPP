@@ -163,7 +163,7 @@ export default function Landing() {
                     <span className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-line bg-bg text-accent">
                       <Icon size={18} aria-hidden />
                     </span>
-                    <span className="font-display text-3xl text-muted/60">0{i + 1}</span>
+                    <span className="font-display text-3xl text-accent">0{i + 1}</span>
                   </span>
                   <h3 className="mb-2 font-medium">{title}</h3>
                   <p className="text-sm text-muted">{body}</p>

@@ -50,7 +50,7 @@ for (const lang of ['en', 'ar'] as const) {
       await freshStart(page);
       await page.goto('/#/guest');
       if (lang === 'ar') {
-        await page.getByRole('button', { name: 'Switch to Arabic' }).click();
+        await page.getByRole('button', { name: /Switch to Arabic/ }).click();
         await expect(page.getByTestId('guest-app')).toHaveAttribute('dir', 'rtl');
         await expect(page.locator('html')).toHaveAttribute('dir', 'rtl');
       }

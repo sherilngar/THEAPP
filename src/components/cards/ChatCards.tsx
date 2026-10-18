@@ -485,7 +485,7 @@ function PrivacyCard() {
 function InfoCard({ sample }: { sample: boolean }) {
   const { t, lang } = useGuestUi();
   return (
-    <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[11px] text-muted">
+    <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted">
       <span>{lang === 'ar' ? 'من دليل الفندق المعتمد' : 'From the approved hotel guide'}</span>
       {sample && <SampleBadge label={t.sampleContent} />}
     </div>

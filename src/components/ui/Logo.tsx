@@ -17,7 +17,7 @@ export function Logo({ className = 'h-10' }: { className?: string }) {
     );
   return (
     <img
-      src="brand/so-logo-trimmed.png"
+      src="brand/so-logo-trimmed.webp"
       alt="SO/ Hotels & Resorts"
       width={202}
       height={74}
