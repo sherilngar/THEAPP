@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc -b",
     "test": "vitest run",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "qr": "node scripts/qr.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
